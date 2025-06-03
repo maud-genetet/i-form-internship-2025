@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>I-Form</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1200</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionWorking_Derectory"/>
+    <addaction name="actionPrint"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionExport_as_DXF"/>
+    <addaction name="actionExport_as_ascii"/>
+    <addaction name="actionExport_as_RST"/>
+    <addaction name="actionExit_Program"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionSelect_Text"/>
+    <addaction name="actionSelect_Graphics"/>
+    <addaction name="actionSelect_All"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionPaste"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionSize_To_Fit"/>
+    <addaction name="actionFull_Screen"/>
+    <addaction name="actionMagnification_Zoom"/>
+   </widget>
+   <widget class="QMenu" name="menuSummary">
+    <property name="title">
+     <string>Summary</string>
+    </property>
+    <addaction name="actionStandard_Options"/>
+    <addaction name="actionWorkpiece"/>
+    <addaction name="actionDie"/>
+   </widget>
+   <widget class="QMenu" name="menuQuery">
+    <property name="title">
+     <string>Query</string>
+    </property>
+    <addaction name="actionStandard_Options_2"/>
+    <addaction name="actionNodes"/>
+    <addaction name="actionElements"/>
+    <addaction name="actionMinimum_Jacobian"/>
+    <addaction name="separator"/>
+    <addaction name="actionSpecial_Options"/>
+    <addaction name="actionContact_Length_and_Ruler"/>
+    <addaction name="actionSurface_Strains"/>
+   </widget>
+   <widget class="QMenu" name="menuMesh">
+    <property name="title">
+     <string>Mesh</string>
+    </property>
+    <addaction name="actionStandard_Options_3"/>
+    <addaction name="actionInitial_Mesh"/>
+    <addaction name="actionDeformed_Mesh"/>
+   </widget>
+   <widget class="QMenu" name="menuField_Variables">
+    <property name="title">
+     <string>Field Variables</string>
+    </property>
+    <addaction name="actionStandard_Options_4"/>
+    <addaction name="actionVelocity_x_r"/>
+    <addaction name="actionVelocity_y_z"/>
+    <addaction name="actionTotal_Velocity"/>
+    <addaction name="separator"/>
+    <addaction name="actionForce_x_r"/>
+    <addaction name="actionForce_y_z"/>
+    <addaction name="actionTotal_Force"/>
+    <addaction name="separator"/>
+    <addaction name="actionTemperature_Rate"/>
+    <addaction name="actionTemperature"/>
+    <addaction name="separator"/>
+    <addaction name="actionStrain_Rate_x_r"/>
+    <addaction name="actionStrain_Rate_y_r"/>
+    <addaction name="actionStrain_rate_z_theta"/>
+    <addaction name="actionStrain_Rate_xy_rz"/>
+    <addaction name="actionEffective_Strain_Rate"/>
+    <addaction name="separator"/>
+    <addaction name="actionStrain_x_r"/>
+    <addaction name="actionStrain_y_r"/>
+    <addaction name="actionStrain_z_theta"/>
+    <addaction name="actionStrain_xy_rz"/>
+    <addaction name="actionEffective_Strain"/>
+    <addaction name="actionVolumetric_Strain"/>
+    <addaction name="actionStrain_1"/>
+    <addaction name="actionStrain_2"/>
+    <addaction name="actionStrain_3"/>
+    <addaction name="separator"/>
+    <addaction name="actionStress_x_r"/>
+    <addaction name="actionStress_y_z"/>
+    <addaction name="actionStress_z_theta"/>
+    <addaction name="actionStress_xy_rz"/>
+    <addaction name="actionEffective_Stress"/>
+    <addaction name="actionAverage_Stress"/>
+    <addaction name="actionStress_1"/>
+    <addaction name="actionStress_2"/>
+    <addaction name="actionStress3"/>
+   </widget>
+   <widget class="QMenu" name="menuAnimation">
+    <property name="title">
+     <string>Animation</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuGraphics">
+    <property name="title">
+     <string>Graphics</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuDie_Stress_Analysis">
+    <property name="title">
+     <string>Die Stress Analysis</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuDie_Thermal_Analysis">
+    <property name="title">
+     <string>Die Thermal Analysis</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuBuild_3D">
+    <property name="title">
+     <string>Build 3D</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuState">
+    <property name="title">
+     <string>State</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuWindow">
+    <property name="title">
+     <string>Window</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuView"/>
+   <addaction name="menuSummary"/>
+   <addaction name="menuQuery"/>
+   <addaction name="menuMesh"/>
+   <addaction name="menuField_Variables"/>
+   <addaction name="menuAnimation"/>
+   <addaction name="menuGraphics"/>
+   <addaction name="menuDie_Stress_Analysis"/>
+   <addaction name="menuDie_Thermal_Analysis"/>
+   <addaction name="menuBuild_3D"/>
+   <addaction name="menuState"/>
+   <addaction name="menuWindow"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionWorking_Derectory">
+   <property name="text">
+    <string>Working Derectory...</string>
+   </property>
+  </action>
+  <action name="actionPrint">
+   <property name="text">
+    <string>Print...</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save...</string>
+   </property>
+  </action>
+  <action name="actionExport_as_DXF">
+   <property name="text">
+    <string>Export as DXF...</string>
+   </property>
+  </action>
+  <action name="actionExport_as_ascii">
+   <property name="text">
+    <string>Export as ascii...</string>
+   </property>
+  </action>
+  <action name="actionExport_as_RST">
+   <property name="text">
+    <string>Export as RST...</string>
+   </property>
+  </action>
+  <action name="actionExit_Program">
+   <property name="text">
+    <string>Exit Program</string>
+   </property>
+  </action>
+  <action name="actionSelect_Text">
+   <property name="text">
+    <string>Select Text</string>
+   </property>
+  </action>
+  <action name="actionSelect_Graphics">
+   <property name="text">
+    <string>Select Graphics</string>
+   </property>
+  </action>
+  <action name="actionSelect_All">
+   <property name="text">
+    <string>Select All</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="text">
+    <string>Copy</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="text">
+    <string>Paste</string>
+   </property>
+  </action>
+  <action name="actionSize_To_Fit">
+   <property name="text">
+    <string>Size To Fit</string>
+   </property>
+  </action>
+  <action name="actionFull_Screen">
+   <property name="text">
+    <string>Full Screen</string>
+   </property>
+  </action>
+  <action name="actionMagnification_Zoom">
+   <property name="text">
+    <string>Magnification Zoom</string>
+   </property>
+  </action>
+  <action name="actionStandard_Options">
+   <property name="text">
+    <string>Standard Options</string>
+   </property>
+  </action>
+  <action name="actionWorkpiece">
+   <property name="text">
+    <string>Workpiece</string>
+   </property>
+  </action>
+  <action name="actionDie">
+   <property name="text">
+    <string>Die</string>
+   </property>
+  </action>
+  <action name="actionStandard_Options_2">
+   <property name="text">
+    <string>Standard Options</string>
+   </property>
+  </action>
+  <action name="actionNodes">
+   <property name="text">
+    <string>Nodes</string>
+   </property>
+  </action>
+  <action name="actionElements">
+   <property name="text">
+    <string>Elements</string>
+   </property>
+  </action>
+  <action name="actionMinimum_Jacobian">
+   <property name="text">
+    <string>Minimum Jacobian</string>
+   </property>
+  </action>
+  <action name="actionSpecial_Options">
+   <property name="text">
+    <string>Special Options</string>
+   </property>
+  </action>
+  <action name="actionContact_Length_and_Ruler">
+   <property name="text">
+    <string>Contact Length and Ruler</string>
+   </property>
+  </action>
+  <action name="actionSurface_Strains">
+   <property name="text">
+    <string>Surface Strains</string>
+   </property>
+  </action>
+  <action name="actionStandard_Options_3">
+   <property name="text">
+    <string>Standard Options</string>
+   </property>
+  </action>
+  <action name="actionInitial_Mesh">
+   <property name="text">
+    <string>Initial Mesh</string>
+   </property>
+  </action>
+  <action name="actionDeformed_Mesh">
+   <property name="text">
+    <string>Deformed Mesh</string>
+   </property>
+  </action>
+  <action name="actionStandard_Options_4">
+   <property name="text">
+    <string>Standard Options</string>
+   </property>
+  </action>
+  <action name="actionVelocity_x_r">
+   <property name="text">
+    <string>Velocity x(r)</string>
+   </property>
+  </action>
+  <action name="actionVelocity_y_z">
+   <property name="text">
+    <string>Velocity y(z)</string>
+   </property>
+  </action>
+  <action name="actionTotal_Velocity">
+   <property name="text">
+    <string>Total Velocity</string>
+   </property>
+  </action>
+  <action name="actionForce_x_r">
+   <property name="text">
+    <string>Force x(r)</string>
+   </property>
+  </action>
+  <action name="actionForce_y_z">
+   <property name="text">
+    <string>Force y(z)</string>
+   </property>
+  </action>
+  <action name="actionTotal_Force">
+   <property name="text">
+    <string>Total Force</string>
+   </property>
+  </action>
+  <action name="actionTemperature_Rate">
+   <property name="text">
+    <string>Temperature Rate</string>
+   </property>
+  </action>
+  <action name="actionTemperature">
+   <property name="text">
+    <string>Temperature</string>
+   </property>
+  </action>
+  <action name="actionStrain_Rate_x_r">
+   <property name="text">
+    <string>Strain Rate x(r)</string>
+   </property>
+  </action>
+  <action name="actionStrain_Rate_y_r">
+   <property name="text">
+    <string>Strain Rate y(z)</string>
+   </property>
+  </action>
+  <action name="actionStrain_rate_z_theta">
+   <property name="text">
+    <string>Strain rate z(theta)</string>
+   </property>
+  </action>
+  <action name="actionStrain_Rate_xy_rz">
+   <property name="text">
+    <string>Strain Rate xy(rz)</string>
+   </property>
+  </action>
+  <action name="actionEffective_Strain_Rate">
+   <property name="text">
+    <string>Effective Strain Rate</string>
+   </property>
+  </action>
+  <action name="actionStrain_x_r">
+   <property name="text">
+    <string>Strain x(r)</string>
+   </property>
+  </action>
+  <action name="actionStrain_y_r">
+   <property name="text">
+    <string>Strain y(z)</string>
+   </property>
+  </action>
+  <action name="actionStrain_z_theta">
+   <property name="text">
+    <string>Strain z(theta)</string>
+   </property>
+  </action>
+  <action name="actionStrain_xy_rz">
+   <property name="text">
+    <string>Strain xy(rz)</string>
+   </property>
+  </action>
+  <action name="actionEffective_Strain">
+   <property name="text">
+    <string>Effective Strain</string>
+   </property>
+  </action>
+  <action name="actionVolumetric_Strain">
+   <property name="text">
+    <string>Volumetric Strain</string>
+   </property>
+  </action>
+  <action name="actionStrain_1">
+   <property name="text">
+    <string>Strain 1</string>
+   </property>
+  </action>
+  <action name="actionStrain_2">
+   <property name="text">
+    <string>Strain 2</string>
+   </property>
+  </action>
+  <action name="actionStrain_3">
+   <property name="text">
+    <string>Strain 3</string>
+   </property>
+  </action>
+  <action name="actionStress_x_r">
+   <property name="text">
+    <string>Stress x(r)</string>
+   </property>
+  </action>
+  <action name="actionStress_y_z">
+   <property name="text">
+    <string>Stress y(z)</string>
+   </property>
+  </action>
+  <action name="actionStress_z_theta">
+   <property name="text">
+    <string>Stress z(theta)</string>
+   </property>
+  </action>
+  <action name="actionStress_xy_rz">
+   <property name="text">
+    <string>Stress xy(rz)</string>
+   </property>
+  </action>
+  <action name="actionEffective_Stress">
+   <property name="text">
+    <string>Effective Stress</string>
+   </property>
+  </action>
+  <action name="actionAverage_Stress">
+   <property name="text">
+    <string>Average Stress</string>
+   </property>
+  </action>
+  <action name="actionStress_1">
+   <property name="text">
+    <string>Stress 1</string>
+   </property>
+  </action>
+  <action name="actionStress_2">
+   <property name="text">
+    <string>Stress 2</string>
+   </property>
+  </action>
+  <action name="actionStress3">
+   <property name="text">
+    <string>Stress3</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
