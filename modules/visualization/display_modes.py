@@ -1,34 +1,31 @@
-# -*- coding: utf-8 -*-
-"""
-Module de gestion des modes d'affichage (normal, wireframe, variables)
-"""
 
+"""
+Display Modes Management Module (normal, wireframe, variables)
+"""
 
 class DisplayModeManager:
-    """
-    Gestionnaire des différents modes d'affichage
-    """
+    """Manager for different display modes"""
     
     def __init__(self):
         self.wireframe_mode = False
     
     def set_wireframe_mode(self, enabled):
-        """Active/désactive le mode wireframe"""
+        """Enable/disable wireframe mode"""
         self.wireframe_mode = enabled
     
     def display_mesh(self, plotter, mesh, mesh_color, edge_color, show_edges=True):
-        """Affiche le mesh principal selon le mode courant"""
+        """Display main mesh according to current mode"""
         if self.wireframe_mode:
-            # Mode wireframe: seulement les arêtes
+            # Wireframe mode: only edges
             plotter.add_mesh(
                 mesh,
                 style='wireframe', 
                 color=edge_color,
                 line_width=1,
-                label="Maillage - Wireframe"
+                label="Mesh - Wireframe"
             )
         else:
-            # Mode normal: mesh opaque avec edges
+            # Normal mode: opaque mesh with edges
             plotter.add_mesh(
                 mesh,
                 show_edges=show_edges,
@@ -36,13 +33,13 @@ class DisplayModeManager:
                 line_width=1,
                 color=mesh_color,
                 opacity=1.0,
-                label="Maillage"
+                label="Mesh"
             )
     
     def display_die(self, plotter, die_mesh, die_id):
-        """Affiche un die selon le mode courant"""
+        """Display die according to current mode"""
         if self.wireframe_mode:
-            # Mode wireframe: seulement les contours
+            # Wireframe mode: only outlines
             plotter.add_mesh(
                 die_mesh,
                 style='wireframe',
@@ -51,7 +48,7 @@ class DisplayModeManager:
                 label=f"Die {die_id} - Wireframe"
             )
         else:
-            # Mode normal: die opaque
+            # Normal mode: opaque die
             plotter.add_mesh(
                 die_mesh,
                 color='lightgrey',
@@ -63,7 +60,7 @@ class DisplayModeManager:
             )
     
     def display_variable(self, plotter, mesh, scalar_name, variable_name, edge_color):
-        """Affiche les variables selon le mode courant"""
+        """Display variables according to current mode"""
         plotter.add_mesh(
             mesh,
             scalars=scalar_name,
@@ -71,7 +68,8 @@ class DisplayModeManager:
             edge_color=edge_color,
             line_width=1,
             opacity=1.0,
-            cmap='turbo',  # Colormap avec plus de couleurs
+            cmap='turbo',  # Colormap with more colors
             show_scalar_bar=True,
-            label=f"Maillage - {variable_name}"
+            label=f"Mesh - {variable_name}"
         )
+

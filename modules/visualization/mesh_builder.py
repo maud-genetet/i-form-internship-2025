@@ -1,21 +1,15 @@
-# -*- coding: utf-8 -*-
 """
-Module de construction des mesh PyVista
+PyVista Mesh Construction Module
 """
 
 import numpy as np
 import pyvista as pv
 
-
 class MeshBuilder:
-    """
-    Responsable de la création des mesh PyVista à partir des données neutral
-    """
+    """Responsible for creating PyVista meshes from neutral data"""
     
     def create_pyvista_mesh(self, neutral_data):
-        """
-        Crée un mesh PyVista à partir des données neutral
-        """
+        """Create PyVista mesh from neutral data"""
         if not neutral_data:
             return None
         
@@ -25,26 +19,26 @@ class MeshBuilder:
         if not nodes or not elements:
             return None
         
-        # Construction des points
+        # Build points
         points, node_id_to_index = self._build_points(nodes)
         
-        # Construction des cellules
+        # Build cells
         cells = self._build_cells(elements, node_id_to_index)
         
         if not cells:
             return None
         
-        # Création du mesh
-        cell_types = [5] * (len(cells) // 5)  # Triangle par défaut
+        # Create mesh
+        cell_types = [5] * (len(cells) // 5)  # Triangle by default
         mesh = pv.UnstructuredGrid(cells, np.array(cell_types), points)
         
-        # Ajout des données scalaires
+        # Add scalar data
         self._add_scalar_data(mesh, elements)
         
         return mesh
     
     def _build_points(self, nodes):
-        """Construit le tableau des points et la table de correspondance"""
+        """Build points array and correspondence table"""
         points = []
         node_id_to_index = {}
         
@@ -57,7 +51,7 @@ class MeshBuilder:
         return np.array(points), node_id_to_index
     
     def _build_cells(self, elements, node_id_to_index):
-        """Construit le tableau des cellules"""
+        """Build cells array"""
         cells = []
         
         for element in elements:
@@ -79,7 +73,7 @@ class MeshBuilder:
         return cells
     
     def _add_scalar_data(self, mesh, elements):
-        """Ajoute toutes les données scalaires disponibles au mesh"""
+        """Add all available scalar data to mesh"""
         element_data = {
             'Element_ID': [],
             'Strain rate x(r)': [],
@@ -123,13 +117,13 @@ class MeshBuilder:
             element_data['Effective stress'].append(element.get_stress_O() or 0.0)
             element_data['Average stress'].append(element.get_stress_Orr() or 0.0)
                     
-        # Ajout au mesh
+        # Add to mesh
         for key, values in element_data.items():
             if any(v != 0.0 for v in values):
                 mesh.cell_data[key] = np.array(values)
     
     def create_die_mesh(self, die):
-        """Crée un mesh pour un die"""
+        """Create mesh for a die"""
         die_nodes = die.get_nodes()
         
         if not die_nodes or len(die_nodes) < 3:
@@ -153,4 +147,3 @@ class MeshBuilder:
                 )
         
         return None
-    

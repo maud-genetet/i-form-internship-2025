@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
+
 """
-Gestionnaire du menu File
-Gère toutes les opérations liées aux fichiers
+File Menu Handler
+Manages all file-related operations
 """
 
 from PyQt5.QtWidgets import QFileDialog
@@ -13,10 +13,10 @@ class FileHandler:
         self.working_directory = None
     
     def set_working_directory(self):
-        """Définit le répertoire de travail"""
+        """Set working directory"""
         directory = QFileDialog.getExistingDirectory(
             self.main_window,
-            "Sélectionner le répertoire de travail",
+            "Select Working Directory",
             self.working_directory
         )
         if directory:
@@ -24,54 +24,51 @@ class FileHandler:
             self.main_window.visualization_manager.set_working_directory(directory)
             self.main_window.visualization_manager._update_data_info()
             
-            # Activer le click tracking UNE SEULE FOIS quand on définit le working directory
+            # Enable click tracking ONCE when setting working directory
             visualization_manager = self.main_window.visualization_manager
             visualization_manager.interaction_handler.enable_click_tracking(visualization_manager.plotter)
     
     def print_document(self):
-        """Lance l'impression du document actuel"""
+        """Print current document"""
         pass
     
     def save_document(self):
-        """Sauvegarde le document actuel"""
-        # TODO: Implémenter la sauvegarde
+        """Save current document"""
+        # TODO: Implement save functionality
         pass
     
     def export_as_dxf(self):
-        """Exporte le document au format DXF"""
-        # TODO: Implémenter l'export DXF
+        """Export document as DXF"""
         filename, _ = QFileDialog.getSaveFileName(
             self.main_window,
-            "Exporter en DXF",
+            "Export as DXF",
             self.working_directory,
-            "Fichiers DXF (*.dxf)"
+            "DXF Files (*.dxf)"
         )
         if filename:
-            # TODO: Logique d'export DXF
+            # TODO: DXF export logic
             pass
     
     def export_as_ascii(self):
-        """Exporte le document au format ASCII"""
-        # TODO: Implémenter l'export ASCII
+        """Export document as ASCII"""
         filename, _ = QFileDialog.getSaveFileName(
             self.main_window,
-            "Exporter en ASCII",
+            "Export as ASCII",
             self.working_directory,
-            "Fichiers texte (*.txt)"
+            "Text Files (*.txt)"
         )
         if filename:
-            # TODO: Logique d'export ASCII
+            # TODO: ASCII export logic
             pass
     
     def export_as_rst(self):
-        """Exporte le document au format RST"""
-        # TODO: Implémenter l'export RST
+        """Export document as RST"""
         filename, _ = QFileDialog.getSaveFileName(
             self.main_window,
-            "Exporter en RST",
+            "Export as RST",
             self.working_directory,
-            "Fichiers RST (*.rst)"
+            "RST Files (*.rst)"
         )
         if filename:
-            # TODO: Logique d'export RST
+            # TODO: RST export logic
             pass

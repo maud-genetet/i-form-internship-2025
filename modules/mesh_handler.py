@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
+
 """
-Gestionnaire du menu Mesh
-Gère toutes les opérations liées au maillage
+Mesh Menu Handler
+Manages all mesh-related operations
 """
 
 import os
@@ -21,45 +21,46 @@ class MeshHandler:
         self.current_neutral_file = None
         
     def initial_mesh(self):
+        """Load initial mesh (FEM1.NEU)"""
         working_directory = None
         if hasattr(self.main_window, 'file_handler') and self.main_window.file_handler.working_directory:
             working_directory = self.main_window.file_handler.working_directory
             print(f"Dir: {working_directory}")
             
-            # We search FEM1.NEU
+            # Search for FEM1.NEU
             fem1_path = os.path.join(working_directory, "FEM1.NEU")
             if not os.path.exists(fem1_path):
-                raise FileNotFoundError(f"Le fichier {fem1_path} n'existe pas")
+                raise FileNotFoundError(f"File {fem1_path} does not exist")
             else:
                 self._load_and_display_mesh(fem1_path)
     
     def _load_and_display_mesh(self, file_path):
-        """Charge et affiche un fichier de maillage"""
+        """Load and display mesh file"""
         self.current_neutral_file = ParserNeutralFile.parser_file(file_path)
         
         if not self.current_neutral_file:
             QMessageBox.warning(
                 self.main_window,
-                "Erreur de parsing",
-                "Impossible de parser le fichier sélectionné.\n"
-                "Vérifiez que le fichier est au bon format .neu"
+                "Parsing Error",
+                "Cannot parse selected file.\n"
+                "Check that file is in correct .neu format"
             )
             return
         
         self.main_window.visualization_manager.load_neutral_file(self.current_neutral_file)    
         self.main_window.visualization_manager.set_as_central_widget()
         
-        # Afficher le nom du fichier chargé
+        # Display loaded filename
         filename = os.path.basename(file_path)
-        print(f"Maillage chargé: {filename}")
+        print(f"Mesh loaded: {filename}")
             
     def deformed_mesh(self):
-        """Affiche le maillage déformé"""
+        """Display deformed mesh"""
         working_directory = None
         if hasattr(self.main_window, 'file_handler') and self.main_window.file_handler.working_directory:
             working_directory = self.main_window.file_handler.working_directory
 
-            # Recherche de tous les fichiers .NEU dans le répertoire
+            # Search for all .NEU files in directory
             try:
                 neu_files = [f for f in os.listdir(working_directory) if f.endswith('.NEU')]
                 number_of_neu_files = len(neu_files)
@@ -67,25 +68,25 @@ class MeshHandler:
                 if number_of_neu_files == 0:
                     QMessageBox.warning(
                         self.main_window,
-                        "Aucun fichier trouvé",
-                        "Aucun fichier .NEU trouvé dans le répertoire de travail."
+                        "No Files Found",
+                        "No .NEU files found in working directory."
                     )
                     return
                 
-                # Trier les fichiers numériquement (FEM1, FEM2, FEM10, FEM11...)
+                # Sort files numerically (FEM1, FEM2, FEM10, FEM11...)
                 def natural_sort_key(filename):
-                    """Fonction de tri naturel pour les noms de fichiers avec numéros"""
+                    """Natural sorting function for filenames with numbers"""
                     parts = re.split(r'(\d+)', filename)
                     return [int(part) if part.isdigit() else part for part in parts]
                 
                 neu_files.sort(key=natural_sort_key)
                 
-                # Ajouter les contrôles de navigation dans la toolbar
+                # Add navigation controls in toolbar
                 self.main_window.visualization_manager.add_deformed_mesh_controls(
                     neu_files, working_directory, self._load_and_display_mesh
                 )
                 
-                # Charger le premier fichier par défaut
+                # Load first file by default
                 if neu_files:
                     first_file_path = os.path.join(working_directory, neu_files[0])
                     self._load_and_display_mesh(first_file_path)
@@ -93,12 +94,12 @@ class MeshHandler:
             except Exception as e:
                 QMessageBox.critical(
                     self.main_window,
-                    "Erreur",
-                    f"Erreur lors de la recherche des fichiers: {str(e)}"
+                    "Error",
+                    f"Error searching for files: {str(e)}"
                 )
         else:
             QMessageBox.warning(
                 self.main_window,
-                "Répertoire de travail non défini",
-                "Veuillez d'abord définir un répertoire de travail via File > Set Working Directory."
+                "Working Directory Not Set",
+                "Please first set a working directory via File > Set Working Directory."
             )
