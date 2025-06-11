@@ -27,6 +27,9 @@ class FileHandler:
             # Enable click tracking ONCE when setting working directory
             visualization_manager = self.main_window.visualization_manager
             visualization_manager.interaction_handler.enable_click_tracking(visualization_manager.plotter)
+
+            # deformed_mesh
+            self.main_window.mesh_handler.deformed_mesh()
     
     def print_document(self):
         """Print current document"""

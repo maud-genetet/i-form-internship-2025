@@ -67,14 +67,6 @@ class DisplayModeManager:
                 },
                 label=f"Mesh - {variable_name}"
             )
-            # Add wireframe overlay
-            plotter.add_mesh(
-                mesh,
-                style='wireframe',
-                color=edge_color,
-                line_width=1,
-                label=f"Wireframe Overlay"
-            )
         else:
             # Normal display with options
             plotter.add_mesh(
@@ -97,17 +89,13 @@ class DisplayModeManager:
     
     def _apply_hd_contour(self, mesh, scalar_name):
         """Apply high definition contour"""
-        try:
-            mesh_copy = mesh.copy()
-            mesh_with_point_data = mesh_copy.cell_data_to_point_data()
-            
-            if scalar_name in mesh_with_point_data.point_data:
-                return mesh_with_point_data
-            else:
-                return mesh_copy
-        except Exception as e:
-            print(f"HD Contour error: {e}")
-            return mesh
+        mesh_copy = mesh.copy()
+        mesh_with_point_data = mesh_copy.cell_data_to_point_data()
+        
+        if scalar_name in mesh_with_point_data.point_data:
+            return mesh_with_point_data
+        else:
+            return mesh_copy
     
     def _get_scalar_data(self, mesh, scalar_name, hd_contour_enabled):
         """Get scalar data"""

@@ -216,3 +216,32 @@ class Element:
                 \nstrain_exx={self.strain_exx}, strain_eyy={self.strain_eyy}, strain_ezz={self.strain_ezz}, strain_exy={self.strain_exy}, strain_e={self.strain_e}, strain_e1={self.strain_e1}, strain_e3={self.strain_e3}, angle13={self.angle13},\
                 \nstress_oxx={self.stress_oxx}, stress_oyy={self.stress_oyy}, stress_ozz={self.stress_ozz}, stress_oxy={self.stress_oxy}, stress_o={self.stress_o}, stress_orr={self.stress_orr})\n"
         
+    def get_info(self):
+        return {
+            'id': self.id,
+            'matno': self.matno,
+            'lnods': self.lnods,
+            'rindx': self.rindx,
+            'densy': self.densy,
+            'fract': self.fract,
+            'strain_rate_exx': self.srnrt_exx,
+            'strain_rate_eyy': self.srnrt_eyy,
+            'strain_rate_ezz': self.srnrt_ezz,
+            'strain_rate_exy': self.srnrt_exy,
+            'strain_rate_e': self.srnrt_e,
+            'strain_rate_ev': self.srnrt_ev,
+            'strain_exx': self.strain_exx,
+            'strain_eyy': self.strain_eyy,
+            'strain_ezz': self.strain_ezz,
+            'strain_exy': self.strain_exy,
+            'strain_e': self.strain_e,
+            'strain_e1': self.strain_e1,
+            'strain_e3': self.strain_e3,
+            'angle13': self.angle13,
+            'stress_oxx': self.stress_oxx,
+            'stress_oyy': self.stress_oyy,
+            'stress_ozz': self.stress_ozz,
+            'stress_oxy': self.stress_oxy,
+            'stress_o': self.stress_o,
+            'stress_orr': self.stress_orr
+        }

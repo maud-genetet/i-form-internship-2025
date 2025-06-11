@@ -7,17 +7,14 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QCheckBox, QSpinBox)
 from pyvistaqt import QtInteractor
 import pyvista as pv
+import vtk
+from PyQt5.QtWidgets import QFrame, QScrollArea
+from PyQt5.QtCore import Qt, QTimer
+import numpy as np
 
-try:
-    from .mesh_builder import MeshBuilder
-    from .interaction_handler import InteractionHandler
-    from .display_modes import DisplayModeManager
-except ImportError:
-    # Fallback for direct import
-    from modules.visualization.mesh_builder import MeshBuilder
-    from modules.visualization.interaction_handler import InteractionHandler
-    from modules.visualization.display_modes import DisplayModeManager
-
+from .mesh_builder import MeshBuilder
+from .interaction_handler import InteractionHandler
+from .display_modes import DisplayModeManager
 
 class VisualizationManager:
     """
@@ -43,6 +40,9 @@ class VisualizationManager:
         self.interaction_handler = InteractionHandler()
         self.display_manager = DisplayModeManager()
         
+        # Mesh info system
+        self.mesh_info_manager = None
+        
         self._setup_visualization_widget()
     
     def _setup_visualization_widget(self):
@@ -53,14 +53,63 @@ class VisualizationManager:
         # Toolbar
         self._create_toolbar(main_layout)
         
+        # Create horizontal layout for plotter + info panel
+        content_layout = QHBoxLayout()
+        
         # PyVista visualization area
         self.plotter = QtInteractor(self.visualization_widget)
-        main_layout.addWidget(self.plotter.interactor)
+        content_layout.addWidget(self.plotter.interactor)
         
+        # Info panel (hidden by default)
+        self._create_info_panel()
+        content_layout.addWidget(self.info_panel)
+        self.info_panel.setVisible(False)
+        
+        main_layout.addLayout(content_layout)
         self.visualization_widget.setLayout(main_layout)
         
         # Plotter configuration
         self._configure_plotter()
+        
+        # Initialize mesh info system after plotter is ready
+        self._add_mesh_info_button_fallback()
+    
+    def _create_info_panel(self):
+        """Create info panel for mesh information"""
+        
+        self.info_panel = QFrame()
+        self.info_panel.setFixedWidth(300)
+        
+        info_layout = QVBoxLayout()
+        
+        # Title
+        self.info_title = QLabel("Mesh Information")
+        info_layout.addWidget(self.info_title)
+        
+        # Scrollable content area
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        
+        self.info_content = QLabel("Click on an element to see information")
+        self.info_content.setWordWrap(True)
+        self.info_content.setAlignment(Qt.AlignTop)
+        
+        scroll_area.setWidget(self.info_content)
+        info_layout.addWidget(scroll_area)
+        
+        self.info_panel.setLayout(info_layout)
+    
+    def _show_info_panel(self):
+        """Show the info panel"""
+        self.info_panel.setVisible(True)
+    
+    def _hide_info_panel(self):
+        """Hide the info panel and disable picking"""
+        self.info_panel.setVisible(False)
+        self._mesh_info_button.setChecked(False)
+        self.plotter.disable_picking()
     
     def _configure_plotter(self):
         """Configure plotter with automatic click zoom"""
@@ -69,6 +118,158 @@ class VisualizationManager:
         
         # Initialize interaction handler
         self.interaction_handler.setup(self.plotter)
+    
+    def _add_mesh_info_button_fallback(self):
+        """Add mesh info button manually as fallback"""
+        try:
+            main_layout = self.visualization_widget.layout()
+            if main_layout.count() > 0:
+                toolbar_widget = main_layout.itemAt(0).widget()
+                toolbar_layout = toolbar_widget.layout()
+                
+                separator = QLabel(" | ")
+                toolbar_layout.addWidget(separator)
+                
+                mesh_info_btn = QPushButton("Mesh Info")
+                mesh_info_btn.setCheckable(True)
+                mesh_info_btn.clicked.connect(self._on_mesh_info_clicked_fallback)
+                toolbar_layout.addWidget(mesh_info_btn)
+                
+                # Store reference to button
+                self._mesh_info_button = mesh_info_btn
+                
+        except Exception as e:
+            print(f"Error adding fallback button: {e}")
+    
+    def _on_mesh_info_clicked_fallback(self, checked):
+        """Fallback mesh info button handler"""
+        if checked:
+            print("Enabling mesh info mode...")
+            self._show_info_panel()
+            self._enable_mesh_picking()
+        else:
+            print("Disabling mesh info mode...")
+            self.info_panel.setVisible(False)
+            self._disable_mesh_picking()
+    
+    def _enable_mesh_picking(self):
+        """Enable mesh picking with direct VTK approach"""
+        if self.plotter and self.current_mesh:
+                print(f"Enabling picking on mesh with {self.current_mesh.n_cells} cells")
+                
+                self.plotter.disable_picking()
+                
+                # Get the VTK render window interactor
+                interactor = self.plotter.iren
+                
+                interactor.remove_observer('LeftButtonPressEvent')
+                
+                interactor.add_observer('LeftButtonPressEvent', self._vtk_click_handler)
+    
+    def _vtk_click_handler(self, obj, event):
+        # Get click position
+        interactor = self.plotter.iren
+        x, y = interactor.get_event_position()
+
+        renderer = self.plotter.renderer
+        
+        # Create a cell picker
+        picker = vtk.vtkCellPicker()
+        picker.SetTolerance(0.001)  # Set picking tolerance
+        
+        # Perform the pick
+        result = picker.Pick(x, y, 0, renderer)
+        if result:
+            cell_id = picker.GetCellId()
+            
+            if cell_id >= 0:
+                self._display_cell_info(cell_id)
+                self._highlight_picked_cell(cell_id)
+            else:
+                print("No valid cell picked")
+                self.info_content.setText("No element found at click position")
+        else:
+            print("Pick failed - clicked outside mesh")
+            self.info_content.setText("Click on the mesh elements")
+            
+    
+    def _highlight_picked_cell(self, cell_id):
+        """Highlight the picked cell visually"""
+        if self.current_mesh and cell_id < self.current_mesh.n_cells:
+            # Extract the single cell
+            single_cell = self.current_mesh.extract_cells([cell_id])
+            
+            # Add it as a highlighted overlay
+            self.plotter.add_mesh(
+                single_cell,
+                color='red',
+                opacity=0.8,
+                style='wireframe',
+                line_width=4,
+                name='picked_cell_highlight'  # Name it so we can remove it later
+            )
+
+    def reapply_mesh_picking_if_needed(self):
+        """Reapply mesh picking after mesh operations"""
+        if hasattr(self, '_mesh_info_button') and self._mesh_info_button.isChecked():
+            print("Reapplying mesh picking after mesh update")
+            # Small delay to ensure mesh is fully loaded
+            QTimer.singleShot(100, self._enable_mesh_picking)
+    
+    def _clear_highlight(self):
+        """Clear cell highlight"""
+        if 'picked_cell_highlight' in self.plotter.actors:
+            self.plotter.remove_actor('picked_cell_highlight')
+    
+    def _display_cell_info(self, cell_index):
+        """Display information for a specific cell index"""
+        
+        if not self.current_data:
+            print("No current_data available")
+            self.info_content.setText("No mesh data available")
+            return
+            
+        try:
+            elements = self.current_data.get_elements()
+            
+            if cell_index >= len(elements) or cell_index < 0:
+                error_msg = f"Cell index {cell_index} out of range (0-{len(elements)-1})"
+                print(error_msg)
+                self.info_content.setText(error_msg)
+                return
+                
+            element = elements[cell_index]
+            element_id = element.get_id()
+            
+            print(f"Element ID: {element_id}")
+            
+            # Get all available information
+            info_text = f"""ELEMENT INFORMATION \n{element.get_info()}"""
+            
+            # Update panel
+            self.info_title.setText(f"Element {element_id} Information")
+            self.info_content.setText(info_text)
+            
+        except Exception as e:
+            error_msg = f"Error getting element info: {e}"
+            print(error_msg)
+            self.info_content.setText(error_msg)
+    
+    def _disable_mesh_picking(self):
+        """Disable mesh picking"""
+        # Clear any highlights
+        self._clear_highlight()
+        
+        # Remove VTK observers (try both syntaxes)
+        if self.plotter and self.plotter.iren:
+            interactor = self.plotter.iren
+            interactor.remove_observer('LeftButtonPressEvent')
+        
+        # Disable PyVista picking
+        if self.plotter:
+            self.plotter.disable_picking()
+                
+        print("Mesh info picking disabled")
     
     def _create_toolbar(self, main_layout):
         """Create control toolbar"""
@@ -263,6 +464,8 @@ class VisualizationManager:
         # Force rendering to ensure everything is displayed
         if self.plotter:
             self.plotter.render()
+
+        self.reapply_mesh_picking_if_needed()
     
     def _update_data_info(self):
         """Update displayed information"""
@@ -345,7 +548,6 @@ class VisualizationManager:
             current_focal_point = camera.focal_point
             
             # Calculate current distance (to keep zoom)
-            import numpy as np
             current_distance = np.linalg.norm(
                 np.array(current_position) - np.array(current_focal_point)
             )

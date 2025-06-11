@@ -5,10 +5,7 @@ Manages display of different variables on the mesh
 
 from PyQt5.QtWidgets import QMessageBox
 
-try:
-    from modules.visualization_options import VisualizationOptions
-except ImportError:
-    from visualization_options import VisualizationOptions
+from modules.visualization_options import VisualizationOptions
 
 
 class FieldVariablesHandler:
@@ -88,6 +85,9 @@ class FieldVariablesHandler:
         self.current_variable = resolved_key
         print(f"Variable displayed: {display_name}")
         visualization_manager.plotter.render()
+        
+        # Reapply picking if needed
+        visualization_manager.reapply_mesh_picking_if_needed()
     
     def _resolve_variable_key(self, variable_key, display_name):
         """Resolve and validate variable key"""

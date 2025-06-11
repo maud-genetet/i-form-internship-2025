@@ -33,6 +33,8 @@ class MeshHandler:
                 raise FileNotFoundError(f"File {fem1_path} does not exist")
             else:
                 self._load_and_display_mesh(fem1_path)
+                # reset the visualization manager to default state
+                self.main_window.visualization_manager.reset_view()
     
     def _load_and_display_mesh(self, file_path):
         """Load and display mesh file"""
@@ -90,6 +92,7 @@ class MeshHandler:
                 if neu_files:
                     first_file_path = os.path.join(working_directory, neu_files[0])
                     self._load_and_display_mesh(first_file_path)
+                    self.main_window.visualization_manager.reset_view()
                         
             except Exception as e:
                 QMessageBox.critical(
