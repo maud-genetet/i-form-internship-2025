@@ -14,7 +14,6 @@ class FileHandler:
     
     def set_working_directory(self):
         """Définit le répertoire de travail"""
-        # TODO: Implémenter la sélection du répertoire de travail
         directory = QFileDialog.getExistingDirectory(
             self.main_window,
             "Sélectionner le répertoire de travail",
@@ -24,10 +23,13 @@ class FileHandler:
             self.working_directory = directory
             self.main_window.visualization_manager.set_working_directory(directory)
             self.main_window.visualization_manager._update_data_info()
+            
+            # Activer le click tracking UNE SEULE FOIS quand on définit le working directory
+            visualization_manager = self.main_window.visualization_manager
+            visualization_manager.interaction_handler.enable_click_tracking(visualization_manager.plotter)
     
     def print_document(self):
         """Lance l'impression du document actuel"""
-        # TODO: Implémenter la fonctionnalité d'impression
         pass
     
     def save_document(self):

@@ -64,23 +64,14 @@ class DisplayModeManager:
     
     def display_variable(self, plotter, mesh, scalar_name, variable_name, edge_color):
         """Affiche les variables selon le mode courant"""
-        if self.wireframe_mode:
-            # Mode wireframe avec colorisation
-            plotter.add_mesh(
-                mesh,
-                scalars=scalar_name,
-                style='wireframe',
-                line_width=1,
-                label=f"Maillage - {variable_name} (Wireframe)"
-            )
-        else:
-            # Mode normal avec colorisation
-            plotter.add_mesh(
-                mesh,
-                scalars=scalar_name,
-                show_edges=True,
-                edge_color=edge_color,
-                line_width=1,
-                opacity=1.0,
-                label=f"Maillage - {variable_name}"
-            )
+        plotter.add_mesh(
+            mesh,
+            scalars=scalar_name,
+            show_edges=True,
+            edge_color=edge_color,
+            line_width=1,
+            opacity=1.0,
+            cmap='turbo',  # Colormap avec plus de couleurs
+            show_scalar_bar=True,
+            label=f"Maillage - {variable_name}"
+        )

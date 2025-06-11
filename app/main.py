@@ -12,13 +12,13 @@ from main_ui import Ui_MainWindow
 from modules.file_handler import FileHandler
 from modules.mesh_handler import MeshHandler
 from modules.visualization import VisualizationManager
+from modules.field_variables_handler import FieldVariablesHandler
 
 '''
 from modules.edit_handler import EditHandler
 from modules.view_handler import ViewHandler
 from modules.summary_handler import SummaryHandler
 from modules.query_handler import QueryHandler
-from modules.field_variables_handler import FieldVariablesHandler
 from modules.animation_handler import AnimationHandler
 from modules.graphics_handler import GraphicsHandler
 from modules.analysis.die_stress_handler import DieStressHandler
@@ -54,13 +54,13 @@ class MainWindow(QMainWindow):
         """Initialise tous les gestionnaires de modules"""
         self.file_handler = FileHandler(self)
         self.mesh_handler = MeshHandler(self)
+        self.field_variables_handler = FieldVariablesHandler(self)
 
         '''
         self.edit_handler = EditHandler(self)
         self.view_handler = ViewHandler(self)
         self.summary_handler = SummaryHandler(self)
         self.query_handler = QueryHandler(self)
-        self.field_variables_handler = FieldVariablesHandler(self)
         self.animation_handler = AnimationHandler(self)
         self.graphics_handler = GraphicsHandler(self)
         self.die_stress_handler = DieStressHandler(self)
@@ -86,6 +86,9 @@ class MainWindow(QMainWindow):
         # Menu Mesh
         self.ui.actionInitial_Mesh.triggered.connect(self.mesh_handler.initial_mesh)
         self.ui.actionDeformed_Mesh.triggered.connect(self.mesh_handler.deformed_mesh)
+        
+        # Menu Field Variables
+        self.connect_field_variables_signals()
         
         '''
         # Menu Edit
@@ -114,25 +117,8 @@ class MainWindow(QMainWindow):
         self.ui.actionContact_Length_and_Ruler.triggered.connect(self.query_handler.contact_length_ruler)
         self.ui.actionSurface_Strains.triggered.connect(self.query_handler.surface_strains)
         
-        # Menu Field Variables (nombreuses connexions)
-        self.connect_field_variables_signals()
-        
         # Autres menus
         # Animation, Graphics, etc. seront connectés selon les besoins
-        '''
-    
-    def get_visualization_manager(self):
-        """
-        Permet aux autres modules d'accéder au gestionnaire de visualisation
-        """
-        return self.visualization_manager
-    
-    def get_current_data(self):
-        """
-        Retourne les données actuellement chargées
-        """
-        return self.visualization_manager.get_current_data()
-
         '''
     
     def connect_field_variables_signals(self):
@@ -184,8 +170,20 @@ class MainWindow(QMainWindow):
         self.ui.actionStress_1.triggered.connect(fv.stress_1)
         self.ui.actionStress_2.triggered.connect(fv.stress_2)
         self.ui.actionStress3.triggered.connect(fv.stress_3)
-        '''
     
+    def get_visualization_manager(self):
+        """
+        Permet aux autres modules d'accéder au gestionnaire de visualisation
+        """
+        return self.visualization_manager
+    
+    def get_current_data(self):
+        """
+        Retourne les données actuellement chargées
+        """
+        return self.visualization_manager.get_current_data()
+
+
 def main():
     """Point d'entrée principal de l'application"""
     app = QApplication(sys.argv)

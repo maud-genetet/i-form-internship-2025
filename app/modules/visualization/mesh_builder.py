@@ -82,23 +82,47 @@ class MeshBuilder:
         """Ajoute toutes les données scalaires disponibles au mesh"""
         element_data = {
             'Element_ID': [],
-            'Contrainte': [],
-            'Deformation': [],
-            'Contrainte_XX': [],
-            'Contrainte_YY': [],
-            'Deformation_XX': [],
-            'Deformation_YY': []
+            'Strain rate x(r)': [],
+            'Strain rate y(z)': [],
+            'Strain rate z(theta)': [],
+            'Strain rate xy(rz)': [],
+            'Effective strain rate': [],
+            'Strain x(r)': [],
+            'Strain y(z)': [],
+            'Strain z(theta)': [],
+            'Strain xy(rz)': [],
+            'Effective strain': [],
+            'Strain 1': [],
+            'Strain 3': [],
+            'Stress x(r)': [],
+            'Stress y(z)': [],
+            'Stress z(theta)': [],
+            'Stress xy(rz)': [],
+            'Effective stress': [],
+            'Average stress': []
         }
         
         for element in elements:
             element_data['Element_ID'].append(element.get_id())
-            element_data['Contrainte'].append(element.get_stress_O() or 0.0)
-            element_data['Deformation'].append(element.get_strain_E() or 0.0)
-            element_data['Contrainte_XX'].append(element.get_stress_Oxx() or 0.0)
-            element_data['Contrainte_YY'].append(element.get_stress_Oyy() or 0.0)
-            element_data['Deformation_XX'].append(element.get_strain_Exx() or 0.0)
-            element_data['Deformation_YY'].append(element.get_strain_Eyy() or 0.0)
-        
+            element_data['Strain rate x(r)'].append(element.get_strain_rate_Exx() or 0.0)
+            element_data['Strain rate y(z)'].append(element.get_strain_rate_Eyy() or 0.0)
+            element_data['Strain rate z(theta)'].append(element.get_strain_rate_Ezz() or 0.0)
+            element_data['Strain rate xy(rz)'].append(element.get_strain_rate_Exy() or 0.0)
+            element_data['Effective strain rate'].append(element.get_strain_rate_E() or 0.0)
+            element_data['Strain x(r)'].append(element.get_strain_Exx() or 0.0)
+            element_data['Strain y(z)'].append(element.get_strain_Eyy() or 0.0)
+            element_data['Strain z(theta)'].append(element.get_strain_Ezz() or 0.0)
+            element_data['Strain xy(rz)'].append(element.get_strain_Exy() or 0.0)
+            element_data['Effective strain'].append(element.get_strain_E() or 0.0)
+            element_data['Strain 1'].append(element.get_strain_E1() or 0.0)
+            element_data['Strain 3'].append(element.get_strain_E3() or 0.0)
+            element_data['Stress x(r)'].append(element.get_stress_Oxx() or 0.0)
+            element_data['Stress y(z)'].append(element.get_stress_Oyy() or 0.0)
+            element_data['Stress z(theta)'].append(element.get_stress_Ozz() or 0.0)
+            element_data['Stress xy(rz)'].append(element.get_stress_Oxy() or 0.0)
+            element_data['Effective stress'].append(element.get_stress_O() or 0.0)
+            element_data['Average stress'].append(element.get_stress_Orr() or 0.0)
+                    
         # Ajout au mesh
         for key, values in element_data.items():
             if any(v != 0.0 for v in values):
@@ -119,31 +143,14 @@ class MeshBuilder:
         
         if len(die_points) >= 3:
             die_points = np.array(die_points)
-            hull_points = self._create_convex_hull_2d(die_points)
             
-            if len(hull_points) >= 3:
-                cells = [len(hull_points)] + list(range(len(hull_points)))
+            if len(die_points) >= 3:
+                cells = [len(die_points)] + list(range(len(die_points)))
                 return pv.UnstructuredGrid(
                     cells,
                     [pv.CellType.POLYGON],
-                    hull_points
+                    die_points
                 )
         
         return None
     
-    def _create_convex_hull_2d(self, points):
-        """Crée une enveloppe convexe 2D"""
-        try:
-            from scipy.spatial import ConvexHull
-            points_2d = points[:, :2]
-            hull = ConvexHull(points_2d)
-            hull_points_2d = points_2d[hull.vertices]
-            return np.column_stack([hull_points_2d, np.zeros(len(hull_points_2d))])
-        except ImportError:
-            # Fallback simple
-            centroid = np.mean(points, axis=0)
-            angles = [np.arctan2(p[1] - centroid[1], p[0] - centroid[0]) for p in points]
-            sorted_indices = np.argsort(angles)
-            return points[sorted_indices]
-        except Exception:
-            return points

@@ -5,7 +5,7 @@ Module principal de visualisation - Configuration et contrôles principaux
 
 import numpy as np
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
-                             QPushButton, QComboBox, QCheckBox)
+                             QPushButton, QCheckBox, QSpinBox)
 from pyvistaqt import QtInteractor
 import pyvista as pv
 
@@ -80,16 +80,6 @@ class VisualizationManager:
         toolbar_layout.addWidget(self.data_info_label)
         
         toolbar_layout.addStretch()
-        
-        # Sélecteur de variable
-        self.variable_combo = QComboBox()
-        self.variable_combo.addItems([
-            "Géométrie", "Contrainte", "Déformation", 
-            "Vitesse", "Force", "Température"
-        ])
-        self.variable_combo.currentTextChanged.connect(self._on_variable_changed)
-        toolbar_layout.addWidget(QLabel("Afficher:"))
-        toolbar_layout.addWidget(self.variable_combo)
 
         # Checkbox wireframe
         self.wireframe_checkbox = QCheckBox("Wireframe")
@@ -106,9 +96,38 @@ class VisualizationManager:
         front_view_btn.clicked.connect(self.set_front_view)
         toolbar_layout.addWidget(front_view_btn)
         
-        clear_btn = QPushButton("Effacer")
-        clear_btn.clicked.connect(self.clear)
-        toolbar_layout.addWidget(clear_btn)
+        # Contrôles pour maillage déformé (cachés par défaut)
+        self.deformed_controls_layout = QHBoxLayout()
+        
+        # Bouton précédent
+        self.prev_mesh_btn = QPushButton("◀")
+        self.prev_mesh_btn.setMaximumWidth(30)
+        self.prev_mesh_btn.clicked.connect(self._previous_mesh)
+        self.prev_mesh_btn.setVisible(False)
+        self.deformed_controls_layout.addWidget(self.prev_mesh_btn)
+        
+        # SpinBox pour sélection directe
+        self.mesh_spinbox = QSpinBox()
+        self.mesh_spinbox.setMinimumWidth(50)
+        self.mesh_spinbox.setMaximumWidth(60)
+        self.mesh_spinbox.valueChanged.connect(self._on_mesh_spinbox_changed)
+        self.mesh_spinbox.setVisible(False)
+        self.deformed_controls_layout.addWidget(self.mesh_spinbox)
+        
+        # Bouton suivant
+        self.next_mesh_btn = QPushButton("▶")
+        self.next_mesh_btn.setMaximumWidth(30)
+        self.next_mesh_btn.clicked.connect(self._next_mesh)
+        self.next_mesh_btn.setVisible(False)
+        self.deformed_controls_layout.addWidget(self.next_mesh_btn)
+        
+        # Variables pour le maillage déformé
+        self.neu_files = []
+        self.working_directory = None
+        self.load_mesh_callback = None
+        self.current_mesh_index = 0
+        
+        toolbar_layout.addLayout(self.deformed_controls_layout)
         
         # Assemblage
         toolbar_widget = QWidget()
@@ -124,9 +143,74 @@ class VisualizationManager:
         if self.current_data:
             self.visualize_mesh()
     
-    def _on_variable_changed(self, variable_name):
-        """Callback pour changement de variable"""
-        self._apply_current_variable()
+    # === MÉTHODES POUR MAILLAGE DÉFORMÉ ===
+    
+    def add_deformed_mesh_controls(self, neu_files, working_directory, load_callback):
+        """Ajoute les contrôles de navigation pour le maillage déformé"""
+        self.neu_files = neu_files
+        self.working_directory = working_directory
+        self.load_mesh_callback = load_callback
+        self.current_mesh_index = 0
+        
+        # Configurer le spinbox
+        self.mesh_spinbox.setMinimum(1)
+        self.mesh_spinbox.setMaximum(len(neu_files))
+        self.mesh_spinbox.setValue(1)
+        
+        # Afficher les contrôles
+        self.prev_mesh_btn.setVisible(True)
+        self.mesh_spinbox.setVisible(True)
+        self.next_mesh_btn.setVisible(True)
+        
+        # Mettre à jour l'état des boutons
+        self._update_mesh_controls_state()
+        
+    def hide_deformed_mesh_controls(self):
+        """Cache les contrôles de navigation du maillage déformé"""
+        self.prev_mesh_btn.setVisible(False)
+        self.mesh_spinbox.setVisible(False)
+        self.next_mesh_btn.setVisible(False)
+    
+    def _previous_mesh(self):
+        """Charge le fichier de maillage précédent"""
+        if self.current_mesh_index > 0:
+            self.current_mesh_index -= 1
+            self._load_current_mesh()
+            self._update_mesh_controls_state()
+    
+    def _next_mesh(self):
+        """Charge le fichier de maillage suivant"""
+        if self.current_mesh_index < len(self.neu_files) - 1:
+            self.current_mesh_index += 1
+            self._load_current_mesh()
+            self._update_mesh_controls_state()
+    
+    def _on_mesh_spinbox_changed(self, value):
+        """Callback pour le changement de valeur du spinbox"""
+        new_index = value - 1  # Conversion 1-based vers 0-based
+        if 0 <= new_index < len(self.neu_files):
+            self.current_mesh_index = new_index
+            self._load_current_mesh()
+            self._update_mesh_controls_state()
+    
+    def _load_current_mesh(self):
+        """Charge le fichier de maillage actuel"""
+        if self.neu_files and self.working_directory and self.load_mesh_callback:
+            current_file = self.neu_files[self.current_mesh_index]
+            file_path = f"{self.working_directory}/{current_file}"
+            print(f"Chargement du fichier {self.current_mesh_index + 1}/{len(self.neu_files)}: {current_file}")
+            self.load_mesh_callback(file_path)
+    
+    def _update_mesh_controls_state(self):
+        """Met à jour l'état des contrôles de navigation"""
+        # Boutons précédent/suivant
+        self.prev_mesh_btn.setEnabled(self.current_mesh_index > 0)
+        self.next_mesh_btn.setEnabled(self.current_mesh_index < len(self.neu_files) - 1)
+        
+        # SpinBox (bloquer les signaux pour éviter la récursion)
+        self.mesh_spinbox.blockSignals(True)
+        self.mesh_spinbox.setValue(self.current_mesh_index + 1)
+        self.mesh_spinbox.blockSignals(False)
     
     # === MÉTHODES PUBLIQUES ===
     
@@ -142,15 +226,19 @@ class VisualizationManager:
         """Charge un fichier neutral pour visualisation"""
         self.current_data = neutral_file
         self._update_data_info()
-        self.visualize_mesh()
-        # Activation automatique du zoom au clic
-        self.interaction_handler.enable_click_tracking(self.plotter)
+        
+        # Visualiser le maillage avec dies
+        self.visualize_mesh(show_edges=True, show_nodes=False, show_dies=True)
+        
+        # Réappliquer la variable actuellement sélectionnée si elle existe
+        if hasattr(self.main_window, 'field_variables_handler'):
+            self.main_window.field_variables_handler.reapply_current_variable()
 
     def set_working_directory(self, dir_name):
         """Définit le répertoire de travail"""
         self.current_dir = dir_name
     
-    def visualize_mesh(self, show_edges=True, show_nodes=True, show_dies=True):
+    def visualize_mesh(self, show_edges=True, show_nodes=False, show_dies=True):
         """Visualise le maillage avec les options spécifiées"""
         if not self.current_data:
             return
@@ -176,12 +264,13 @@ class VisualizationManager:
                 
                 if show_dies:
                     self._add_dies_to_plot()
-                
-                # Application de la variable sélectionnée
-                self._apply_current_variable()
-                
+
         except Exception as e:
             print(f"Erreur lors de la visualisation: {e}")
+        
+        # Forcer le rendu pour s'assurer que tout est affiché
+        if self.plotter:
+            self.plotter.render()
     
     def _update_data_info(self):
         """Met à jour les informations affichées"""
@@ -225,33 +314,24 @@ class VisualizationManager:
         
         dies = self.current_data.get_dies()
         
-        for i, die in enumerate(dies):
-            die_mesh = self.mesh_builder.create_die_mesh(die)
-            if die_mesh:
-                self.display_manager.display_die(
-                    self.plotter, die_mesh, die.get_id()
-                )
-    
-    def _apply_current_variable(self):
-        """Applique la variable sélectionnée au mesh"""
-        if not self.current_mesh:
+        if not dies:
+            print("Aucun die trouvé dans les données")
             return
         
-        variable = self.variable_combo.currentText()
-        variable_mapping = {
-            'Contrainte': 'Contrainte',
-            'Déformation': 'Deformation',
-            'Vitesse': 'Vitesse',
-            'Force': 'Force',
-            'Température': 'Temperature'
-        }
+        print(f"Affichage de {len(dies)} die(s)")
         
-        if variable in variable_mapping and variable_mapping[variable] in self.current_mesh.cell_data:
-            self.display_manager.display_variable(
-                self.plotter, self.current_mesh, 
-                variable_mapping[variable], variable,
-                self.default_edge_color
-            )
+        for i, die in enumerate(dies):
+            try:
+                die_mesh = self.mesh_builder.create_die_mesh(die)
+                if die_mesh:
+                    self.display_manager.display_die(
+                        self.plotter, die_mesh, die.get_id()
+                    )
+                    print(f"Die {die.get_id()} ajouté")
+                else:
+                    print(f"Impossible de créer le mesh pour le die {die.get_id()}")
+            except Exception as e:
+                print(f"Erreur lors de l'ajout du die {i}: {e}")
     
     def clear(self):
         """Efface la visualisation"""
