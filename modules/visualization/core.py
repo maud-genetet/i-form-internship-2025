@@ -1,4 +1,3 @@
-
 """
 Main Visualization Module - Configuration and Main Controls
 """
@@ -81,10 +80,7 @@ class VisualizationManager:
         
         toolbar_layout.addStretch()
 
-        # Wireframe checkbox
-        self.wireframe_checkbox = QCheckBox("Wireframe")
-        self.wireframe_checkbox.toggled.connect(self._on_wireframe_toggled)
-        toolbar_layout.addWidget(self.wireframe_checkbox)
+        # Note: Wireframe checkbox will be moved by VisualizationOptions
         
         # Control buttons
         reset_btn = QPushButton("Reset View")
@@ -136,12 +132,8 @@ class VisualizationManager:
         main_layout.addWidget(toolbar_widget)
     
     def _on_wireframe_toggled(self, checked):
-        """Wireframe mode callback"""
-        self.display_manager.set_wireframe_mode(checked)
-        print(f"Wireframe mode: {'ON' if checked else 'OFF'}")
-        
-        if self.current_data:
-            self.visualize_mesh()
+        """Wireframe mode callback - now handled by VisualizationOptions"""
+        pass  # This method is now handled by VisualizationOptions
     
     # === DEFORMED MESH METHODS ===
     

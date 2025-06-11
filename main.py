@@ -11,7 +11,7 @@ from PyQt5.QtCore import Qt
 from main_ui import Ui_MainWindow
 from modules.file_handler import FileHandler
 from modules.mesh_handler import MeshHandler
-from modules.visualization import VisualizationManager
+from modules.visualization import VisualizationManager # We import the module thanks to the __init__.py file
 from modules.field_variables_handler import FieldVariablesHandler
 
 '''
