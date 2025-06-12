@@ -84,3 +84,13 @@ class Node:
     def __str__(self):
         return f"Node(id={self.id}, x={self.x}, y={self.y}, vx={self.vx}, vy={self.vy}, fx={self.fx}, fy={self.fy}, dtemp={self.dtemp}, temp={self.temp}, n2met={self.n2met}, code={self.code})"
         
+    def get_info(self):
+        return (
+            f"=== Node Information (ID: {self.id}) ===\n"
+            f"Coordinates: {self.coord}\n"
+            f"Velocity: {self.vel}\n"
+            f"Acceleration: {self.acc}\n"
+            f"Mass: {self.mass}\n"
+            f"Displacement: {self.displ}\n"
+            f"Force: {self.force}\n"
+        )

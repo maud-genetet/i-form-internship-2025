@@ -217,31 +217,35 @@ class Element:
                 \nstress_oxx={self.stress_oxx}, stress_oyy={self.stress_oyy}, stress_ozz={self.stress_ozz}, stress_oxy={self.stress_oxy}, stress_o={self.stress_o}, stress_orr={self.stress_orr})\n"
         
     def get_info(self):
-        return {
-            'id': self.id,
-            'matno': self.matno,
-            'lnods': self.lnods,
-            'rindx': self.rindx,
-            'densy': self.densy,
-            'fract': self.fract,
-            'strain_rate_exx': self.srnrt_exx,
-            'strain_rate_eyy': self.srnrt_eyy,
-            'strain_rate_ezz': self.srnrt_ezz,
-            'strain_rate_exy': self.srnrt_exy,
-            'strain_rate_e': self.srnrt_e,
-            'strain_rate_ev': self.srnrt_ev,
-            'strain_exx': self.strain_exx,
-            'strain_eyy': self.strain_eyy,
-            'strain_ezz': self.strain_ezz,
-            'strain_exy': self.strain_exy,
-            'strain_e': self.strain_e,
-            'strain_e1': self.strain_e1,
-            'strain_e3': self.strain_e3,
-            'angle13': self.angle13,
-            'stress_oxx': self.stress_oxx,
-            'stress_oyy': self.stress_oyy,
-            'stress_ozz': self.stress_ozz,
-            'stress_oxy': self.stress_oxy,
-            'stress_o': self.stress_o,
-            'stress_orr': self.stress_orr
-        }
+        return (
+            f"\nMaterial number: {self.matno}\n"
+            f"Quality: {self.rindx}\n"
+            f"Density: {self.densy}\n"
+            f"Fract: {self.fract}\n\n"
+
+            f"--- Strain Rates ---\n"
+            f"ε̇_xx (strain rate xx): {self.srnrt_exx}\n"
+            f"ε̇_yy (strain rate yy): {self.srnrt_eyy}\n"
+            f"ε̇_zz (strain rate zz): {self.srnrt_ezz}\n"
+            f"ε̇_xy (strain rate xy): {self.srnrt_exy}\n"
+            f"ε̇_eq (effective strain rate): {self.srnrt_e}\n"
+            f"ε̇_vol (volumetric strain rate): {self.srnrt_ev}\n\n"
+
+            f"--- Strains ---\n"
+            f"ε_xx: {self.strain_exx}\n"
+            f"ε_yy: {self.strain_eyy}\n"
+            f"ε_zz: {self.strain_ezz}\n"
+            f"ε_xy: {self.strain_exy}\n"
+            f"ε_eq (effective strain): {self.strain_e}\n"
+            f"ε₁ (principal strain 1): {self.strain_e1}\n"
+            f"ε₃ (principal strain 3): {self.strain_e3}\n"
+            f"Angle between ε₁ and ε₃: {self.angle13}°\n\n"
+
+            f"--- Stress ---\n"
+            f"σ_xx: {self.stress_oxx}\n"
+            f"σ_yy: {self.stress_oyy}\n"
+            f"σ_zz: {self.stress_ozz}\n"
+            f"σ_xy: {self.stress_oxy}\n"
+            f"σ_eq (effective stress): {self.stress_o}\n"
+            f"Residual stress (σ_res): {self.stress_orr}\n"
+        )
