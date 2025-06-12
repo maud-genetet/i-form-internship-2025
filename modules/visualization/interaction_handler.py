@@ -5,6 +5,7 @@ User Interaction Management Module (click zoom, keyboard shortcuts, cell picking
 import numpy as np
 import vtk
 from PyQt5.QtCore import QTimer
+import time
 
 class InteractionHandler:
     """Manager for user interactions with visualization"""
@@ -17,6 +18,8 @@ class InteractionHandler:
         self.info_content = None
         self.info_title = None
         self.picking_enabled = False
+        self.last_click_time = 0
+        self.click_debounce_delay = 0.2  # 200ms delay between clicks
     
     def setup(self, plotter):
         """Configure interactions on plotter"""
@@ -37,6 +40,10 @@ class InteractionHandler:
         """Enable mesh picking with direct VTK approach"""
         if not self.plotter or not self.current_mesh:
             print("Cannot enable picking: missing plotter or mesh")
+            return
+            
+        # Avoid multiple enabling
+        if self.picking_enabled:
             return
             
         print(f"Enabling picking on mesh with {self.current_mesh.n_cells} cells")
@@ -76,11 +83,19 @@ class InteractionHandler:
         """Reapply mesh picking after mesh operations"""
         if self.picking_enabled:
             print("Reapplying mesh picking after mesh update")
+            # Reset the picking_enabled flag to allow re-enabling
+            self.picking_enabled = False
             # Small delay to ensure mesh is fully loaded
             QTimer.singleShot(100, self.enable_mesh_picking)
     
     def _vtk_click_handler(self, obj, event):
         """Handle VTK click events for cell picking"""
+        # Debounce clicks to avoid multiple triggers
+        current_time = time.time()
+        if current_time - self.last_click_time < self.click_debounce_delay:
+            return
+        self.last_click_time = current_time
+        
         # Get click position
         interactor = self.plotter.iren
         x, y = interactor.get_event_position()
@@ -97,14 +112,13 @@ class InteractionHandler:
             cell_id = picker.GetCellId()
             
             if cell_id >= 0:
+                print(f"Picked cell ID: {cell_id}")
                 self._display_cell_info(cell_id)
                 self._highlight_picked_cell(cell_id)
             else:
-                print("No valid cell picked")
                 if self.info_content:
                     self.info_content.setText("No element found at click position")
         else:
-            print("Pick failed - clicked outside mesh")
             if self.info_content:
                 self.info_content.setText("Click on the mesh elements")
     
@@ -136,7 +150,6 @@ class InteractionHandler:
         """Display information for a specific cell index"""
         
         if not self.current_data:
-            print("No current_data available")
             if self.info_content:
                 self.info_content.setText("No mesh data available")
             return
@@ -146,15 +159,12 @@ class InteractionHandler:
             
             if cell_index >= len(elements) or cell_index < 0:
                 error_msg = f"Cell index {cell_index} out of range (0-{len(elements)-1})"
-                print(error_msg)
                 if self.info_content:
                     self.info_content.setText(error_msg)
                 return
                 
             element = elements[cell_index]
             element_id = element.get_id()
-            
-            print(f"Element ID: {element_id}")
             
             # Get all available information
             info_text = f"""ELEMENT INFORMATION \n{element.get_info()}"""
@@ -167,7 +177,6 @@ class InteractionHandler:
             
         except Exception as e:
             error_msg = f"Error getting element info: {e}"
-            print(error_msg)
             if self.info_content:
                 self.info_content.setText(error_msg)
     
