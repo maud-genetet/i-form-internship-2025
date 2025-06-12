@@ -40,9 +40,6 @@ class VisualizationManager:
         self.interaction_handler = InteractionHandler()
         self.display_manager = DisplayModeManager()
         
-        # Mesh info system
-        self.mesh_info_manager = None
-        
         self._setup_visualization_widget()
     
     def _setup_visualization_widget(self):
@@ -109,7 +106,7 @@ class VisualizationManager:
         """Hide the info panel and disable picking"""
         self.info_panel.setVisible(False)
         self._mesh_info_button.setChecked(False)
-        self.plotter.disable_picking()
+        self.interaction_handler.disable_mesh_picking()
     
     def _configure_plotter(self):
         """Configure plotter with automatic click zoom"""
@@ -118,6 +115,11 @@ class VisualizationManager:
         
         # Initialize interaction handler
         self.interaction_handler.setup(self.plotter)
+        self.interaction_handler.set_info_panel(
+            self.info_panel, 
+            self.info_content, 
+            self.info_title
+        )
     
     def _add_mesh_info_button_fallback(self):
         """Add mesh info button manually as fallback"""
@@ -146,130 +148,15 @@ class VisualizationManager:
         if checked:
             print("Enabling mesh info mode...")
             self._show_info_panel()
-            self._enable_mesh_picking()
+            self.interaction_handler.enable_mesh_picking()
         else:
             print("Disabling mesh info mode...")
             self.info_panel.setVisible(False)
-            self._disable_mesh_picking()
-    
-    def _enable_mesh_picking(self):
-        """Enable mesh picking with direct VTK approach"""
-        if self.plotter and self.current_mesh:
-                print(f"Enabling picking on mesh with {self.current_mesh.n_cells} cells")
-                
-                self.plotter.disable_picking()
-                
-                # Get the VTK render window interactor
-                interactor = self.plotter.iren
-                
-                interactor.remove_observer('LeftButtonPressEvent')
-                
-                interactor.add_observer('LeftButtonPressEvent', self._vtk_click_handler)
-    
-    def _vtk_click_handler(self, obj, event):
-        # Get click position
-        interactor = self.plotter.iren
-        x, y = interactor.get_event_position()
-
-        renderer = self.plotter.renderer
-        
-        # Create a cell picker
-        picker = vtk.vtkCellPicker()
-        picker.SetTolerance(0.001)  # Set picking tolerance
-        
-        # Perform the pick
-        result = picker.Pick(x, y, 0, renderer)
-        if result:
-            cell_id = picker.GetCellId()
-            
-            if cell_id >= 0:
-                self._display_cell_info(cell_id)
-                self._highlight_picked_cell(cell_id)
-            else:
-                print("No valid cell picked")
-                self.info_content.setText("No element found at click position")
-        else:
-            print("Pick failed - clicked outside mesh")
-            self.info_content.setText("Click on the mesh elements")
-            
-    
-    def _highlight_picked_cell(self, cell_id):
-        """Highlight the picked cell visually"""
-        if self.current_mesh and cell_id < self.current_mesh.n_cells:
-            # Extract the single cell
-            single_cell = self.current_mesh.extract_cells([cell_id])
-            
-            # Add it as a highlighted overlay
-            self.plotter.add_mesh(
-                single_cell,
-                color='red',
-                opacity=0.8,
-                style='wireframe',
-                line_width=4,
-                name='picked_cell_highlight'  # Name it so we can remove it later
-            )
+            self.interaction_handler.disable_mesh_picking()
 
     def reapply_mesh_picking_if_needed(self):
         """Reapply mesh picking after mesh operations"""
-        if hasattr(self, '_mesh_info_button') and self._mesh_info_button.isChecked():
-            print("Reapplying mesh picking after mesh update")
-            # Small delay to ensure mesh is fully loaded
-            QTimer.singleShot(100, self._enable_mesh_picking)
-    
-    def _clear_highlight(self):
-        """Clear cell highlight"""
-        if 'picked_cell_highlight' in self.plotter.actors:
-            self.plotter.remove_actor('picked_cell_highlight')
-    
-    def _display_cell_info(self, cell_index):
-        """Display information for a specific cell index"""
-        
-        if not self.current_data:
-            print("No current_data available")
-            self.info_content.setText("No mesh data available")
-            return
-            
-        try:
-            elements = self.current_data.get_elements()
-            
-            if cell_index >= len(elements) or cell_index < 0:
-                error_msg = f"Cell index {cell_index} out of range (0-{len(elements)-1})"
-                print(error_msg)
-                self.info_content.setText(error_msg)
-                return
-                
-            element = elements[cell_index]
-            element_id = element.get_id()
-            
-            print(f"Element ID: {element_id}")
-            
-            # Get all available information
-            info_text = f"""ELEMENT INFORMATION \n{element.get_info()}"""
-            
-            # Update panel
-            self.info_title.setText(f"Element {element_id} Information")
-            self.info_content.setText(info_text)
-            
-        except Exception as e:
-            error_msg = f"Error getting element info: {e}"
-            print(error_msg)
-            self.info_content.setText(error_msg)
-    
-    def _disable_mesh_picking(self):
-        """Disable mesh picking"""
-        # Clear any highlights
-        self._clear_highlight()
-        
-        # Remove VTK observers (try both syntaxes)
-        if self.plotter and self.plotter.iren:
-            interactor = self.plotter.iren
-            interactor.remove_observer('LeftButtonPressEvent')
-        
-        # Disable PyVista picking
-        if self.plotter:
-            self.plotter.disable_picking()
-                
-        print("Mesh info picking disabled")
+        self.interaction_handler.reapply_mesh_picking_if_needed()
     
     def _create_toolbar(self, main_layout):
         """Create control toolbar"""
@@ -280,8 +167,6 @@ class VisualizationManager:
         toolbar_layout.addWidget(self.data_info_label)
         
         toolbar_layout.addStretch()
-
-        # Note: Wireframe checkbox will be moved by VisualizationOptions
         
         # Control buttons
         reset_btn = QPushButton("Reset View")
@@ -331,10 +216,6 @@ class VisualizationManager:
         toolbar_widget.setLayout(toolbar_layout)
         toolbar_widget.setMaximumHeight(40)
         main_layout.addWidget(toolbar_widget)
-    
-    def _on_wireframe_toggled(self, checked):
-        """Wireframe mode callback - now handled by VisualizationOptions"""
-        pass  # This method is now handled by VisualizationOptions
     
     # === DEFORMED MESH METHODS ===
     
@@ -444,16 +325,14 @@ class VisualizationManager:
             if mesh:
                 self.current_mesh = mesh
                 
+                self.interaction_handler.set_mesh_data(mesh, self.current_data)
+                
                 # Display according to mode
                 self.display_manager.display_mesh(
                     self.plotter, mesh, 
                     self.default_mesh_color, self.default_edge_color,
                     show_edges
                 )
-                
-                # Additional elements
-                if show_nodes:
-                    self._add_nodes_to_plot()
                 
                 if show_dies:
                     self._add_dies_to_plot()
@@ -465,6 +344,7 @@ class VisualizationManager:
         if self.plotter:
             self.plotter.render()
 
+        # If we change time step or mesh, reapply picking
         self.reapply_mesh_picking_if_needed()
     
     def _update_data_info(self):
@@ -479,29 +359,6 @@ class VisualizationManager:
         else:
             self.data_info_label.setText("No data")
     
-    def _add_nodes_to_plot(self):
-        """Add nodes to visualization"""
-        if not self.current_data:
-            return
-        
-        nodes = self.current_data.get_nodes()
-        points = []
-        
-        for node in nodes:
-            x = node.get_coordX() if node.get_coordX() is not None else 0.0
-            y = node.get_coordY() if node.get_coordY() is not None else 0.0
-            points.append([x, y, 0.0])
-        
-        if points:
-            points_mesh = pv.PolyData(np.array(points))
-            self.plotter.add_mesh(
-                points_mesh,
-                color=self.default_node_color,
-                point_size=3,
-                render_points_as_spheres=True,
-                label="Node"
-            )
-    
     def _add_dies_to_plot(self):
         """Add dies to visualization"""
         if not self.current_data:
@@ -509,24 +366,11 @@ class VisualizationManager:
         
         dies = self.current_data.get_dies()
         
-        if not dies:
-            print("No dies found in data")
-            return
-        
-        print(f"Displaying {len(dies)} die(s)")
-        
         for i, die in enumerate(dies):
-            try:
-                die_mesh = self.mesh_builder.create_die_mesh(die)
-                if die_mesh:
-                    self.display_manager.display_die(
-                        self.plotter, die_mesh, die.get_id()
-                    )
-                    print(f"Die {die.get_id()} added")
-                else:
-                    print(f"Cannot create mesh for die {die.get_id()}")
-            except Exception as e:
-                print(f"Error adding die {i}: {e}")
+            die_mesh = self.mesh_builder.create_die_mesh(die)
+            self.display_manager.display_die(
+                self.plotter, die_mesh, die.get_id()
+            )
     
     def clear(self):
         """Clear visualization"""
@@ -569,16 +413,6 @@ class VisualizationManager:
             self.plotter.render()
             print("Front view activated (zoom preserved)")
     
-    def export_image(self, filename):
-        """Export current view as image"""
-        if self.plotter:
-            self.plotter.screenshot(filename)
-    
     def get_current_data(self):
         """Return currently loaded data"""
         return self.current_data
-    
-    def add_custom_mesh(self, mesh, **kwargs):
-        """Add custom mesh to visualization"""
-        if self.plotter:
-            self.plotter.add_mesh(mesh, **kwargs)

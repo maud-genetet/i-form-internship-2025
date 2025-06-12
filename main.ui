@@ -102,6 +102,7 @@
     <addaction name="actionStrain_Rate_y_r"/>
     <addaction name="actionStrain_rate_z_theta"/>
     <addaction name="actionStrain_Rate_xy_rz"/>
+    <addaction name="actionStrain_2"/>
     <addaction name="actionEffective_Strain_Rate"/>
     <addaction name="separator"/>
     <addaction name="actionStrain_x_r"/>
@@ -111,7 +112,6 @@
     <addaction name="actionEffective_Strain"/>
     <addaction name="actionVolumetric_Strain"/>
     <addaction name="actionStrain_1"/>
-    <addaction name="actionStrain_2"/>
     <addaction name="actionStrain_3"/>
     <addaction name="separator"/>
     <addaction name="actionStress_x_r"/>
@@ -428,7 +428,7 @@
   </action>
   <action name="actionStrain_2">
    <property name="text">
-    <string>Strain 2</string>
+    <string>Volumetric Strain Rate</string>
    </property>
   </action>
   <action name="actionStrain_3">
