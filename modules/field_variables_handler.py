@@ -75,7 +75,7 @@ class FieldVariablesHandler:
         """Get visualization manager"""
         return self.main_window.visualization_manager
     
-    def _apply_variable_to_mesh(self, variable_key, display_name):
+    def _apply_variable_to_mesh(self, variable_key):
         """Apply variable to current mesh"""
         visualization_manager = self.get_visualization_manager()
         
@@ -84,7 +84,7 @@ class FieldVariablesHandler:
             return
         
         # Resolve variable key
-        resolved_key = self._resolve_variable_key(variable_key, display_name)
+        resolved_key = self._resolve_variable_key(variable_key)
         if not resolved_key:
             return
         
@@ -94,7 +94,7 @@ class FieldVariablesHandler:
             visualization_manager.plotter,
             visualization_manager.current_mesh,
             resolved_key,
-            display_name,
+            variable_key,
             visualization_manager.default_edge_color,
             self.viz_options.get_current_options()
         )
@@ -103,24 +103,24 @@ class FieldVariablesHandler:
         visualization_manager._add_dies_to_plot()
         
         self.current_variable = resolved_key
-        print(f"Variable displayed: {display_name}")
+        print(f"Variable displayed: {variable_key}")
         visualization_manager.plotter.render()
         
         # Reapply picking if needed
         visualization_manager.reapply_mesh_picking_if_needed()
     
-    def _resolve_variable_key(self, variable_key, display_name):
+    def _resolve_variable_key(self, variable_key):
         """Resolve and validate variable key"""
         mesh = self.get_visualization_manager().current_mesh
         
         if variable_key not in mesh.cell_data:
-            mesh_key = self.variable_mapping.get(variable_key, variable_key)
+            mesh_key = self.variable_mapping.get(variable_key)
             if mesh_key not in mesh.cell_data:
                 available_list = list(mesh.cell_data.keys())
                 QMessageBox.information(
                     self.main_window,
                     "Variable Not Available",
-                    f"The variable '{display_name}' is not available.\n"
+                    f"The variable '{variable_key}' is not available.\n"
                     f"Available: {', '.join(available_list[:5])}{'...' if len(available_list) > 5 else ''}"
                 )
                 return None
@@ -169,144 +169,144 @@ class FieldVariablesHandler:
     
     # === VELOCITY ===
     def velocity_x_r(self):
-        self._apply_variable_to_mesh("Velocity X(r)", "Velocity X(r)")
+        self._apply_variable_to_mesh("Velocity X(r)")
     
     def velocity_y_z(self):
-        self._apply_variable_to_mesh("Velocity Y(z)", "Velocity Y(z)")
+        self._apply_variable_to_mesh("Velocity Y(z)")
     
     def total_velocity(self):
-        self._apply_variable_to_mesh("Total Velocity", "Total Velocity")
+        self._apply_variable_to_mesh("Total Velocity")
     
     # === FORCE ===
     def force_x_r(self):
-        self._apply_variable_to_mesh("Force X(r)", "Force X(r)")
+        self._apply_variable_to_mesh("Force X(r)")
     
     def force_y_z(self):
-        self._apply_variable_to_mesh("Force Y(z)", "Force Y(z)")
+        self._apply_variable_to_mesh("Force Y(z)")
     
     def total_force(self):
-        self._apply_variable_to_mesh("Total Force", "Total Force")
+        self._apply_variable_to_mesh("Total Force")
     
     # === TEMPERATURE ===
     def temperature_rate(self):
-        self._apply_variable_to_mesh("Temperature Rate", "Temperature Rate")
+        self._apply_variable_to_mesh("Temperature Rate")
     
     def temperature(self):
-        self._apply_variable_to_mesh("Temperature", "Temperature")
+        self._apply_variable_to_mesh("Temperature")
     
     # === STRAIN RATE ===
     def strain_rate_x_r(self):
-        self._apply_variable_to_mesh("Strain rate x(r)", "Strain Rate X(r)")
+        self._apply_variable_to_mesh("Strain rate x(r)")
     
     def strain_rate_y_z(self):
-        self._apply_variable_to_mesh("Strain rate y(z)", "Strain Rate Y(z)")
+        self._apply_variable_to_mesh("Strain rate y(z)")
     
     def strain_rate_z_theta(self):
-        self._apply_variable_to_mesh("Strain rate z(theta)", "Strain Rate Z(theta)")
+        self._apply_variable_to_mesh("Strain rate z(theta)")
     
     def strain_rate_xy_rz(self):
-        self._apply_variable_to_mesh("Strain rate xy(rz)", "Strain Rate XY(rz)")
+        self._apply_variable_to_mesh("Strain rate xy(rz)")
     
     def effective_strain_rate(self):
-        self._apply_variable_to_mesh("Effective strain rate", "Effective Strain Rate")
+        self._apply_variable_to_mesh("Effective strain rate")
     
     def volumetric_strain_rate(self):
-        self._apply_variable_to_mesh("Volumetric Strain Rate", "Volumetric Strain Rate")
+        self._apply_variable_to_mesh("Volumetric Strain Rate")
     
     # === STRAIN ===
     def strain_x_r(self):
-        self._apply_variable_to_mesh("Strain x(r)", "Strain X(r)")
+        self._apply_variable_to_mesh("Strain x(r)")
     
     def strain_y_z(self):
-        self._apply_variable_to_mesh("Strain y(z)", "Strain Y(z)")
+        self._apply_variable_to_mesh("Strain y(z)")
     
     def strain_z_theta(self):
-        self._apply_variable_to_mesh("Strain z(theta)", "Strain Z(theta)")
+        self._apply_variable_to_mesh("Strain z(theta)")
     
     def strain_xy_rz(self):
-        self._apply_variable_to_mesh("Strain xy(rz)", "Strain XY(rz)")
+        self._apply_variable_to_mesh("Strain xy(rz)")
     
     def effective_strain(self):
-        self._apply_variable_to_mesh("Effective strain", "Effective Strain")
+        self._apply_variable_to_mesh("Effective strain")
     
     def volumetric_strain(self):
-        self._apply_variable_to_mesh("Volumetric Strain", "Volumetric Strain")
+        self._apply_variable_to_mesh("Volumetric Strain")
     
     def strain_1(self):
-        self._apply_variable_to_mesh("Strain 1", "Strain 1")
+        self._apply_variable_to_mesh("Strain 1")
     
     def strain_2(self):
-        self._apply_variable_to_mesh("Strain 2", "Strain 2")
+        self._apply_variable_to_mesh("Strain 2")
     
     def strain_3(self):
-        self._apply_variable_to_mesh("Strain 3", "Strain 3")
+        self._apply_variable_to_mesh("Strain 3")
     
     # === STRESS ===
     def stress_x_r(self):
-        self._apply_variable_to_mesh("Stress x(r)", "Stress X(r)")
+        self._apply_variable_to_mesh("Stress x(r)")
     
     def stress_y_z(self):
-        self._apply_variable_to_mesh("Stress y(z)", "Stress Y(z)")
+        self._apply_variable_to_mesh("Stress y(z)")
     
     def stress_z_theta(self):
-        self._apply_variable_to_mesh("Stress z(theta)", "Stress Z(theta)")
+        self._apply_variable_to_mesh("Stress z(theta)")
     
     def stress_xy_rz(self):
-        self._apply_variable_to_mesh("Stress xy(rz)", "Stress XY(rz)")
+        self._apply_variable_to_mesh("Stress xy(rz)")
     
     def effective_stress(self):
-        self._apply_variable_to_mesh("Effective stress", "Effective Stress")
+        self._apply_variable_to_mesh("Effective stress")
     
     def average_stress(self):
-        self._apply_variable_to_mesh("Average stress", "Average Stress")
+        self._apply_variable_to_mesh("Average stress")
     
     def stress_1(self):
-        self._apply_variable_to_mesh("Stress 1", "Stress 1")
+        self._apply_variable_to_mesh("Stress 1")
     
     def stress_2(self):
-        self._apply_variable_to_mesh("Stress 2", "Stress 2")
+        self._apply_variable_to_mesh("Stress 2")
     
     def stress_3(self):
-        self._apply_variable_to_mesh("Stress 3", "Stress 3")
+        self._apply_variable_to_mesh("Stress 3")
     
     # === NEW VARIABLES ===
     def thickness_plane_stress(self):
-        self._apply_variable_to_mesh("Thickness (Plane Stress)", "Thickness (Plane Stress)")
+        self._apply_variable_to_mesh("Thickness (Plane Stress)")
     
     def relative_density(self):
-        self._apply_variable_to_mesh("Relative Density", "Relative Density")
+        self._apply_variable_to_mesh("Relative Density")
     
     def ductile_damage(self):
-        self._apply_variable_to_mesh("Ductile Damage", "Ductile Damage")
+        self._apply_variable_to_mesh("Ductile Damage")
     
     # === ELECTRIC ===
     def electric_potential(self):
-        self._apply_variable_to_mesh("Electric Potential", "Electric Potential")
+        self._apply_variable_to_mesh("Electric Potential")
     
     def electric_current_density(self):
-        self._apply_variable_to_mesh("Electric Current Density", "Electric Current Density")
+        self._apply_variable_to_mesh("Electric Current Density")
     
     def electric_resistivity(self):
-        self._apply_variable_to_mesh("Electric Resistivity", "Electric Resistivity")
+        self._apply_variable_to_mesh("Electric Resistivity")
     
     # === SPECIAL OPTIONS ===
     def stress_y_z_ef_stress(self):
-        self._apply_variable_to_mesh("Stress y(z)/Ef.Stress", "Stress y(z)/Ef.Stress")
+        self._apply_variable_to_mesh("Stress y(z)/Ef.Stress")
     
     def stress_xy_rz_ef_stress(self):
-        self._apply_variable_to_mesh("Stress xy(rz)/Ef.Stress", "Stress xy(rz)/Ef.Stress")
+        self._apply_variable_to_mesh("Stress xy(rz)/Ef.Stress")
     
     def average_stress_ef_stress(self):
-        self._apply_variable_to_mesh("Average Stress/Ef.Stress", "Average Stress/Ef.Stress")
+        self._apply_variable_to_mesh("Average Stress/Ef.Stress")
     
     def pressure(self):
         self._apply_variable_to_mesh("Pressure", "Pressure")
     
     def pressure_ef_stress(self):
-        self._apply_variable_to_mesh("Pressure/Ef.Stress", "Pressure/Ef.Stress")
+        self._apply_variable_to_mesh("Pressure/Ef.Stress")
     
     def surface_enlargement_ratio(self):
-        self._apply_variable_to_mesh("Surface Enlargement Ratio", "Surface Enlargement Ratio")
+        self._apply_variable_to_mesh("Surface Enlargement Ratio")
     
     def element_quality(self):
-        self._apply_variable_to_mesh("Element Quality", "Element Quality")
+        self._apply_variable_to_mesh("Element Quality")

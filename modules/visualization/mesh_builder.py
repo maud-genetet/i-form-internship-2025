@@ -29,10 +29,10 @@ class MeshBuilder:
             return None
         
         # Create mesh
-        cell_types = [5] * (len(cells) // 5)  # Triangle by default
+        cell_types = [5] * (len(cells) // 5)  #  9 for Quad, 5 for triangles ( 5 is better for mixed types )
         mesh = pv.UnstructuredGrid(cells, np.array(cell_types), points)
         
-        # Add scalar data
+        # Add scalar data 
         self._add_scalar_data(mesh, elements, nodes)
         
         return mesh
@@ -76,122 +76,143 @@ class MeshBuilder:
         """Add all available scalar data to mesh including new variables"""
         element_data = {
             'Element_ID': [],
+
+            'Velocity X(r)': [],
+            'Velocity Y(z)': [],
+            'Total Velocity': [],
+
+            'Force X(r)': [],
+            'Force Y(z)': [],
+            'Total Force': [],
+
+            'Temperature': [],
+            'Temperature Rate': [],
+
             'Strain rate x(r)': [],
             'Strain rate y(z)': [],
             'Strain rate z(theta)': [],
             'Strain rate xy(rz)': [],
             'Effective strain rate': [],
+            'Volumetric strain rate': [],
+
             'Strain x(r)': [],
             'Strain y(z)': [],
             'Strain z(theta)': [],
             'Strain xy(rz)': [],
             'Effective strain': [],
+            'Volumetric strain': [],
             'Strain 1': [],
+            'Strain 2': [],
             'Strain 3': [],
+
             'Stress x(r)': [],
             'Stress y(z)': [],
             'Stress z(theta)': [],
             'Stress xy(rz)': [],
             'Effective stress': [],
             'Average stress': [],
-            'Element Quality': [],
+            'Stress 1': [],
+            'Stress 2': [],
+            'Stress 3': [],
+
+            'Thickness': [],
+            'Relative Density': [],
+            'Ductile Damage': [],
+
+            'Electric Potential': [],
+            'Electric Current Density': [],
+            'Electric Resistivity': [],
+
             'Relative Density': [],
             'Stress y(z)/Ef.Stress': [],
             'Stress xy(rz)/Ef.Stress': [],
             'Average Stress/Ef.Stress': [],
             'Pressure': [],
             'Pressure/Ef.Stress': [],
-            'Velocity X(r)': [],
-            'Velocity Y(z)': [],
-            'Total Velocity': [],
-            'Force X(r)': [],
-            'Force Y(z)': [],
-            'Total Force': [],
-            'Temperature': [],
-            'Temperature Rate': [],
+            'Surface Enlargement Ratio': [],
+
+            'Element Quality': [],
         }
         
         for element in elements:
+
             element_data['Element_ID'].append(element.get_id())
+
             element_data['Strain rate x(r)'].append(element.get_strain_rate_Exx() or 0.0)
             element_data['Strain rate y(z)'].append(element.get_strain_rate_Eyy() or 0.0)
             element_data['Strain rate z(theta)'].append(element.get_strain_rate_Ezz() or 0.0)
             element_data['Strain rate xy(rz)'].append(element.get_strain_rate_Exy() or 0.0)
             element_data['Effective strain rate'].append(element.get_strain_rate_E() or 0.0)
+            element_data['Volumetric strain rate'].append(element.get_strain_rate_Ev() or 0.0)
+
             element_data['Strain x(r)'].append(element.get_strain_Exx() or 0.0)
             element_data['Strain y(z)'].append(element.get_strain_Eyy() or 0.0)
             element_data['Strain z(theta)'].append(element.get_strain_Ezz() or 0.0)
             element_data['Strain xy(rz)'].append(element.get_strain_Exy() or 0.0)
             element_data['Effective strain'].append(element.get_strain_E() or 0.0)
+            #element_data['Volumetric strain'].append(element.get
             element_data['Strain 1'].append(element.get_strain_E1() or 0.0)
+            #element_data['Strain 2'].append(0.0)
             element_data['Strain 3'].append(element.get_strain_E3() or 0.0)
-            stress_xx = element.get_stress_Oxx() or 0.0
-            stress_yy = element.get_stress_Oyy() or 0.0
-            stress_zz = element.get_stress_Ozz() or 0.0
-            stress_xy = element.get_stress_Oxy() or 0.0
-            effective_stress = element.get_stress_O() or 0.0
-            average_stress = element.get_stress_Orr() or 0.0
-            element_data['Stress x(r)'].append(stress_xx)
-            element_data['Stress y(z)'].append(stress_yy)
-            element_data['Stress z(theta)'].append(stress_zz)
-            element_data['Stress xy(rz)'].append(stress_xy)
-            element_data['Effective stress'].append(effective_stress)
-            element_data['Average stress'].append(average_stress)
-            element_data['Element Quality'].append(element.get_rindx() or 0.0)
-            element_data['Relative Density'].append(element.get_densy() or 0.0)
-            pressure = -(stress_xx + stress_yy + stress_zz) / 3.0
-            element_data['Pressure'].append(pressure)
-            if effective_stress != 0.0:
-                element_data['Stress y(z)/Ef.Stress'].append(stress_yy / effective_stress)
-                element_data['Stress xy(rz)/Ef.Stress'].append(stress_xy / effective_stress)
-                element_data['Average Stress/Ef.Stress'].append(average_stress / effective_stress)
-                element_data['Pressure/Ef.Stress'].append(pressure / effective_stress)
-            else:
-                element_data['Stress y(z)/Ef.Stress'].append(0.0)
-                element_data['Stress xy(rz)/Ef.Stress'].append(0.0)
-                element_data['Average Stress/Ef.Stress'].append(0.0)
-                element_data['Pressure/Ef.Stress'].append(0.0)
-            element_nodes = element.get_lnods()
 
-            if element_nodes:
+            element_data['Stress x(r)'].append(element.get_stress_Oxx() or 0.0)
+            element_data['Stress y(z)'].append(element.get_stress_Oyy() or 0.0)
+            element_data['Stress z(theta)'].append(element.get_stress_Ozz() or 0.0)
+            element_data['Stress xy(rz)'].append(element.get_stress_Oxy() or 0.0)
+            element_data['Effective stress'].append(element.get_stress_O() or 0.0)
+            element_data['Average stress'].append(element.get_stress_Orr() or 0.0)
+            #element_data['Stress 1'].append(0.0)
+            #element_data['Stress 2'].append(0.0)
+            #element_data['Stress 3'].append(0.0)
+
+            #element_data['Thickness'].append(element.get_
+            #element_data['Relative Density'].append(element.get_
+            #element_data['Ductile Damage'].append(element.get_
+
+            #element_data['Electric Potential'].append(element.get_
+            #element_data['Electric Current Density'].append(element.get_
+            #element_data['Electric Resistivity'].append(element.get_
+
+            element_data['Relative Density'].append(element.get_densy() or 0.0)
+            element_data['Stress y(z)/Ef.Stress'].append(element.get_stress_yy_on_effective_stress() or 0.0)
+            element_data['Stress xy(rz)/Ef.Stress'].append(element.get_stress_xy_on_effective_stress() or 0.0)
+            element_data['Average Stress/Ef.Stress'].append(element.get_stress_yy_on_effective_stress() or 0.0)
+            element_data['Pressure'].append(element.get_pressure() or 0.0)
+            element_data['Pressure/Ef.Stress'].append((element.get_pressure() or 0.0) / (element.get_stress_O() or 1.0))
+            #element_data['Surface Enlargement Ratio'].append(element.get
+            element_data['Element Quality'].append(element.get_rindx() or 0.0)
+
+            nb_nodes = element.get_nb_lnods()        
+            vx_sum = vy_sum = fx_sum = fy_sum = temp_sum = dtemp_sum = 0.0           
                 
-                # For this part we do the average of the values of the nodes
-                vx_sum = vy_sum = fx_sum = fy_sum = temp_sum = dtemp_sum = 0.0
-                valid_nodes = 0
-                
-                for node in element_nodes:
-                    if node:
-                        vx = node.get_Vx() or 0.0
-                        vy = node.get_Vy() or 0.0
-                        fx = node.get_Fx() or 0.0
-                        fy = node.get_Fy() or 0.0
-                        temp = node.get_Temp() or 0.0
-                        dtemp = node.get_DTemp() or 0.0
+            for i in range(nb_nodes):
+                node = element.get_lnods_by_index(i)
                         
-                        vx_sum += vx
-                        vy_sum += vy
-                        fx_sum += fx
-                        fy_sum += fy
-                        temp_sum += temp
-                        dtemp_sum += dtemp
-                        valid_nodes += 1
-                
-                if valid_nodes > 0:
-                    avg_vx = vx_sum / valid_nodes
-                    avg_vy = vy_sum / valid_nodes
-                    avg_fx = fx_sum / valid_nodes
-                    avg_fy = fy_sum / valid_nodes
-                    avg_temp = temp_sum / valid_nodes
-                    avg_dtemp = dtemp_sum / valid_nodes
+                vx_sum += (node.get_Vx() or 0.0)
+                vy_sum += (node.get_Vy() or 0.0)
+                fx_sum += (node.get_Fx() or 0.0)
+                fy_sum += (node.get_Fy() or 0.0)
+                temp_sum += (node.get_Temp() or 0.0)
+                dtemp_sum += (node.get_DTemp() or 0.0)
                     
-                    element_data['Velocity X(r)'].append(avg_vx)
-                    element_data['Velocity Y(z)'].append(avg_vy)
-                    element_data['Total Velocity'].append(np.sqrt(avg_vx**2 + avg_vy**2))
-                    element_data['Force X(r)'].append(avg_fx)
-                    element_data['Force Y(z)'].append(avg_fy)
-                    element_data['Total Force'].append(np.sqrt(avg_fx**2 + avg_fy**2))
-                    element_data['Temperature'].append(avg_temp)
-                    element_data['Temperature Rate'].append(avg_dtemp)
+            if nb_nodes > 0:
+                avg_vx = vx_sum / nb_nodes
+                avg_vy = vy_sum / nb_nodes
+                avg_fx = fx_sum / nb_nodes
+                avg_fy = fy_sum / nb_nodes
+                avg_temp = temp_sum / nb_nodes
+                avg_dtemp = dtemp_sum / nb_nodes
+            else:
+                avg_vx = avg_vy = avg_fx = avg_fy = avg_temp = avg_dtemp = 0.0
+
+            element_data['Velocity X(r)'].append(avg_vx)
+            element_data['Velocity Y(z)'].append(avg_vy)
+            element_data['Total Velocity'].append(np.sqrt(avg_vx**2 + avg_vy**2))
+            element_data['Force X(r)'].append(avg_fx)
+            element_data['Force Y(z)'].append(avg_fy)
+            element_data['Total Force'].append(np.sqrt(avg_fx**2 + avg_fy**2))
+            element_data['Temperature'].append(avg_temp)
+            element_data['Temperature Rate'].append(avg_dtemp)
 
         for key, values in element_data.items():
             if any(v != 0.0 for v in values):

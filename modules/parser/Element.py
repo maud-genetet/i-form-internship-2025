@@ -241,14 +241,6 @@ class Element:
             return self.get_pressure() / self.stress_o
         return 0.0
     
-    def get_relative_density(self):
-        """Get relative density (assuming it's related to densy)"""
-        return self.densy or 0.0
-    
-    def get_element_quality(self):
-        """Get element quality (using rindx)"""
-        return self.rindx or 0.0
-
     # ============== UTILITY METHODS ==============
     def get_info(self):
         return (

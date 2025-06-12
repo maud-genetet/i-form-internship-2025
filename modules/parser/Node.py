@@ -87,10 +87,10 @@ class Node:
     def get_info(self):
         return (
             f"=== Node Information (ID: {self.id}) ===\n"
-            f"Coordinates: {self.coord}\n"
-            f"Velocity: {self.vel}\n"
-            f"Acceleration: {self.acc}\n"
-            f"Mass: {self.mass}\n"
-            f"Displacement: {self.displ}\n"
-            f"Force: {self.force}\n"
+            f"Coordinates: {self.x}, {self.y}\n"
+            f"Velocity: {self.vx}, {self.vy}\n"
+            f"Force: {self.fx}, {self.fy}\n"
+            f"Temperature: {self.temp} (Rate: {self.dtemp})\n"
+            f"Material Number: {self.n2met}\n"
+            f"Code: {self.code}\n"
         )
