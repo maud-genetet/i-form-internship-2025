@@ -124,51 +124,72 @@ class MainWindow(QMainWindow):
         """Connect Field Variables menu signals"""
         fv = self.field_variables_handler
         
-        # Standard
+        # Standard Options
         self.ui.actionStandard_Options_4.triggered.connect(fv.standard_options)
         
         # Velocity
-        self.ui.actionVelocity_x_r.triggered.connect(fv.velocity_x_r)
-        self.ui.actionVelocity_y_z.triggered.connect(fv.velocity_y_z)
-        self.ui.actionTotal_Velocity.triggered.connect(fv.total_velocity)
+        self.ui.actionVelocity_x_r_2.triggered.connect(fv.velocity_x_r)
+        self.ui.actionVelocity_y_z_2.triggered.connect(fv.velocity_y_z)
+        self.ui.actionTotal_Velocity_2.triggered.connect(fv.total_velocity)
         
         # Force
-        self.ui.actionForce_x_r.triggered.connect(fv.force_x_r)
-        self.ui.actionForce_y_z.triggered.connect(fv.force_y_z)
-        self.ui.actionTotal_Force.triggered.connect(fv.total_force)
+        self.ui.actionForce_x_r_2.triggered.connect(fv.force_x_r)
+        self.ui.actionForce_y_y.triggered.connect(fv.force_y_z)
+        self.ui.actionTotal_Force_2.triggered.connect(fv.total_force)
         
         # Temperature
         self.ui.actionTemperature_Rate.triggered.connect(fv.temperature_rate)
         self.ui.actionTemperature.triggered.connect(fv.temperature)
         
         # Strain Rate
-        self.ui.actionStrain_Rate_x_r.triggered.connect(fv.strain_rate_x_r)
-        self.ui.actionStrain_Rate_y_r.triggered.connect(fv.strain_rate_y_z)
-        self.ui.actionStrain_rate_z_theta.triggered.connect(fv.strain_rate_z_theta)
-        self.ui.actionStrain_Rate_xy_rz.triggered.connect(fv.strain_rate_xy_rz)
-        self.ui.actionEffective_Strain_Rate.triggered.connect(fv.effective_strain_rate)
+        self.ui.actionStrain_Rate_x_r_2.triggered.connect(fv.strain_rate_x_r)
+        self.ui.actionStrain_Rate_y_z.triggered.connect(fv.strain_rate_y_z)
+        self.ui.actionStrain_Rate_z_theta.triggered.connect(fv.strain_rate_z_theta)
+        self.ui.actionStrain_Rate_xy_z.triggered.connect(fv.strain_rate_xy_rz)
+        self.ui.actionEffective_Strain_Rate_2.triggered.connect(fv.effective_strain_rate)
+        self.ui.actionVolumetric_Strain_Rate.triggered.connect(fv.volumetric_strain_rate)
         
         # Strain
-        self.ui.actionStrain_x_r.triggered.connect(fv.strain_x_r)
-        self.ui.actionStrain_y_r.triggered.connect(fv.strain_y_z)
-        self.ui.actionStrain_z_theta.triggered.connect(fv.strain_z_theta)
-        self.ui.actionStrain_xy_rz.triggered.connect(fv.strain_xy_rz)
-        self.ui.actionEffective_Strain.triggered.connect(fv.effective_strain)
-        self.ui.actionVolumetric_Strain.triggered.connect(fv.volumetric_strain)
-        self.ui.actionStrain_1.triggered.connect(fv.strain_1)
-        self.ui.actionStrain_2.triggered.connect(fv.strain_2)
-        self.ui.actionStrain_3.triggered.connect(fv.strain_3)
+        self.ui.actionStrain_x_r_2.triggered.connect(fv.strain_x_r)
+        self.ui.actionStrain_y_z.triggered.connect(fv.strain_y_z)
+        self.ui.actionStrain_z_theta_2.triggered.connect(fv.strain_z_theta)
+        self.ui.actionStrain_xy_rz_2.triggered.connect(fv.strain_xy_rz)
+        self.ui.actionEffective_Strain_2.triggered.connect(fv.effective_strain)
+        self.ui.actionVolumetric_Strain_2.triggered.connect(fv.volumetric_strain)
+        self.ui.actionStrain_4.triggered.connect(fv.strain_1)
+        self.ui.actionStrain_5.triggered.connect(fv.strain_2)
+        self.ui.actionStrain_6.triggered.connect(fv.strain_3)
         
         # Stress
-        self.ui.actionStress_x_r.triggered.connect(fv.stress_x_r)
-        self.ui.actionStress_y_z.triggered.connect(fv.stress_y_z)
-        self.ui.actionStress_z_theta.triggered.connect(fv.stress_z_theta)
-        self.ui.actionStress_xy_rz.triggered.connect(fv.stress_xy_rz)
-        self.ui.actionEffective_Stress.triggered.connect(fv.effective_stress)
-        self.ui.actionAverage_Stress.triggered.connect(fv.average_stress)
-        self.ui.actionStress_1.triggered.connect(fv.stress_1)
-        self.ui.actionStress_2.triggered.connect(fv.stress_2)
-        self.ui.actionStress3.triggered.connect(fv.stress_3)
+        self.ui.actionStress_x_r_2.triggered.connect(fv.stress_x_r)
+        self.ui.actionStress_y_z_2.triggered.connect(fv.stress_y_z)
+        self.ui.actionStress_z_theta_2.triggered.connect(fv.stress_z_theta)
+        self.ui.actionStress_xy_rz_2.triggered.connect(fv.stress_xy_rz)
+        self.ui.actionEffective_Stress_2.triggered.connect(fv.effective_stress)
+        self.ui.actionAverage_Stress_2.triggered.connect(fv.average_stress)
+        self.ui.actionStress_3.triggered.connect(fv.stress_1)
+        self.ui.actionStress_4.triggered.connect(fv.stress_2)
+        self.ui.actionStress_5.triggered.connect(fv.stress_3)
+        
+        self.ui.actionThickness_Plane_Stress.triggered.connect(fv.thickness_plane_stress)
+        self.ui.actionRelative_Density.triggered.connect(fv.relative_density)
+        self.ui.actionDuctile_Damage.triggered.connect(fv.ductile_damage)
+        
+        # Electric
+        self.ui.actionElectric_Potential.triggered.connect(fv.electric_potential)
+        self.ui.actionElectric_Current_Density.triggered.connect(fv.electric_current_density)
+        self.ui.actionElectric_Resistivity.triggered.connect(fv.electric_resistivity)
+        
+        # Special Options
+        self.ui.actionStress_y_z_Ef_Stress.triggered.connect(fv.stress_y_z_ef_stress)
+        self.ui.actionStress_xy_rz_Ef_Stress.triggered.connect(fv.stress_xy_rz_ef_stress)
+        self.ui.actionAverage_Stress_Ef_Stress.triggered.connect(fv.average_stress_ef_stress)
+        self.ui.actionPressure.triggered.connect(fv.pressure)
+        self.ui.actionPressure_Ef_Stress.triggered.connect(fv.pressure_ef_stress)
+        self.ui.actionSurface_Enlargement_Ratio.triggered.connect(fv.surface_enlargement_ratio)
+        
+        # Element Quality
+        self.ui.actionElement_Quality.triggered.connect(fv.element_quality)
     
     def get_visualization_manager(self):
         """Return visualization manager for other modules"""

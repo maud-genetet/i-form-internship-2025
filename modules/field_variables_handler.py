@@ -1,6 +1,5 @@
 """
-Field Variables Menu Handler - Simplified
-Manages display of different variables on the mesh
+Field Variables Menu Handler 
 """
 
 from PyQt5.QtWidgets import QMessageBox
@@ -16,21 +15,25 @@ class FieldVariablesHandler:
         # Initialize unified visualization options
         self.viz_options = VisualizationOptions(main_window)
         
-        # Variable mapping
         self.variable_mapping = {
             "Velocity_X": "Velocity X(r)",
             "Velocity_Y": "Velocity Y(z)",
             "Total_Velocity": "Total Velocity",
+            
             "Force_X": "Force X(r)",
             "Force_Y": "Force Y(z)",
             "Total_Force": "Total Force",
+            
             "Temperature_Rate": "Temperature Rate",
             "Temperature": "Temperature",
+            
             "Strain_Rate_X": "Strain rate x(r)",
             "Strain_Rate_Y": "Strain rate y(z)",
             "Strain_Rate_Z": "Strain rate z(theta)",
             "Strain_Rate_XY": "Strain rate xy(rz)",
             "Effective_Strain_Rate": "Effective strain rate",
+            "Volumetric_Strain_Rate": "Volumetric strain rate",
+            
             "Deformation_XX": "Strain x(r)",
             "Deformation_YY": "Strain y(z)",
             "Deformation_ZZ": "Strain z(theta)",
@@ -40,6 +43,7 @@ class FieldVariablesHandler:
             "Strain_1": "Strain 1",
             "Strain_2": "Strain 2",
             "Strain_3": "Strain 3",
+            
             "Stress_X": "Stress x(r)",
             "Stress_Y": "Stress y(z)",
             "Stress_ZZ": "Stress z(theta)",
@@ -49,6 +53,22 @@ class FieldVariablesHandler:
             "Stress_1": "Stress 1",
             "Stress_2": "Stress 2",
             "Stress_3": "Stress 3",
+            
+            "Thickness_Plane_Stress": "Thickness (Plane Stress)",
+            "Relative_Density": "Relative Density",
+            "Ductile_Damage": "Ductile Damage",
+            
+            "Electric_Potential": "Electric Potential",
+            "Electric_Current_Density": "Electric Current Density", 
+            "Electric_Resistivity": "Electric Resistivity",
+            
+            "Stress_Y_Ef_Stress": "Stress y(z)/Ef.Stress",
+            "Stress_XY_Ef_Stress": "Stress xy(rz)/Ef.Stress",
+            "Average_Stress_Ef_Stress": "Average Stress/Ef.Stress",
+            "Pressure": "Pressure",
+            "Pressure_Ef_Stress": "Pressure/Ef.Stress",
+            "Surface_Enlargement_Ratio": "Surface Enlargement Ratio",
+            "Element_Quality": "Element Quality",
         }
     
     def get_visualization_manager(self):
@@ -149,27 +169,27 @@ class FieldVariablesHandler:
     
     # === VELOCITY ===
     def velocity_x_r(self):
-        self._apply_variable_to_mesh("Velocity_X", "Velocity X(r)")
+        self._apply_variable_to_mesh("Velocity X(r)", "Velocity X(r)")
     
     def velocity_y_z(self):
-        self._apply_variable_to_mesh("Velocity_Y", "Velocity Y(z)")
+        self._apply_variable_to_mesh("Velocity Y(z)", "Velocity Y(z)")
     
     def total_velocity(self):
-        self._apply_variable_to_mesh("Total_Velocity", "Total Velocity")
+        self._apply_variable_to_mesh("Total Velocity", "Total Velocity")
     
     # === FORCE ===
     def force_x_r(self):
-        self._apply_variable_to_mesh("Force_X", "Force X(r)")
+        self._apply_variable_to_mesh("Force X(r)", "Force X(r)")
     
     def force_y_z(self):
-        self._apply_variable_to_mesh("Force_Y", "Force Y(z)")
+        self._apply_variable_to_mesh("Force Y(z)", "Force Y(z)")
     
     def total_force(self):
-        self._apply_variable_to_mesh("Total_Force", "Total Force")
+        self._apply_variable_to_mesh("Total Force", "Total Force")
     
     # === TEMPERATURE ===
     def temperature_rate(self):
-        self._apply_variable_to_mesh("Temperature_Rate", "Temperature Rate")
+        self._apply_variable_to_mesh("Temperature Rate", "Temperature Rate")
     
     def temperature(self):
         self._apply_variable_to_mesh("Temperature", "Temperature")
@@ -190,6 +210,9 @@ class FieldVariablesHandler:
     def effective_strain_rate(self):
         self._apply_variable_to_mesh("Effective strain rate", "Effective Strain Rate")
     
+    def volumetric_strain_rate(self):
+        self._apply_variable_to_mesh("Volumetric Strain Rate", "Volumetric Strain Rate")
+    
     # === STRAIN ===
     def strain_x_r(self):
         self._apply_variable_to_mesh("Strain x(r)", "Strain X(r)")
@@ -207,13 +230,13 @@ class FieldVariablesHandler:
         self._apply_variable_to_mesh("Effective strain", "Effective Strain")
     
     def volumetric_strain(self):
-        self._apply_variable_to_mesh("Volumetric_Strain", "Volumetric Strain")
+        self._apply_variable_to_mesh("Volumetric Strain", "Volumetric Strain")
     
     def strain_1(self):
         self._apply_variable_to_mesh("Strain 1", "Strain 1")
     
     def strain_2(self):
-        self._apply_variable_to_mesh("Strain_2", "Strain 2")
+        self._apply_variable_to_mesh("Strain 2", "Strain 2")
     
     def strain_3(self):
         self._apply_variable_to_mesh("Strain 3", "Strain 3")
@@ -238,10 +261,52 @@ class FieldVariablesHandler:
         self._apply_variable_to_mesh("Average stress", "Average Stress")
     
     def stress_1(self):
-        self._apply_variable_to_mesh("Stress_1", "Stress 1")
+        self._apply_variable_to_mesh("Stress 1", "Stress 1")
     
     def stress_2(self):
-        self._apply_variable_to_mesh("Stress_2", "Stress 2")
+        self._apply_variable_to_mesh("Stress 2", "Stress 2")
     
     def stress_3(self):
-        self._apply_variable_to_mesh("Stress_3", "Stress 3")
+        self._apply_variable_to_mesh("Stress 3", "Stress 3")
+    
+    # === NEW VARIABLES ===
+    def thickness_plane_stress(self):
+        self._apply_variable_to_mesh("Thickness (Plane Stress)", "Thickness (Plane Stress)")
+    
+    def relative_density(self):
+        self._apply_variable_to_mesh("Relative Density", "Relative Density")
+    
+    def ductile_damage(self):
+        self._apply_variable_to_mesh("Ductile Damage", "Ductile Damage")
+    
+    # === ELECTRIC ===
+    def electric_potential(self):
+        self._apply_variable_to_mesh("Electric Potential", "Electric Potential")
+    
+    def electric_current_density(self):
+        self._apply_variable_to_mesh("Electric Current Density", "Electric Current Density")
+    
+    def electric_resistivity(self):
+        self._apply_variable_to_mesh("Electric Resistivity", "Electric Resistivity")
+    
+    # === SPECIAL OPTIONS ===
+    def stress_y_z_ef_stress(self):
+        self._apply_variable_to_mesh("Stress y(z)/Ef.Stress", "Stress y(z)/Ef.Stress")
+    
+    def stress_xy_rz_ef_stress(self):
+        self._apply_variable_to_mesh("Stress xy(rz)/Ef.Stress", "Stress xy(rz)/Ef.Stress")
+    
+    def average_stress_ef_stress(self):
+        self._apply_variable_to_mesh("Average Stress/Ef.Stress", "Average Stress/Ef.Stress")
+    
+    def pressure(self):
+        self._apply_variable_to_mesh("Pressure", "Pressure")
+    
+    def pressure_ef_stress(self):
+        self._apply_variable_to_mesh("Pressure/Ef.Stress", "Pressure/Ef.Stress")
+    
+    def surface_enlargement_ratio(self):
+        self._apply_variable_to_mesh("Surface Enlargement Ratio", "Surface Enlargement Ratio")
+    
+    def element_quality(self):
+        self._apply_variable_to_mesh("Element Quality", "Element Quality")

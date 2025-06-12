@@ -86,43 +86,98 @@
     <property name="title">
      <string>Field Variables</string>
     </property>
+    <widget class="QMenu" name="menuVelocity">
+     <property name="title">
+      <string>Velocity</string>
+     </property>
+     <addaction name="actionVelocity_x_r_2"/>
+     <addaction name="actionVelocity_y_z_2"/>
+     <addaction name="actionTotal_Velocity_2"/>
+    </widget>
+    <widget class="QMenu" name="menuStrain_Rate">
+     <property name="title">
+      <string>Strain Rate</string>
+     </property>
+     <addaction name="actionStrain_Rate_x_r_2"/>
+     <addaction name="actionStrain_Rate_y_z"/>
+     <addaction name="actionStrain_Rate_z_theta"/>
+     <addaction name="actionStrain_Rate_xy_z"/>
+     <addaction name="actionEffective_Strain_Rate_2"/>
+     <addaction name="actionVolumetric_Strain_Rate"/>
+    </widget>
+    <widget class="QMenu" name="menuForce">
+     <property name="title">
+      <string>Force</string>
+     </property>
+     <addaction name="actionForce_x_r_2"/>
+     <addaction name="actionForce_y_y"/>
+     <addaction name="actionTotal_Force_2"/>
+    </widget>
+    <widget class="QMenu" name="menuStrain">
+     <property name="title">
+      <string>Strain</string>
+     </property>
+     <addaction name="actionStrain_x_r_2"/>
+     <addaction name="actionStrain_y_z"/>
+     <addaction name="actionStrain_z_theta_2"/>
+     <addaction name="actionStrain_xy_rz_2"/>
+     <addaction name="actionEffective_Strain_2"/>
+     <addaction name="actionVolumetric_Strain_2"/>
+     <addaction name="actionStrain_4"/>
+     <addaction name="actionStrain_5"/>
+     <addaction name="actionStrain_6"/>
+    </widget>
+    <widget class="QMenu" name="menuStress">
+     <property name="title">
+      <string>Stress</string>
+     </property>
+     <addaction name="actionStress_x_r_2"/>
+     <addaction name="actionStress_y_z_2"/>
+     <addaction name="actionStress_z_theta_2"/>
+     <addaction name="actionStress_xy_rz_2"/>
+     <addaction name="actionEffective_Stress_2"/>
+     <addaction name="actionAverage_Stress_2"/>
+     <addaction name="actionStress_3"/>
+     <addaction name="actionStress_4"/>
+     <addaction name="actionStress_5"/>
+    </widget>
+    <widget class="QMenu" name="menuElectric">
+     <property name="title">
+      <string>Electric</string>
+     </property>
+     <addaction name="actionElectric_Potential"/>
+     <addaction name="actionElectric_Current_Density"/>
+     <addaction name="actionElectric_Resistivity"/>
+    </widget>
     <addaction name="actionStandard_Options_4"/>
-    <addaction name="actionVelocity_x_r"/>
-    <addaction name="actionVelocity_y_z"/>
-    <addaction name="actionTotal_Velocity"/>
+    <addaction name="menuVelocity"/>
     <addaction name="separator"/>
-    <addaction name="actionForce_x_r"/>
-    <addaction name="actionForce_y_z"/>
-    <addaction name="actionTotal_Force"/>
+    <addaction name="menuForce"/>
     <addaction name="separator"/>
     <addaction name="actionTemperature_Rate"/>
     <addaction name="actionTemperature"/>
     <addaction name="separator"/>
-    <addaction name="actionStrain_Rate_x_r"/>
-    <addaction name="actionStrain_Rate_y_r"/>
-    <addaction name="actionStrain_rate_z_theta"/>
-    <addaction name="actionStrain_Rate_xy_rz"/>
-    <addaction name="actionStrain_2"/>
-    <addaction name="actionEffective_Strain_Rate"/>
+    <addaction name="menuStrain_Rate"/>
     <addaction name="separator"/>
-    <addaction name="actionStrain_x_r"/>
-    <addaction name="actionStrain_y_r"/>
-    <addaction name="actionStrain_z_theta"/>
-    <addaction name="actionStrain_xy_rz"/>
-    <addaction name="actionEffective_Strain"/>
-    <addaction name="actionVolumetric_Strain"/>
-    <addaction name="actionStrain_1"/>
-    <addaction name="actionStrain_3"/>
+    <addaction name="menuStrain"/>
     <addaction name="separator"/>
-    <addaction name="actionStress_x_r"/>
-    <addaction name="actionStress_y_z"/>
-    <addaction name="actionStress_z_theta"/>
-    <addaction name="actionStress_xy_rz"/>
-    <addaction name="actionEffective_Stress"/>
-    <addaction name="actionAverage_Stress"/>
-    <addaction name="actionStress_1"/>
-    <addaction name="actionStress_2"/>
-    <addaction name="actionStress3"/>
+    <addaction name="menuStress"/>
+    <addaction name="separator"/>
+    <addaction name="actionThickness_Plane_Stress"/>
+    <addaction name="actionRelative_Density"/>
+    <addaction name="actionDuctile_Damage"/>
+    <addaction name="separator"/>
+    <addaction name="menuElectric"/>
+    <addaction name="separator"/>
+    <addaction name="actionSpecial_Options_2"/>
+    <addaction name="actionStress_y_z_Ef_Stress"/>
+    <addaction name="actionStress_xy_rz_Ef_Stress"/>
+    <addaction name="actionAverage_Stress_Ef_Stress"/>
+    <addaction name="actionPressure"/>
+    <addaction name="actionPressure_Ef_Stress"/>
+    <addaction name="actionSurface_Enlargement_Ratio"/>
+    <addaction name="separator"/>
+    <addaction name="actionElement_Quality"/>
    </widget>
    <widget class="QMenu" name="menuAnimation">
     <property name="title">
@@ -322,13 +377,11 @@
    </property>
   </action>
   <action name="actionStandard_Options_4">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Standard Options</string>
-   </property>
-  </action>
-  <action name="actionVelocity_x_r">
-   <property name="text">
-    <string>Velocity x(r)</string>
    </property>
   </action>
   <action name="actionVelocity_y_z">
@@ -339,11 +392,6 @@
   <action name="actionTotal_Velocity">
    <property name="text">
     <string>Total Velocity</string>
-   </property>
-  </action>
-  <action name="actionForce_x_r">
-   <property name="text">
-    <string>Force x(r)</string>
    </property>
   </action>
   <action name="actionForce_y_z">
@@ -366,11 +414,6 @@
     <string>Temperature</string>
    </property>
   </action>
-  <action name="actionStrain_Rate_x_r">
-   <property name="text">
-    <string>Strain Rate x(r)</string>
-   </property>
-  </action>
   <action name="actionStrain_Rate_y_r">
    <property name="text">
     <string>Strain Rate y(z)</string>
@@ -389,11 +432,6 @@
   <action name="actionEffective_Strain_Rate">
    <property name="text">
     <string>Effective Strain Rate</string>
-   </property>
-  </action>
-  <action name="actionStrain_x_r">
-   <property name="text">
-    <string>Strain x(r)</string>
    </property>
   </action>
   <action name="actionStrain_y_r">
@@ -436,11 +474,6 @@
     <string>Strain 3</string>
    </property>
   </action>
-  <action name="actionStress_x_r">
-   <property name="text">
-    <string>Stress x(r)</string>
-   </property>
-  </action>
   <action name="actionStress_y_z">
    <property name="text">
     <string>Stress y(z)</string>
@@ -479,6 +512,229 @@
   <action name="actionStress3">
    <property name="text">
     <string>Stress3</string>
+   </property>
+  </action>
+  <action name="actionVelocity_x_r_2">
+   <property name="text">
+    <string>Velocity x(r)</string>
+   </property>
+  </action>
+  <action name="actionVelocity_y_z_2">
+   <property name="text">
+    <string>Velocity y(z)</string>
+   </property>
+  </action>
+  <action name="actionTotal_Velocity_2">
+   <property name="text">
+    <string>Total Velocity</string>
+   </property>
+  </action>
+  <action name="actionForce_x_r_2">
+   <property name="text">
+    <string>Force x(r)</string>
+   </property>
+  </action>
+  <action name="actionForce_y_y">
+   <property name="text">
+    <string>Force y(y)</string>
+   </property>
+  </action>
+  <action name="actionTotal_Force_2">
+   <property name="text">
+    <string>Total Force</string>
+   </property>
+  </action>
+  <action name="actionStrain_Rate_x_r_2">
+   <property name="text">
+    <string>Strain Rate x(r)</string>
+   </property>
+  </action>
+  <action name="actionStrain_Rate_y_z">
+   <property name="text">
+    <string>Strain Rate y(z)</string>
+   </property>
+  </action>
+  <action name="actionStrain_Rate_z_theta">
+   <property name="text">
+    <string>Strain Rate z(theta)</string>
+   </property>
+  </action>
+  <action name="actionStrain_Rate_xy_z">
+   <property name="text">
+    <string>Strain Rate xy(rz)</string>
+   </property>
+  </action>
+  <action name="actionEffective_Strain_Rate_2">
+   <property name="text">
+    <string>Effective Strain Rate</string>
+   </property>
+  </action>
+  <action name="actionVolumetric_Strain_Rate">
+   <property name="text">
+    <string>Volumetric Strain Rate</string>
+   </property>
+  </action>
+  <action name="actionStrain_x_r_2">
+   <property name="text">
+    <string>Strain x(r)</string>
+   </property>
+  </action>
+  <action name="actionStrain_y_z">
+   <property name="text">
+    <string>Strain y(z)</string>
+   </property>
+  </action>
+  <action name="actionStrain_xy_rz_2">
+   <property name="text">
+    <string>Strain xy(rz)</string>
+   </property>
+  </action>
+  <action name="actionEffective_Strain_2">
+   <property name="text">
+    <string>Effective Strain</string>
+   </property>
+  </action>
+  <action name="actionVolumetric_Strain_2">
+   <property name="text">
+    <string>Volumetric Strain</string>
+   </property>
+  </action>
+  <action name="actionStrain_4">
+   <property name="text">
+    <string>Strain 1</string>
+   </property>
+  </action>
+  <action name="actionStrain_5">
+   <property name="text">
+    <string>Strain 2</string>
+   </property>
+  </action>
+  <action name="actionStrain_6">
+   <property name="text">
+    <string>Strain 3</string>
+   </property>
+  </action>
+  <action name="actionStrain_z_theta_2">
+   <property name="text">
+    <string>Strain z(theta)</string>
+   </property>
+  </action>
+  <action name="actionStress_x_r_2">
+   <property name="text">
+    <string>Stress x(r)</string>
+   </property>
+  </action>
+  <action name="actionStress_y_z_2">
+   <property name="text">
+    <string>Stress y(z)</string>
+   </property>
+  </action>
+  <action name="actionStress_z_theta_2">
+   <property name="text">
+    <string>Stress z(theta)</string>
+   </property>
+  </action>
+  <action name="actionStress_xy_rz_2">
+   <property name="text">
+    <string>Stress xy(rz)</string>
+   </property>
+  </action>
+  <action name="actionEffective_Stress_2">
+   <property name="text">
+    <string>Effective Stress</string>
+   </property>
+  </action>
+  <action name="actionAverage_Stress_2">
+   <property name="text">
+    <string>Average Stress</string>
+   </property>
+  </action>
+  <action name="actionStress_3">
+   <property name="text">
+    <string>Stress 1</string>
+   </property>
+  </action>
+  <action name="actionStress_4">
+   <property name="text">
+    <string>Stress 2</string>
+   </property>
+  </action>
+  <action name="actionStress_5">
+   <property name="text">
+    <string>Stress 3</string>
+   </property>
+  </action>
+  <action name="actionThickness_Plane_Stress">
+   <property name="text">
+    <string>Thickness (Plane Stress)</string>
+   </property>
+  </action>
+  <action name="actionRelative_Density">
+   <property name="text">
+    <string>Relative Density</string>
+   </property>
+  </action>
+  <action name="actionDuctile_Damage">
+   <property name="text">
+    <string>Ductile Damage</string>
+   </property>
+  </action>
+  <action name="actionElectric_Potential">
+   <property name="text">
+    <string>Electric Potential</string>
+   </property>
+  </action>
+  <action name="actionElectric_Current_Density">
+   <property name="text">
+    <string>Electric Current Density</string>
+   </property>
+  </action>
+  <action name="actionElectric_Resistivity">
+   <property name="text">
+    <string>Electric Resistivity</string>
+   </property>
+  </action>
+  <action name="actionSpecial_Options_2">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Special Options</string>
+   </property>
+  </action>
+  <action name="actionStress_y_z_Ef_Stress">
+   <property name="text">
+    <string>Stress y(z)/Ef.Stress</string>
+   </property>
+  </action>
+  <action name="actionStress_xy_rz_Ef_Stress">
+   <property name="text">
+    <string>Stress xy(rz)/Ef.Stress</string>
+   </property>
+  </action>
+  <action name="actionAverage_Stress_Ef_Stress">
+   <property name="text">
+    <string>Average Stress/Ef.Stress</string>
+   </property>
+  </action>
+  <action name="actionPressure">
+   <property name="text">
+    <string>Pressure</string>
+   </property>
+  </action>
+  <action name="actionPressure_Ef_Stress">
+   <property name="text">
+    <string>Pressure/Ef.Stress</string>
+   </property>
+  </action>
+  <action name="actionSurface_Enlargement_Ratio">
+   <property name="text">
+    <string>Surface Enlargement Ratio</string>
+   </property>
+  </action>
+  <action name="actionElement_Quality">
+   <property name="text">
+    <string>Element Quality</string>
    </property>
   </action>
  </widget>

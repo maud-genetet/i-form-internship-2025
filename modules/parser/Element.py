@@ -208,14 +208,48 @@ class Element:
     def get_stress_Orr(self):
         return self.stress_orr
 
-    # ============== UTILITY METHODS ==============
+    # ============== CALCULATED GETTERS ==============
     
-    def __str__(self):
-        return f"Element(id={self.id}, matno={self.matno}, \nlnods1={self.lnods1}, \nlnods2={self.lnods2}, \nlnods3={self.lnods3}, \nlnods4={self.lnods4}, \nrindx={self.rindx}, densy={self.densy}, fract={self.fract},\
-                \nstrain_rate_exx={self.srnrt_exx}, strain_rate_eyy={self.srnrt_eyy}, strain_rate_ezz={self.srnrt_ezz}, strain_rate_exy={self.srnrt_exy}, strain_rate_e={self.srnrt_e}, strain_rate_ev={self.srnrt_ev},\
-                \nstrain_exx={self.strain_exx}, strain_eyy={self.strain_eyy}, strain_ezz={self.strain_ezz}, strain_exy={self.strain_exy}, strain_e={self.strain_e}, strain_e1={self.strain_e1}, strain_e3={self.strain_e3}, angle13={self.angle13},\
-                \nstress_oxx={self.stress_oxx}, stress_oyy={self.stress_oyy}, stress_ozz={self.stress_ozz}, stress_oxy={self.stress_oxy}, stress_o={self.stress_o}, stress_orr={self.stress_orr})\n"
-        
+    def get_stress_yy_on_effective_stress(self):
+        """Get stress_yy / effective_stress ratio"""
+        if self.stress_o and self.stress_o != 0:
+            return (self.stress_oyy or 0.0) / self.stress_o
+        return 0.0
+    
+    def get_stress_xy_on_effective_stress(self):
+        """Get stress_xy / effective_stress ratio"""
+        if self.stress_o and self.stress_o != 0:
+            return (self.stress_oxy or 0.0) / self.stress_o
+        return 0.0
+    
+    def get_average_stress_on_effective_stress(self):
+        """Get average_stress / effective_stress ratio"""
+        if self.stress_o and self.stress_o != 0:
+            return (self.stress_orr or 0.0) / self.stress_o
+        return 0.0
+    
+    def get_pressure(self):
+        """Calculate pressure as negative of average normal stress"""
+        oxx = self.stress_oxx or 0.0
+        oyy = self.stress_oyy or 0.0
+        ozz = self.stress_ozz or 0.0
+        return -(oxx + oyy + ozz) / 3.0
+    
+    def get_pressure_on_effective_stress(self):
+        """Get pressure / effective_stress ratio"""
+        if self.stress_o and self.stress_o != 0:
+            return self.get_pressure() / self.stress_o
+        return 0.0
+    
+    def get_relative_density(self):
+        """Get relative density (assuming it's related to densy)"""
+        return self.densy or 0.0
+    
+    def get_element_quality(self):
+        """Get element quality (using rindx)"""
+        return self.rindx or 0.0
+
+    # ============== UTILITY METHODS ==============
     def get_info(self):
         return (
             f"\nMaterial number: {self.matno}\n"
@@ -247,5 +281,11 @@ class Element:
             f"σ_zz: {self.stress_ozz}\n"
             f"σ_xy: {self.stress_oxy}\n"
             f"σ_eq (effective stress): {self.stress_o}\n"
-            f"Residual stress (σ_res): {self.stress_orr}\n"
+            f"Residual stress (σ_res): {self.stress_orr}\n\n"
+            
+            f"--- Calculated Values ---\n"
+            f"Pressure: {self.get_pressure():.6f}\n"
+            f"σ_yy/σ_eq: {self.get_stress_yy_on_effective_stress():.6f}\n"
+            f"σ_xy/σ_eq: {self.get_stress_xy_on_effective_stress():.6f}\n"
+            f"Pressure/σ_eq: {self.get_pressure_on_effective_stress():.6f}\n"
         )
