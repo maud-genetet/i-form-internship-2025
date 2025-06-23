@@ -144,24 +144,9 @@ class FieldVariablesHandler:
     def reapply_current_variable(self):
         """Reapply current variable with current options"""
         if self.current_variable:
-            display_name = self._find_display_name(self.current_variable)
-            self._apply_variable_to_mesh(self.current_variable, display_name)
+            self._apply_variable_to_mesh(self.current_variable)
         else:
             self._show_geometry_only()
-    
-    def _find_display_name(self, variable_key):
-        """Find display name for variable key"""
-        for key, mesh_key in self.variable_mapping.items():
-            if mesh_key == variable_key:
-                return mesh_key
-        return variable_key
-    
-    def get_available_variables(self):
-        """Return available variables"""
-        visualization_manager = self.get_visualization_manager()
-        if visualization_manager.current_mesh:
-            return list(visualization_manager.current_mesh.cell_data.keys())
-        return []
     
     # === STANDARD OPTIONS ===
     def standard_options(self):
@@ -300,7 +285,7 @@ class FieldVariablesHandler:
         self._apply_variable_to_mesh("Average Stress/Ef.Stress")
     
     def pressure(self):
-        self._apply_variable_to_mesh("Pressure", "Pressure")
+        self._apply_variable_to_mesh("Pressure")
     
     def pressure_ef_stress(self):
         self._apply_variable_to_mesh("Pressure/Ef.Stress")

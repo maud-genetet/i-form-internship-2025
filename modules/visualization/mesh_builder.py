@@ -215,7 +215,7 @@ class MeshBuilder:
             element_data['Temperature Rate'].append(avg_dtemp)
 
         for key, values in element_data.items():
-            if any(v != 0.0 for v in values):
+            if len(values) != 0:
                 mesh.cell_data[key] = np.array(values)
     
     def create_die_mesh(self, die):
