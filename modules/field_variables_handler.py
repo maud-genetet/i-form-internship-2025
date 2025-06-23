@@ -135,9 +135,18 @@ class FieldVariablesHandler:
             QMessageBox.warning(self.main_window, "No Data", "Please load a mesh first.")
             return
         
-        # Get current edge setting
-        show_edges = self.viz_options.get_current_options()['show_mesh_edges']
-        visualization_manager.visualize_mesh(show_edges=show_edges, show_nodes=False, show_dies=True)
+        # Get current options
+        options = self.viz_options.get_current_options()
+        show_edges = options['show_mesh_edges']
+        show_constraints = options['view_constraints']
+        
+        # Use enhanced visualize_mesh method with constraints support
+        visualization_manager.visualize_mesh(
+            show_edges=show_edges, 
+            show_nodes=False, 
+            show_dies=True,
+            show_constraints=show_constraints
+        )
         self.current_variable = None
         print("Displaying geometry only")
     

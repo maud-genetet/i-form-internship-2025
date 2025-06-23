@@ -35,6 +35,9 @@ class MeshBuilder:
         # Add scalar data 
         self._add_scalar_data(mesh, elements, nodes)
         
+        # Add node constraint codes as point data
+        self._add_node_constraint_codes(mesh, nodes, node_id_to_index)
+        
         return mesh
     
     def _build_points(self, nodes):
@@ -72,6 +75,40 @@ class MeshBuilder:
         
         return cells
     
+    def _add_node_constraint_codes(self, mesh, nodes, node_id_to_index):
+        """Add node constraint codes as point data for visualization"""
+        # Create array for node codes (same length as mesh points)
+        node_codes = np.zeros(len(mesh.points))
+        
+        # Store constraint information in a class attribute for external access
+        constraint_info = {
+            'node_ids': [],
+            'positions_x': [],
+            'positions_y': [],
+            'codes': []
+        }
+        
+        # Fill with actual node codes and store constraint information
+        for node in nodes:
+            if node.get_id() in node_id_to_index:
+                index = node_id_to_index[node.get_id()]
+                code = node.get_code()
+                node_codes[index] = code
+                
+                # Store node information for ALL nodes with non-zero codes
+                if code != 0:  # Store all constrained nodes (positive and negative codes)
+                    constraint_info['node_ids'].append(node.get_id())
+                    constraint_info['positions_x'].append(node.get_coordX())
+                    constraint_info['positions_y'].append(node.get_coordY())
+                    constraint_info['codes'].append(code)
+        
+        # Add node codes to mesh point data
+        mesh.point_data['Node_Code'] = node_codes
+        
+        # Store constraint information as a mesh attribute
+        if constraint_info['node_ids']:
+            mesh._constraint_info = constraint_info
+        
     def _add_scalar_data(self, mesh, elements, nodes):
         """Add all available scalar data to mesh including new variables"""
         element_data = {

@@ -312,7 +312,7 @@ class VisualizationManager:
         """Set working directory"""
         self.current_dir = dir_name
     
-    def visualize_mesh(self, show_edges=True, show_nodes=False, show_dies=True):
+    def visualize_mesh(self, show_edges=True, show_nodes=False, show_dies=True, show_constraints=False):
         """Visualize mesh with specified options"""
         if not self.current_data:
             return
@@ -328,10 +328,10 @@ class VisualizationManager:
                 self.interaction_handler.set_mesh_data(mesh, self.current_data)
                 
                 # Display according to mode
-                self.display_manager.display_mesh(
+                self.display_manager.display_mesh_with_constraints(
                     self.plotter, mesh, 
                     self.default_mesh_color, self.default_edge_color,
-                    show_edges
+                    show_edges, show_constraints
                 )
                 
                 if show_dies:

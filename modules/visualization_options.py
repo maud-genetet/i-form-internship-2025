@@ -17,12 +17,14 @@ class VisualizationOptions:
         self.show_mesh_edges = True
         self.monochromatic_mode = False
         self.high_definition_contour = False
+        self.view_constraints = False
         
         # UI controls
         self.wireframe_checkbox = None
         self.mesh_edges_checkbox = None
         self.monochromatic_checkbox = None
         self.hd_contour_checkbox = None
+        self.constraints_checkbox = None
         
         self._setup_controls()
     
@@ -57,6 +59,12 @@ class VisualizationOptions:
         self.mesh_edges_checkbox.setChecked(self.show_mesh_edges)
         self.mesh_edges_checkbox.toggled.connect(self._on_mesh_edges_toggled)
         toolbar_layout.addWidget(self.mesh_edges_checkbox)
+        
+        # Add constraints checkbox
+        self.constraints_checkbox = QCheckBox("View Constraints")
+        self.constraints_checkbox.setChecked(self.view_constraints)
+        self.constraints_checkbox.toggled.connect(self._on_constraints_toggled)
+        toolbar_layout.addWidget(self.constraints_checkbox)
         
         # Add monochromatic mode checkbox
         self.monochromatic_checkbox = QCheckBox("Monochromatic")
@@ -93,6 +101,12 @@ class VisualizationOptions:
         print(f"Show mesh edges: {'ON' if checked else 'OFF'}")
         self._refresh_display()
     
+    def _on_constraints_toggled(self, checked):
+        """Handle constraints view toggle"""
+        self.view_constraints = checked
+        print(f"View constraints: {'ON' if checked else 'OFF'}")
+        self._refresh_display()
+    
     def _on_monochromatic_toggled(self, checked):
         """Handle monochromatic mode toggle"""
         self.monochromatic_mode = checked
@@ -122,5 +136,6 @@ class VisualizationOptions:
             'wireframe_mode': self.wireframe_mode,
             'show_mesh_edges': self.show_mesh_edges,
             'monochromatic_mode': self.monochromatic_mode,
-            'high_definition_contour': self.high_definition_contour
+            'high_definition_contour': self.high_definition_contour,
+            'view_constraints': self.view_constraints
         }
