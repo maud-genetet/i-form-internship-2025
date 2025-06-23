@@ -43,6 +43,7 @@ class DisplayModeManager:
         monochromatic_mode = options.get('monochromatic_mode', False)
         high_definition_contour = options.get('high_definition_contour', False)
         view_constraints = options.get('view_constraints', False)
+        line_contour_mode = options.get('line_contour_mode', False)
         
         # Apply HD contour if needed
         if high_definition_contour:
@@ -54,37 +55,41 @@ class DisplayModeManager:
         # Get scalar data
         scalars_array, use_point_data = self._get_scalar_data(mesh, scalar_name, high_definition_contour)
         
-        # Add mesh with variable colors and wireframe overlay if needed
-        if wireframe_mode:
-            # Show variable colors with wireframe overlay
-            plotter.add_mesh(
-                mesh,
-                scalars=scalars_array,
-                show_edges=False,  # No regular edges
-                opacity=1.0,
-                cmap=cmap,
-                show_scalar_bar=True,
-                scalar_bar_args={
-                    'title': variable_name,
-                },
-                label=f"Mesh - {variable_name}"
-            )
+        # NEW: Handle line contour mode
+        if line_contour_mode:
+            self._display_line_contours(plotter, mesh, scalars_array, variable_name, cmap, show_mesh_edges, edge_color)
         else:
-            # Normal display with options
-            plotter.add_mesh(
-                mesh,
-                scalars=scalars_array,
-                show_edges=show_mesh_edges,
-                edge_color=edge_color if show_mesh_edges else None,
-                line_width=1,
-                opacity=1.0,
-                cmap=cmap,
-                show_scalar_bar=True,
-                scalar_bar_args={
-                    'title': variable_name,
-                },
-                label=f"Mesh - {variable_name}"
-            )
+            # Normal display modes
+            if wireframe_mode:
+                # Show variable colors with wireframe overlay
+                plotter.add_mesh(
+                    mesh,
+                    scalars=scalars_array,
+                    show_edges=False,  # No regular edges
+                    opacity=1.0,
+                    cmap=cmap,
+                    show_scalar_bar=True,
+                    scalar_bar_args={
+                        'title': variable_name,
+                    },
+                    label=f"Mesh - {variable_name}"
+                )
+            else:
+                # Normal display with options
+                plotter.add_mesh(
+                    mesh,
+                    scalars=scalars_array,
+                    show_edges=show_mesh_edges,
+                    edge_color=edge_color if show_mesh_edges else None,
+                    line_width=1,
+                    opacity=1.0,
+                    cmap=cmap,
+                    show_scalar_bar=True,
+                    scalar_bar_args={
+                        'title': variable_name,
+                    },
+                    label=f"Mesh - {variable_name}"
+                )
         
         # Add constraints if enabled
         if view_constraints:
@@ -92,6 +97,92 @@ class DisplayModeManager:
         
         if use_point_data:
             print(f"HD Contour: Using smooth interpolation for {variable_name}")
+    
+    def _display_line_contours(self, plotter, mesh, scalars_array, variable_name, cmap, show_mesh_edges, edge_color):
+        """Display contours as colored lines instead of filled regions"""
+        
+        # First, add the base mesh
+        if show_mesh_edges:
+            plotter.add_mesh(
+                mesh,
+                color='white',
+                show_edges=True,
+                edge_color=edge_color,
+                line_width=1,
+                opacity=0.1,
+                label="Base Mesh"
+            )
+        else:
+            plotter.add_mesh(
+                mesh,
+                color='white',
+                opacity=0.1,
+                show_edges=False,
+                label="Base Mesh"
+            )
+        
+        # Generate contour lines
+        try:
+            # Determine number of contour levels
+            n_contours = 10
+            
+            # Get scalar range
+            scalar_min = np.min(scalars_array)
+            scalar_max = np.max(scalars_array)
+            
+            if scalar_min == scalar_max:
+                print(f"Warning: Constant scalar values for {variable_name}")
+                return
+            
+            # Generate contour levels
+            contour_levels = np.linspace(scalar_min, scalar_max, n_contours)
+            
+            # Create mesh copy with scalars
+            mesh_with_scalars = mesh.copy()
+            if len(scalars_array) == mesh.n_cells:
+                mesh_with_scalars.cell_data['scalars'] = scalars_array
+                # Convert to point data for better contours
+                mesh_with_scalars = mesh_with_scalars.cell_data_to_point_data()
+            else:
+                mesh_with_scalars.point_data['scalars'] = scalars_array
+            
+            # Generate contours
+            contours = mesh_with_scalars.contour(
+                scalars='scalars',
+                isosurfaces=contour_levels
+            )
+            
+            if contours.n_cells > 0:
+                # Add contour lines with colors
+                plotter.add_mesh(
+                    contours,
+                    scalars='scalars',
+                    cmap=cmap,
+                    line_width=2,
+                    style='surface',
+                    show_scalar_bar=True,
+                    scalar_bar_args={
+                        'title': variable_name,
+                    },
+                    label=f"Contours - {variable_name}"
+                )
+                print(f"Generated {contours.n_cells} contour lines for {variable_name}")
+            else:
+                print(f"No contour lines generated for {variable_name}")
+                
+        except Exception as e:
+            print(f"Error generating contours for {variable_name}: {e}")
+            # Fallback to normal display
+            plotter.add_mesh(
+                mesh,
+                scalars=scalars_array,
+                cmap=cmap,
+                show_scalar_bar=True,
+                scalar_bar_args={
+                    'title': variable_name,
+                },
+                label=f"Mesh - {variable_name} (fallback)"
+            )
     
     def display_mesh_with_constraints(self, plotter, mesh, mesh_color, edge_color, show_edges=True, show_constraints=False):
         """Display mesh with optional constraints"""

@@ -1,6 +1,6 @@
 """
 Unified Visualization Options Manager
-Handles all visualization options including wireframe
+Handles all visualization options including wireframe and line contour
 """
 
 from PyQt5.QtWidgets import QCheckBox, QLabel
@@ -18,6 +18,7 @@ class VisualizationOptions:
         self.monochromatic_mode = False
         self.high_definition_contour = False
         self.view_constraints = False
+        self.line_contour_mode = False  # NEW: Line contour option
         
         # UI controls
         self.wireframe_checkbox = None
@@ -25,6 +26,7 @@ class VisualizationOptions:
         self.monochromatic_checkbox = None
         self.hd_contour_checkbox = None
         self.constraints_checkbox = None
+        self.line_contour_checkbox = None  # NEW: Line contour checkbox
         
         self._setup_controls()
     
@@ -78,6 +80,12 @@ class VisualizationOptions:
         self.hd_contour_checkbox.toggled.connect(self._on_hd_contour_toggled)
         toolbar_layout.addWidget(self.hd_contour_checkbox)
         
+        # NEW: Add line contour checkbox
+        self.line_contour_checkbox = QCheckBox("Line Contour")
+        self.line_contour_checkbox.setChecked(self.line_contour_mode)
+        self.line_contour_checkbox.toggled.connect(self._on_line_contour_toggled)
+        toolbar_layout.addWidget(self.line_contour_checkbox)
+        
         # Add remove variables button
         from PyQt5.QtWidgets import QPushButton
         self.remove_variables_btn = QPushButton("Remove Variables")
@@ -119,6 +127,13 @@ class VisualizationOptions:
         print(f"HD Contour mode: {'ON' if checked else 'OFF'}")
         self._refresh_display()
     
+    # NEW: Line contour toggle handler
+    def _on_line_contour_toggled(self, checked):
+        """Handle line contour mode toggle"""
+        self.line_contour_mode = checked
+        print(f"Line Contour mode: {'ON' if checked else 'OFF'}")
+        self._refresh_display()
+    
     def _on_remove_variables_clicked(self):
         """Handle remove variables button click"""
         print("Removing variables - returning to geometry view")
@@ -137,5 +152,6 @@ class VisualizationOptions:
             'show_mesh_edges': self.show_mesh_edges,
             'monochromatic_mode': self.monochromatic_mode,
             'high_definition_contour': self.high_definition_contour,
-            'view_constraints': self.view_constraints
+            'view_constraints': self.view_constraints,
+            'line_contour_mode': self.line_contour_mode
         }
