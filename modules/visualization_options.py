@@ -18,7 +18,8 @@ class VisualizationOptions:
         self.monochromatic_mode = False
         self.high_definition_contour = False
         self.view_constraints = False
-        self.line_contour_mode = False  # NEW: Line contour option
+        self.line_contour_mode = False
+        self.vector_mode = False
         
         # UI controls
         self.wireframe_checkbox = None
@@ -26,7 +27,8 @@ class VisualizationOptions:
         self.monochromatic_checkbox = None
         self.hd_contour_checkbox = None
         self.constraints_checkbox = None
-        self.line_contour_checkbox = None  # NEW: Line contour checkbox
+        self.line_contour_checkbox = None
+        self.vector_checkbox = None
         
         self._setup_controls()
     
@@ -80,11 +82,17 @@ class VisualizationOptions:
         self.hd_contour_checkbox.toggled.connect(self._on_hd_contour_toggled)
         toolbar_layout.addWidget(self.hd_contour_checkbox)
         
-        # NEW: Add line contour checkbox
+        # Add line contour checkbox
         self.line_contour_checkbox = QCheckBox("Line Contour")
         self.line_contour_checkbox.setChecked(self.line_contour_mode)
         self.line_contour_checkbox.toggled.connect(self._on_line_contour_toggled)
         toolbar_layout.addWidget(self.line_contour_checkbox)
+        
+        # Add vector checkbox
+        self.vector_checkbox = QCheckBox("Vector")
+        self.vector_checkbox.setChecked(self.vector_mode)
+        self.vector_checkbox.toggled.connect(self._on_vector_toggled)
+        toolbar_layout.addWidget(self.vector_checkbox)
         
         # Add remove variables button
         from PyQt5.QtWidgets import QPushButton
@@ -127,11 +135,17 @@ class VisualizationOptions:
         print(f"HD Contour mode: {'ON' if checked else 'OFF'}")
         self._refresh_display()
     
-    # NEW: Line contour toggle handler
     def _on_line_contour_toggled(self, checked):
         """Handle line contour mode toggle"""
         self.line_contour_mode = checked
         print(f"Line Contour mode: {'ON' if checked else 'OFF'}")
+        self._refresh_display()
+    
+    # Vector toggle handler
+    def _on_vector_toggled(self, checked):
+        """Handle vector mode toggle"""
+        self.vector_mode = checked
+        print(f"Vector mode: {'ON' if checked else 'OFF'}")
         self._refresh_display()
     
     def _on_remove_variables_clicked(self):
@@ -153,5 +167,6 @@ class VisualizationOptions:
             'monochromatic_mode': self.monochromatic_mode,
             'high_definition_contour': self.high_definition_contour,
             'view_constraints': self.view_constraints,
-            'line_contour_mode': self.line_contour_mode
+            'line_contour_mode': self.line_contour_mode,
+            'vector_mode': self.vector_mode
         }

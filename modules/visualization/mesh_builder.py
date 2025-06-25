@@ -38,6 +38,10 @@ class MeshBuilder:
         # Add node constraint codes as point data
         self._add_node_constraint_codes(mesh, nodes, node_id_to_index)
         
+        # Store original data for vector calculations
+        mesh._original_data = neutral_data
+        mesh._node_id_to_index = node_id_to_index
+        
         return mesh
     
     def _build_points(self, nodes):

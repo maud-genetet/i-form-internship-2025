@@ -44,6 +44,7 @@ class DisplayModeManager:
         high_definition_contour = options.get('high_definition_contour', False)
         view_constraints = options.get('view_constraints', False)
         line_contour_mode = options.get('line_contour_mode', False)
+        vector_mode = options.get('vector_mode', False)
         
         # Apply HD contour if needed
         if high_definition_contour:
@@ -55,8 +56,10 @@ class DisplayModeManager:
         # Get scalar data
         scalars_array, use_point_data = self._get_scalar_data(mesh, scalar_name, high_definition_contour)
         
-        # NEW: Handle line contour mode
-        if line_contour_mode:
+        # Handle vector mode
+        if vector_mode:
+            self._display_vector_field(plotter, mesh, scalar_name, variable_name, show_mesh_edges, edge_color)
+        elif line_contour_mode:
             self._display_line_contours(plotter, mesh, scalars_array, variable_name, cmap, show_mesh_edges, edge_color)
         else:
             # Normal display modes
@@ -97,6 +100,289 @@ class DisplayModeManager:
         
         if use_point_data:
             print(f"HD Contour: Using smooth interpolation for {variable_name}")
+    
+    def _display_vector_field(self, plotter, mesh, scalar_name, variable_name, show_mesh_edges, edge_color):
+        """Display vector field for stress/strain variables"""
+        
+        # First, add the base mesh with light transparency
+        if show_mesh_edges:
+            plotter.add_mesh(
+                mesh,
+                color='lightgray',
+                show_edges=True,
+                edge_color=edge_color,
+                line_width=1,
+                opacity=0.3,
+                label="Base Mesh"
+            )
+        else:
+            plotter.add_mesh(
+                mesh,
+                color='lightgray',
+                opacity=0.3,
+                show_edges=False,
+                label="Base Mesh"
+            )
+        
+        try:
+            # For velocity vectors, try different approaches
+            if "Velocity" in variable_name:
+                print(f"Processing velocity variable: {variable_name}")
+                
+                # Method 1: Try node data first
+                points, vectors = self._get_velocity_vectors_from_nodes(mesh)
+                
+                # Method 2: If node data doesn't work well, try interpolated cell data
+                if vectors is None or np.all(np.linalg.norm(vectors, axis=1) < 1e-10):
+                    print("Node data not useful, trying interpolated cell data...")
+                    points, vectors = self._interpolate_velocity_to_nodes(mesh)
+                    
+                # Method 3: If still not working, try using cell centers with cell data
+                if vectors is None or np.all(np.linalg.norm(vectors, axis=1) < 1e-10):
+                    print("Interpolated data not useful, using cell centers...")
+                    cell_centers = mesh.cell_centers()
+                    points = cell_centers.points
+                    vectors = self._calculate_velocity_vectors(mesh)
+            else:
+                # For other variables, use cell centers
+                cell_centers = mesh.cell_centers()
+                points = cell_centers.points
+                vectors = self._calculate_vectors_from_variable(mesh, scalar_name, variable_name)
+            
+            if vectors is not None and len(vectors) == len(points):
+                # Create vector field
+                vector_mesh = pv.PolyData(points)
+                vector_mesh['vectors'] = vectors
+                
+                # Calculate vector magnitudes for coloring
+                magnitudes = np.linalg.norm(vectors, axis=1)
+                vector_mesh['magnitude'] = magnitudes
+                
+                # Filter out zero vectors for better visualization
+                non_zero_mask = magnitudes > 1e-10
+                if np.any(non_zero_mask):
+                    filtered_points = points[non_zero_mask]
+                    filtered_vectors = vectors[non_zero_mask]
+                    filtered_magnitudes = magnitudes[non_zero_mask]
+                    
+                    vector_mesh = pv.PolyData(filtered_points)
+                    vector_mesh['vectors'] = filtered_vectors
+                    vector_mesh['magnitude'] = filtered_magnitudes
+                    
+                    # Calculate appropriate scale factor
+                    mesh_bounds = mesh.bounds
+                    mesh_size = max(mesh_bounds[1] - mesh_bounds[0], mesh_bounds[3] - mesh_bounds[2])
+                    max_magnitude = np.max(filtered_magnitudes)
+                    
+                    if max_magnitude > 0:
+                        # Scale arrows to be about 3% of mesh size at maximum
+                        scale_factor = (mesh_size * 0.03) / max_magnitude
+                    else:
+                        scale_factor = mesh_size * 0.01
+                    
+                    # Add arrows with automatic scaling
+                    arrows = vector_mesh.glyph(
+                        orient='vectors',
+                        scale='magnitude',
+                        factor=scale_factor,
+                        geom=pv.Arrow()
+                    )
+                    
+                    plotter.add_mesh(
+                        arrows,
+                        scalars='magnitude',
+                        cmap='plasma',
+                        show_scalar_bar=True,
+                        scalar_bar_args={
+                            'title': f"{variable_name} Vectors",
+                        },
+                        label=f"Vectors - {variable_name}"
+                    )
+                    
+                    print(f"Generated {len(filtered_vectors)} vectors for {variable_name} (scale: {scale_factor:.6f})")
+                else:
+                    print(f"No significant vectors found for {variable_name}")
+                    self._fallback_display(plotter, mesh, scalar_name, variable_name)
+            else:
+                print(f"Could not generate vectors for {variable_name}")
+                # Fallback to normal display
+                self._fallback_display(plotter, mesh, scalar_name, variable_name)
+                
+        except Exception as e:
+            print(f"Error generating vectors for {variable_name}: {e}")
+            # Fallback to normal display
+            self._fallback_display(plotter, mesh, scalar_name, variable_name)
+    
+    def _calculate_vectors_from_variable(self, mesh, scalar_name, variable_name):
+        """Calculate vector components based on the variable type"""
+        
+        # For stress and strain variables, try to get tensor components
+        if "Stress" in variable_name or "Strain" in variable_name:
+            return self._calculate_stress_strain_vectors(mesh, variable_name)
+        elif "Velocity" in variable_name:
+            return self._calculate_velocity_vectors(mesh)
+        elif "Force" in variable_name:
+            return self._calculate_force_vectors(mesh)
+        else:
+            # For scalar variables, create normal vectors scaled by the scalar value
+            return self._calculate_scalar_normal_vectors(mesh, scalar_name)
+    
+    def _calculate_stress_strain_vectors(self, mesh, variable_name):
+        """Calculate stress or strain vectors from tensor components"""
+        try:
+            # Try to get principal stress/strain components
+            if "Stress" in variable_name:
+                if 'Stress x(r)' in mesh.cell_data and 'Stress y(z)' in mesh.cell_data:
+                    stress_x = mesh.cell_data['Stress x(r)']
+                    stress_y = mesh.cell_data['Stress y(z)']
+                    stress_z = np.zeros_like(stress_x)  # 2D case
+                    
+                    vectors = np.column_stack([stress_x, stress_y, stress_z])
+                    return vectors
+                    
+            elif "Strain" in variable_name:
+                if 'Strain x(r)' in mesh.cell_data and 'Strain y(z)' in mesh.cell_data:
+                    strain_x = mesh.cell_data['Strain x(r)']
+                    strain_y = mesh.cell_data['Strain y(z)']
+                    strain_z = np.zeros_like(strain_x)  # 2D case
+                    
+                    vectors = np.column_stack([strain_x, strain_y, strain_z])
+                    return vectors
+            
+            return None
+            
+        except Exception as e:
+            print(f"Error calculating stress/strain vectors: {e}")
+            return None
+    
+    def _calculate_velocity_vectors(self, mesh):
+        """Calculate velocity vectors"""
+        try:
+            if 'Velocity X(r)' in mesh.cell_data and 'Velocity Y(z)' in mesh.cell_data:
+                vel_x = mesh.cell_data['Velocity X(r)']
+                vel_y = mesh.cell_data['Velocity Y(z)']
+                vel_z = np.zeros_like(vel_x)  # 2D case
+                
+                # For velocity, the vectors represent direction of movement
+                vectors = np.column_stack([vel_x, vel_y, vel_z])
+                return vectors
+            return None
+            
+        except Exception as e:
+            print(f"Error calculating velocity vectors: {e}")
+            return None
+    
+    def _calculate_force_vectors(self, mesh):
+        """Calculate force vectors"""
+        try:
+            if 'Force X(r)' in mesh.cell_data and 'Force Y(z)' in mesh.cell_data:
+                force_x = mesh.cell_data['Force X(r)']
+                force_y = mesh.cell_data['Force Y(z)']
+                force_z = np.zeros_like(force_x)  # 2D case
+                
+                vectors = np.column_stack([force_x, force_y, force_z])
+                return vectors
+            return None
+            
+        except Exception as e:
+            print(f"Error calculating force vectors: {e}")
+            return None
+    
+    def _calculate_scalar_normal_vectors(self, mesh, scalar_name):
+        """Calculate normal vectors scaled by scalar values"""
+        try:
+            if scalar_name in mesh.cell_data:
+                scalar_values = mesh.cell_data[scalar_name]
+                
+                # For 2D case, create vectors in Z direction scaled by scalar value
+                vectors = np.column_stack([
+                    np.zeros_like(scalar_values),  # X component
+                    np.zeros_like(scalar_values),  # Y component  
+                    scalar_values * 0.1  # Z component (scaled)
+                ])
+                return vectors
+            return None
+            
+        except Exception as e:
+            print(f"Error calculating scalar normal vectors: {e}")
+            return None
+    
+    def _get_velocity_vectors_from_nodes(self, mesh):
+        """Get velocity vectors directly from node data"""
+        try:
+            # Get mesh points (node positions)
+            points = mesh.points
+            
+            # Try to get velocity data from the original mesh data
+            if hasattr(mesh, '_original_data') and hasattr(mesh, '_node_id_to_index'):
+                nodes = mesh._original_data.get_nodes()
+                node_id_to_index = mesh._node_id_to_index
+                
+                # Create velocity array matching mesh points order
+                velocities = np.zeros((len(points), 3))
+                
+                # Debug: let's check some velocity values
+                debug_count = 0
+                
+                for node in nodes:
+                    if node.get_id() in node_id_to_index:
+                        index = node_id_to_index[node.get_id()]
+                        vx = node.get_Vx() or 0.0
+                        vy = node.get_Vy() or 0.0
+                        
+                        # Debug first few nodes
+                        if debug_count < 5:
+                            print(f"Node {node.get_id()}: vx={vx}, vy={vy}, pos=({node.get_coordX()}, {node.get_coordY()})")
+                            debug_count += 1
+                        
+                        velocities[index] = [vx, vy, 0.0]
+                
+                # Let's also check if we need to normalize or process the vectors
+                magnitudes = np.linalg.norm(velocities, axis=1)
+                non_zero_magnitudes = magnitudes[magnitudes > 1e-10]
+                print(f"Velocity stats: min={np.min(non_zero_magnitudes):.6f}, max={np.max(non_zero_magnitudes):.6f}, mean={np.mean(non_zero_magnitudes):.6f}")
+                
+                return points, velocities
+            else:
+                # Fallback: use interpolated velocity from cell data
+                print("Using fallback interpolation method")
+                return self._interpolate_velocity_to_nodes(mesh)
+                
+        except Exception as e:
+            print(f"Error getting velocity vectors from nodes: {e}")
+            return self._interpolate_velocity_to_nodes(mesh)
+    
+    def _interpolate_velocity_to_nodes(self, mesh):
+        """Interpolate velocity from cell data to node positions"""
+        try:
+            # Convert cell data to point data for better node-based visualization
+            mesh_with_point_data = mesh.cell_data_to_point_data()
+            
+            if 'Velocity X(r)' in mesh_with_point_data.point_data and 'Velocity Y(z)' in mesh_with_point_data.point_data:
+                vel_x = mesh_with_point_data.point_data['Velocity X(r)']
+                vel_y = mesh_with_point_data.point_data['Velocity Y(z)']
+                vel_z = np.zeros_like(vel_x)
+                
+                vectors = np.column_stack([vel_x, vel_y, vel_z])
+                return mesh.points, vectors
+            else:
+                return None, None
+                
+        except Exception as e:
+            print(f"Error interpolating velocity to nodes: {e}")
+            return None, None
+        """Fallback to normal scalar display when vector display fails"""
+        if scalar_name in mesh.cell_data:
+            plotter.add_mesh(
+                mesh,
+                scalars=mesh.cell_data[scalar_name],
+                cmap='turbo',
+                show_scalar_bar=True,
+                scalar_bar_args={
+                    'title': variable_name,
+                },
+                label=f"Mesh - {variable_name} (fallback)"
+            )
     
     def _display_line_contours(self, plotter, mesh, scalars_array, variable_name, cmap, show_mesh_edges, edge_color):
         """Display contours as colored lines instead of filled regions"""
