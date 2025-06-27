@@ -33,7 +33,6 @@ class ParserNeutralFile:
 
                 # Traitement des noeuds
                 for i in range(2, 2 + nb_nodes):
-                    print(f"Traitement du noeud à la ligne {i + 1}.")
                     ligne = lignes[i].strip()
                     if ligne:
                         parts = ligne.split()
@@ -64,141 +63,126 @@ class ParserNeutralFile:
 
                 nb_elements = int(lignes[actual_ligne].strip())
                 print(f"Nombre d'éléments : {nb_elements}")
+
+                actual_ligne += 1
+
                 # Traitement des éléments
-
-                for i in range(actual_ligne + 1, actual_ligne + 1 + nb_elements):
-                    print(f"Traitement de l'élément à la ligne {i + 1}.")
-                    ligne = lignes[i].strip()
+                for i in range(nb_elements):
+                    base_line = actual_ligne + i
+                    
+                    ligne = lignes[base_line].strip()
                     if ligne:
                         parts = ligne.split()
-                        if len(parts) < 9:
-                            print(f"Erreur de format pour l'élément à la ligne {i + 1}.")
-                            continue
+                        if len(parts) >= 9:
+                            element_id = int(parts[0])
+                            element = Element(element_id)
 
-                        element_id = int(parts[0])
-                        element = Element(element_id)
+                            matno = int(parts[1])
+                            lnods1 = int(parts[2])
+                            lnods2 = int(parts[3])
+                            lnods3 = int(parts[4])
+                            lnods4 = int(parts[5])
+                            rindx = ParserNeutralFile.fortran_float(parts[6])
+                            densy = ParserNeutralFile.fortran_float(parts[7])
+                            fract = ParserNeutralFile.fortran_float(parts[8])
 
-                        matno = int(parts[1])
-                        lnods1 = int(parts[2])
-                        lnods2 = int(parts[3])
-                        lnods3 = int(parts[4])
-                        lnods4 = int(parts[5])
-                        rindx = ParserNeutralFile.fortran_float(parts[6])
-                        densy = ParserNeutralFile.fortran_float(parts[7])
-                        fract = ParserNeutralFile.fortran_float(parts[8])
+                            element.set_matno(matno)
+                            element.set_lnods(neu.get_node_by_id(lnods1))
+                            element.set_lnods(neu.get_node_by_id(lnods2))
+                            element.set_lnods(neu.get_node_by_id(lnods3))
+                            element.set_lnods(neu.get_node_by_id(lnods4))
+                            element.set_rindx(rindx)
+                            element.set_densy(densy)
+                            element.set_fract(fract)
 
-                        element.set_matno(matno)
-                        element.set_lnods(neu.get_node_by_id(lnods1))
-                        element.set_lnods(neu.get_node_by_id(lnods2))
-                        element.set_lnods(neu.get_node_by_id(lnods3))
-                        element.set_lnods(neu.get_node_by_id(lnods4))
-                        element.set_rindx(rindx)
-                        element.set_densy(densy)
-                        element.set_fract(fract)
+                            neu.add_element(element)
+                        else:
+                            print(f"Erreur de format pour l'élément à la ligne {base_line + 1}.")
 
-                        neu.add_element(element)
-
-                actual_ligne += 1 + nb_elements
-
-                # Strain rate elements
-                for i in range(actual_ligne, actual_ligne + nb_elements):
-                    print(f"Traitement de l'élément de taux de déformation à la ligne {i + 1}.")
-                    ligne = lignes[i].strip()
+                    strain_rate_line = actual_ligne + nb_elements + i
+                    ligne = lignes[strain_rate_line].strip()
                     if ligne:
                         parts = ligne.split()
-                        if len(parts) < 6:
-                            print(f"Erreur de format pour l'élément de taux de déformation à la ligne {i + 1}.")
-                            continue
+                        if len(parts) >= 6:
+                            element_id = int(parts[0])
+                            element = neu.get_element_by_id(element_id)
 
-                        element_id = int(parts[0])
-                        element = neu.get_element_by_id(element_id)
+                            if element:
+                                strnrt_exx = ParserNeutralFile.fortran_float(parts[1])
+                                strnrt_eyy = ParserNeutralFile.fortran_float(parts[2])
+                                strnrt_ezz = ParserNeutralFile.fortran_float(parts[3])
+                                strnrt_exy = ParserNeutralFile.fortran_float(parts[4])
+                                strnrt_e = ParserNeutralFile.fortran_float(parts[5])
+                                strnrt_ev = ParserNeutralFile.fortran_float(parts[6])
 
-                        if element:
-                            strnrt_exx = ParserNeutralFile.fortran_float(parts[1])
-                            strnrt_eyy = ParserNeutralFile.fortran_float(parts[2])
-                            strnrt_ezz = ParserNeutralFile.fortran_float(parts[3])
-                            strnrt_exy = ParserNeutralFile.fortran_float(parts[4])
-                            strnrt_e = ParserNeutralFile.fortran_float(parts[5])
-                            strnrt_ev = ParserNeutralFile.fortran_float(parts[6])
+                                element.set_strain_rate_Exx(strnrt_exx)
+                                element.set_strain_rate_Eyy(strnrt_eyy)
+                                element.set_strain_rate_Ezz(strnrt_ezz)
+                                element.set_strain_rate_Exy(strnrt_exy)
+                                element.set_strain_rate_E(strnrt_e)
+                                element.set_strain_rate_Ev(strnrt_ev)
+                        else:
+                            print(f"Erreur de format pour l'élément de taux de déformation à la ligne {strain_rate_line + 1}.")
 
-                            element.set_strain_rate_Exx(strnrt_exx)
-                            element.set_strain_rate_Eyy(strnrt_eyy)
-                            element.set_strain_rate_Ezz(strnrt_ezz)
-                            element.set_strain_rate_Exy(strnrt_exy)
-                            element.set_strain_rate_E(strnrt_e)
-                            element.set_strain_rate_Ev(strnrt_ev)
-
-                actual_ligne += nb_elements
-
-                # Strain elements
-                for i in range(actual_ligne, actual_ligne + nb_elements):
-                    print(f"Traitement de l'élément de déformation à la ligne {i + 1}.")
-                    ligne = lignes[i].strip()
+                    strain_line = actual_ligne + 2 * nb_elements + i
+                    ligne = lignes[strain_line].strip()
                     if ligne:
                         parts = ligne.split()
-                        if len(parts) < 8:
-                            print(f"Erreur de format pour l'élément de déformation à la ligne {i + 1}.")
-                            continue
+                        if len(parts) >= 8:
+                            element_id = int(parts[0])
+                            element = neu.get_element_by_id(element_id)
 
-                        element_id = int(parts[0])
-                        element = neu.get_element_by_id(element_id)
+                            if element:
+                                strain_exx = ParserNeutralFile.fortran_float(parts[1])
+                                strain_eyy = ParserNeutralFile.fortran_float(parts[2])
+                                strain_ezz = ParserNeutralFile.fortran_float(parts[3])
+                                strain_exy = ParserNeutralFile.fortran_float(parts[4])
+                                strain_e = ParserNeutralFile.fortran_float(parts[5])
+                                strain_e1 = ParserNeutralFile.fortran_float(parts[6])
+                                strain_e3 = ParserNeutralFile.fortran_float(parts[7])
+                                angle_13 = ParserNeutralFile.fortran_float(parts[8])
 
-                        if element:
-                            strain_exx = ParserNeutralFile.fortran_float(parts[1])
-                            strain_eyy = ParserNeutralFile.fortran_float(parts[2])
-                            strain_ezz = ParserNeutralFile.fortran_float(parts[3])
-                            strain_exy = ParserNeutralFile.fortran_float(parts[4])
-                            strain_e = ParserNeutralFile.fortran_float(parts[5])
-                            strain_e1 = ParserNeutralFile.fortran_float(parts[6])
-                            strain_e3 = ParserNeutralFile.fortran_float(parts[7])
-                            angle_13 = ParserNeutralFile.fortran_float(parts[8])
+                                element.set_strain_Exx(strain_exx)
+                                element.set_strain_Eyy(strain_eyy)
+                                element.set_strain_Ezz(strain_ezz)
+                                element.set_strain_Exy(strain_exy)
+                                element.set_strain_E(strain_e)
+                                element.set_strain_E1(strain_e1)
+                                element.set_strain_E3(strain_e3)
+                                element.set_angle_13(angle_13)
+                        else:
+                            print(f"Erreur de format pour l'élément de déformation à la ligne {strain_line + 1}.")
 
-                            element.set_strain_Exx(strain_exx)
-                            element.set_strain_Eyy(strain_eyy)
-                            element.set_strain_Ezz(strain_ezz)
-                            element.set_strain_Exy(strain_exy)
-                            element.set_strain_E(strain_e)
-                            element.set_strain_E1(strain_e1)
-                            element.set_strain_E3(strain_e3)
-                            element.set_angle_13(angle_13)
-
-                actual_ligne += nb_elements
-
-                # stress elements
-
-                for i in range(actual_ligne, actual_ligne + nb_elements):
-                    print(f"Traitement de l'élément de contrainte à la ligne {i + 1}.")
-                    ligne = lignes[i].strip()
+                    stress_line = actual_ligne + 3 * nb_elements + i
+                    ligne = lignes[stress_line].strip()
                     if ligne:
                         parts = ligne.split()
-                        if len(parts) < 7:
-                            print(f"Erreur de format pour l'élément de contrainte à la ligne {i + 1}.")
-                            continue
+                        if len(parts) >= 7:
+                            element_id = int(parts[0])
+                            element = neu.get_element_by_id(element_id)
 
-                        element_id = int(parts[0])
-                        element = neu.get_element_by_id(element_id)
+                            if element:
+                                stress_oxx = ParserNeutralFile.fortran_float(parts[1])
+                                stress_oyy = ParserNeutralFile.fortran_float(parts[2])
+                                stress_ozz = ParserNeutralFile.fortran_float(parts[3])
+                                stress_oxy = ParserNeutralFile.fortran_float(parts[4])
+                                stress_o = ParserNeutralFile.fortran_float(parts[5])
+                                stress_orr = ParserNeutralFile.fortran_float(parts[6])
 
-                        if element:
-                            stress_oxx = ParserNeutralFile.fortran_float(parts[1])
-                            stress_oyy = ParserNeutralFile.fortran_float(parts[2])
-                            stress_ozz = ParserNeutralFile.fortran_float(parts[3])
-                            stress_oxy = ParserNeutralFile.fortran_float(parts[4])
-                            stress_o = ParserNeutralFile.fortran_float(parts[5])
-                            stress_orr = ParserNeutralFile.fortran_float(parts[6])
+                                element.set_stress_Oxx(stress_oxx)
+                                element.set_stress_Oyy(stress_oyy)
+                                element.set_stress_Ozz(stress_ozz)
+                                element.set_stress_Oxy(stress_oxy)
+                                element.set_stress_O(stress_o)
+                                element.set_stress_Orr(stress_orr)
+                        else:
+                            print(f"Erreur de format pour l'élément de contrainte à la ligne {stress_line + 1}.")
 
-                            element.set_stress_Oxx(stress_oxx)
-                            element.set_stress_Oyy(stress_oyy)
-                            element.set_stress_Ozz(stress_ozz)
-                            element.set_stress_Oxy(stress_oxy)
-                            element.set_stress_O(stress_o)
-                            element.set_stress_Orr(stress_orr)
-
-                actual_ligne += nb_elements
+                actual_ligne += 4 * nb_elements
 
                 # Temperature nodes
 
                 for i in range(actual_ligne, actual_ligne + nb_nodes):
-                    print(f"Traitement du noeud de température à la ligne {i + 1}.")
                     ligne = lignes[i].strip()
                     if ligne:
                         parts = ligne.split()

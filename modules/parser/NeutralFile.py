@@ -2,8 +2,8 @@ class NeutralFile:
     
     def __init__(self, title):
         self.title = title
-        self.nodes = []
-        self.elements = []
+        self.nodes = {}
+        self.elements = {}
         self.dies = []
         self.t_time = None
 
@@ -23,20 +23,20 @@ class NeutralFile:
         return self.title
     
     def get_nodes(self):
-        return self.nodes
+        return self.nodes.values()
     
     def get_elements(self):
-        return self.elements
+        return self.elements.values()
     
     def get_t_time(self):
         return self.t_time
     
     def get_node_by_id(self, node_id):
-        return self.nodes[node_id]
+        return self.nodes.get(node_id)
     
     def get_element_by_id(self, element_id):
-        return self.elements[element_id]
-    
+        return self.elements.get(element_id)
+
     def get_nb_nodes(self):
         return len(self.nodes)
     
