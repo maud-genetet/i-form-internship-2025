@@ -8,10 +8,10 @@ class NeutralFile:
         self.t_time = None
 
     def add_node(self, node):
-        self.nodes.append(node)
+        self.nodes[node.get_id()] = node
 
     def add_element(self, element):
-        self.elements.append(element)
+        self.elements[element.get_id()] = element
 
     def add_die(self, die):
         self.dies.append(die)
@@ -32,16 +32,10 @@ class NeutralFile:
         return self.t_time
     
     def get_node_by_id(self, node_id):
-        for node in self.nodes:
-            if node.get_id() == node_id:
-                return node
-        return None
+        return self.nodes[node_id]
     
     def get_element_by_id(self, element_id):
-        for element in self.elements:
-            if element.get_id() == element_id:
-                return element
-        return None
+        return self.elements[element_id]
     
     def get_nb_nodes(self):
         return len(self.nodes)
@@ -54,15 +48,3 @@ class NeutralFile:
     
     def get_dies(self):
         return self.dies
-    
-    def get_edges(self):
-        edges = []
-        for element in self.elements:
-            nb_lnods = element.get_nb_lnods()
-            for i in range(nb_lnods):
-                node1 = element.get_lnods_by_index(i)
-                node2 = element.get_lnods_by_index((i + 1) % nb_lnods)
-                edge = (node1, node2)
-                if edge not in edges and (node2, node1) not in edges:
-                    edges.append(edge)
-        return edges

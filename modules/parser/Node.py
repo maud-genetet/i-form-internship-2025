@@ -12,6 +12,7 @@ class Node:
         self.temp = None
         self.n2met = None
         self.code = 0
+        self.is_contact = False
 
     # ============== SETTERS ==============
     
@@ -44,6 +45,9 @@ class Node:
 
     def set_code(self, code):
         self.code = code
+
+    def set_is_contact(self, is_contact):
+        self.is_contact = is_contact
 
     # ============== GETTERS ==============
     
@@ -79,6 +83,9 @@ class Node:
     
     def get_code(self):
         return self.code
+    
+    def is_contact_node(self):
+        return self.is_contact
 
     # ============== METHODS ==============        
     def __str__(self):
@@ -93,4 +100,5 @@ class Node:
             f"Temperature: {self.temp} (Rate: {self.dtemp})\n"
             f"Material Number: {self.n2met}\n"
             f"Code: {self.code}\n"
+            f"Is Contact Node: {'Yes' if self.is_contact else 'No'}\n"
         )

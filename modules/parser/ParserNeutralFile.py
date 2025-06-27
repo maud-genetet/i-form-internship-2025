@@ -33,6 +33,7 @@ class ParserNeutralFile:
 
                 # Traitement des noeuds
                 for i in range(2, 2 + nb_nodes):
+                    print(f"Traitement du noeud à la ligne {i + 1}.")
                     ligne = lignes[i].strip()
                     if ligne:
                         parts = ligne.split()
@@ -66,6 +67,7 @@ class ParserNeutralFile:
                 # Traitement des éléments
 
                 for i in range(actual_ligne + 1, actual_ligne + 1 + nb_elements):
+                    print(f"Traitement de l'élément à la ligne {i + 1}.")
                     ligne = lignes[i].strip()
                     if ligne:
                         parts = ligne.split()
@@ -100,6 +102,7 @@ class ParserNeutralFile:
 
                 # Strain rate elements
                 for i in range(actual_ligne, actual_ligne + nb_elements):
+                    print(f"Traitement de l'élément de taux de déformation à la ligne {i + 1}.")
                     ligne = lignes[i].strip()
                     if ligne:
                         parts = ligne.split()
@@ -129,6 +132,7 @@ class ParserNeutralFile:
 
                 # Strain elements
                 for i in range(actual_ligne, actual_ligne + nb_elements):
+                    print(f"Traitement de l'élément de déformation à la ligne {i + 1}.")
                     ligne = lignes[i].strip()
                     if ligne:
                         parts = ligne.split()
@@ -163,6 +167,7 @@ class ParserNeutralFile:
                 # stress elements
 
                 for i in range(actual_ligne, actual_ligne + nb_elements):
+                    print(f"Traitement de l'élément de contrainte à la ligne {i + 1}.")
                     ligne = lignes[i].strip()
                     if ligne:
                         parts = ligne.split()
@@ -193,6 +198,7 @@ class ParserNeutralFile:
                 # Temperature nodes
 
                 for i in range(actual_ligne, actual_ligne + nb_nodes):
+                    print(f"Traitement du noeud de température à la ligne {i + 1}.")
                     ligne = lignes[i].strip()
                     if ligne:
                         parts = ligne.split()
@@ -276,9 +282,24 @@ class ParserNeutralFile:
                             
                             actual_ligne += nb_nodes_die
 
-                # Contact elements
+                # Contact nodes
                 nb_contact_elements = int(lignes[actual_ligne].strip())
                 actual_ligne += 1
+
+                # put the node n in contact with set_contact 
+                for i in range(actual_ligne, actual_ligne + nb_contact_elements):
+                    ligne = lignes[i].strip()
+                    if ligne:
+                        parts = ligne.split()
+                        if len(parts) < 1:
+                            print(f"Erreur de format pour l'élément de contact à la ligne {i + 1}.")
+                            continue
+
+                        node_id = int(parts[0])
+                        node = neu.get_node_by_id(node_id)
+                        node.set_is_contact(True)
+
+                actual_ligne += nb_contact_elements
 
                 print(f"Nombre d'éléments de contact : {nb_contact_elements}")     
 
