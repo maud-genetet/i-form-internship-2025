@@ -350,14 +350,13 @@ class VisualizationManager:
     def _update_data_info(self):
         """Update displayed information"""
         if self.current_data and self.current_dir:
-            info = (f"Directory: {self.current_dir} | "
-                   f"Nodes: {self.current_data.get_nb_nodes()} | "
+            info = (f"Nodes: {self.current_data.get_nb_nodes()} | "
                    f"Elements: {self.current_data.get_nb_elements()}")
             self.data_info_label.setText(info)
         elif self.current_dir:
-            self.data_info_label.setText(f"Directory: {self.current_dir} | No data loaded")
+            self.data_info_label.setText(f"No data loaded")
         else:
-            self.data_info_label.setText("No data")
+            self.data_info_label.setText("No directory set")
     
     def _add_dies_to_plot(self):
         """Add dies to visualization"""
