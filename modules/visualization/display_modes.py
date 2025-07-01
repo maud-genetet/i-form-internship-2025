@@ -18,12 +18,23 @@ class DisplayModeManager:
         self.wireframe_mode = enabled
     
     def display_mesh(self, plotter, mesh, mesh_color, edge_color, show_edges=True):
-        """Display main mesh"""
-        if self.wireframe_mode:
-            plotter.add_mesh(mesh, style='wireframe', color=edge_color, line_width=1, label="Mesh - Wireframe")
+        """Display main mesh - MODIFIED to use material colors when available"""
+        
+        # Check if we have material colors - NEW
+        if 'Material_Colors' in mesh.cell_data:
+            # Use material colors
+            if self.wireframe_mode:
+                plotter.add_mesh(mesh, style='wireframe', scalars='Material_Colors', rgb=True, line_width=1, label="Mesh - Materials (Wireframe)")
+            else:
+                plotter.add_mesh(mesh, show_edges=show_edges, edge_color=edge_color, line_width=1, 
+                               scalars='Material_Colors', rgb=True, opacity=1.0, label="Mesh - Materials")
         else:
-            plotter.add_mesh(mesh, show_edges=show_edges, edge_color=edge_color, line_width=1, 
-                           color=mesh_color, opacity=1.0, label="Mesh")
+            # Original behavior - fallback to single color
+            if self.wireframe_mode:
+                plotter.add_mesh(mesh, style='wireframe', color=edge_color, line_width=1, label="Mesh - Wireframe")
+            else:
+                plotter.add_mesh(mesh, show_edges=show_edges, edge_color=edge_color, line_width=1, 
+                               color=mesh_color, opacity=1.0, label="Mesh")
     
     def display_die(self, plotter, die_mesh, die_id):
         """Display die"""
@@ -132,17 +143,6 @@ class DisplayModeManager:
                 # Method 1: Try node data first
                 points, vectors = self._get_velocity_vectors_from_nodes(mesh)
                 
-                # Method 2: If node data doesn't work well, try interpolated cell data
-                if vectors is None or np.all(np.linalg.norm(vectors, axis=1) < 1e-10):
-                    print("Node data not useful, trying interpolated cell data...")
-                    points, vectors = self._interpolate_velocity_to_nodes(mesh)
-                    
-                # Method 3: If still not working, try using cell centers with cell data
-                if vectors is None or np.all(np.linalg.norm(vectors, axis=1) < 1e-10):
-                    print("Interpolated data not useful, using cell centers...")
-                    cell_centers = mesh.cell_centers()
-                    points = cell_centers.points
-                    vectors = self._calculate_velocity_vectors(mesh)
             else:
                 # For other variables, use cell centers
                 cell_centers = mesh.cell_centers()

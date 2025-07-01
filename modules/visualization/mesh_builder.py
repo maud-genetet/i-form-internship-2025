@@ -8,6 +8,23 @@ import pyvista as pv
 class MeshBuilder:
     """Responsible for creating PyVista meshes from neutral data"""
     
+    def __init__(self):
+        # Define distinct colors for different materials
+        self.material_colors = [
+            [1.0, 1.0, 0.0],    # Yellow
+            [0.5, 0.0, 0.5],    # Purple
+            [0.0, 0.0, 1.0],    # Blue
+            [1.0, 0.0, 0.0],    # Red
+            [1.0, 0.5, 0.0],    # Orange
+            [0.0, 1.0, 0.0],    # Green
+            [0.0, 1.0, 1.0],    # Cyan
+            [0.5, 0.5, 0.5],    # Gray
+            [1.0, 0.0, 1.0],    # Magenta
+            [0.5, 1.0, 0.5],    # Light Green
+            [0.5, 0.5, 1.0],    # Light Blue
+            [1.0, 0.5, 1.0]    # Light Magenta
+        ]
+    
     def create_pyvista_mesh(self, neutral_data):
         """Create PyVista mesh from neutral data"""
         if not neutral_data:
@@ -35,6 +52,9 @@ class MeshBuilder:
         # Add scalar data 
         self._add_scalar_data(mesh, elements, nodes)
         
+        # Add material colors
+        self._add_material_colors(mesh, elements)
+        
         # Add node constraint codes as point data
         self._add_node_constraint_codes(mesh, nodes, node_id_to_index)
         
@@ -44,6 +64,22 @@ class MeshBuilder:
         
         return mesh
     
+    def _add_material_colors(self, mesh, elements):
+        """Add RGB colors based on material numbers"""
+        colors = []
+        
+        for element in elements:
+            mat_num = element.get_matno()
+            if mat_num is None or mat_num == 0:
+                # Default gray color for unknown/zero material
+                colors.append([0.7, 0.7, 0.7])
+            else:
+                color_index = (mat_num - 1) % len(self.material_colors)
+                colors.append(self.material_colors[color_index])
+        
+        # Convert to numpy array and add to mesh
+        mesh.cell_data['Material_Colors'] = np.array(colors)
+        
     def _build_points(self, nodes):
         """Build points array and correspondence table"""
         points = []

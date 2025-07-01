@@ -85,14 +85,10 @@ class MeshHandler:
                 
                 # Add navigation controls in toolbar
                 self.main_window.visualization_manager.add_deformed_mesh_controls(
-                    neu_files, working_directory, self._load_and_display_mesh
+                    neu_files, working_directory, self._load_and_display_mesh, 
                 )
                 
-                # Load first file by default
-                if neu_files:
-                    first_file_path = os.path.join(working_directory, neu_files[0])
-                    self._load_and_display_mesh(first_file_path)
-                    self.main_window.visualization_manager.reset_view()
+                self.main_window.visualization_manager.reset_view()
                         
             except Exception as e:
                 QMessageBox.critical(
