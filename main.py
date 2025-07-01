@@ -13,13 +13,13 @@ from modules.file_handler import FileHandler
 from modules.mesh_handler import MeshHandler
 from modules.visualization import VisualizationManager # We import the module thanks to the __init__.py file
 from modules.field_variables_handler import FieldVariablesHandler
+from modules.animation_handler import AnimationHandler  # Add this import
 
 '''
 from modules.edit_handler import EditHandler
 from modules.view_handler import ViewHandler
 from modules.summary_handler import SummaryHandler
 from modules.query_handler import QueryHandler
-from modules.animation_handler import AnimationHandler
 from modules.graphics_handler import GraphicsHandler
 from modules.analysis.die_stress_handler import DieStressHandler
 from modules.analysis.die_thermal_handler import DieThermalHandler
@@ -55,13 +55,13 @@ class MainWindow(QMainWindow):
         self.file_handler = FileHandler(self)
         self.mesh_handler = MeshHandler(self)
         self.field_variables_handler = FieldVariablesHandler(self)
+        self.animation_handler = AnimationHandler(self)  # Add this line
 
         '''
         self.edit_handler = EditHandler(self)
         self.view_handler = ViewHandler(self)
         self.summary_handler = SummaryHandler(self)
         self.query_handler = QueryHandler(self)
-        self.animation_handler = AnimationHandler(self)
         self.graphics_handler = GraphicsHandler(self)
         self.die_stress_handler = DieStressHandler(self)
         self.die_thermal_handler = DieThermalHandler(self)
@@ -89,6 +89,9 @@ class MainWindow(QMainWindow):
         
         # Field Variables Menu
         self.connect_field_variables_signals()
+        
+        # Animation Menu
+        self.connect_animation_signals()  # Add this line
         
         '''
         # Edit Menu
@@ -190,6 +193,28 @@ class MainWindow(QMainWindow):
         
         # Element Quality
         self.ui.actionElement_Quality.triggered.connect(fv.element_quality)
+    
+    def connect_animation_signals(self):
+        """Connect Animation menu signals"""
+        ah = self.animation_handler
+        
+        # Main animation controls
+        self.ui.actionAnimation_Controls.triggered.connect(ah.animation_controls)
+        self.ui.actionQuick_Play.triggered.connect(ah.quick_play)
+        self.ui.actionAnimation_Settings.triggered.connect(ah.animation_controls)
+        
+        # Playback controls
+        self.ui.actionPlay_Pause.triggered.connect(ah._toggle_animation)
+        self.ui.actionStop_Animation.triggered.connect(ah._stop_animation)
+        self.ui.actionReset_Animation.triggered.connect(ah._reset_animation)
+        
+        # Frame navigation
+        self.ui.actionFirst_Frame.triggered.connect(ah._go_to_first_frame)
+        self.ui.actionPrevious_Frame.triggered.connect(ah._previous_frame)
+        self.ui.actionNext_Frame.triggered.connect(ah._next_frame)
+        self.ui.actionLast_Frame.triggered.connect(ah._go_to_last_frame)
+        
+        print("Animation menu signals connected")
     
     def get_visualization_manager(self):
         """Return visualization manager for other modules"""
