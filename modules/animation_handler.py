@@ -413,16 +413,25 @@ class AnimationHandler:
         
         if hasattr(visualization_manager, 'neu_files') and visualization_manager.neu_files:
             if 0 <= frame_index < len(visualization_manager.neu_files):
-                visualization_manager.current_mesh_index = frame_index
-                visualization_manager._load_current_mesh()
+                # Check if we have preloaded data
+                preloaded_data = visualization_manager.get_preloaded_data(frame_index)
                 
-                # Update main window mesh controls if they exist
+                if preloaded_data:
+                    # Instant loading from preloaded data
+                    visualization_manager.current_mesh_index = frame_index
+                    visualization_manager.load_neutral_file(preloaded_data)
+                else:
+                    # Fallback to normal loading
+                    visualization_manager.current_mesh_index = frame_index
+                    visualization_manager._load_current_mesh()
+                
+                # Update controls
                 if hasattr(visualization_manager, 'mesh_spinbox'):
                     visualization_manager.mesh_spinbox.blockSignals(True)
                     visualization_manager.mesh_spinbox.setValue(frame_index + 1)
                     visualization_manager.mesh_spinbox.blockSignals(False)
                     visualization_manager._update_mesh_controls_state()
-    
+   
     # Public interface methods for menu integration
     def animation_controls(self):
         """Show animation controls (called from menu)"""

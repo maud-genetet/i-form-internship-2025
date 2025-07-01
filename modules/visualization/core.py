@@ -40,6 +40,8 @@ class VisualizationManager:
         self.interaction_handler = InteractionHandler()
         self.display_manager = DisplayModeManager()
         
+        self.preloaded_data = {}
+        
         self._setup_visualization_widget()
     
     def _setup_visualization_widget(self):
@@ -272,8 +274,15 @@ class VisualizationManager:
         if self.neu_files and self.working_directory and self.load_mesh_callback:
             current_file = self.neu_files[self.current_mesh_index]
             file_path = f"{self.working_directory}/{current_file}"
-            print(f"Loading file {self.current_mesh_index + 1}/{len(self.neu_files)}: {current_file}")
-            self.load_mesh_callback(file_path)
+            
+            # Check if we have preloaded data
+            preloaded_data = self.get_preloaded_data(self.current_mesh_index)
+            if preloaded_data:
+                print(f"Fast loading file {self.current_mesh_index + 1}/{len(self.neu_files)}: {current_file} (preloaded)")
+                self.load_neutral_file(preloaded_data)
+            else:
+                print(f"Loading file {self.current_mesh_index + 1}/{len(self.neu_files)}: {current_file} (from disk)")
+                self.load_mesh_callback(file_path)
     
     def _update_mesh_controls_state(self):
         """Update navigation controls state"""
@@ -415,3 +424,12 @@ class VisualizationManager:
     def get_current_data(self):
         """Return currently loaded data"""
         return self.current_data
+    
+    def set_preloaded_data(self, preloaded_data_dict):
+        """Set preloaded data from preloader"""
+        self.preloaded_data = preloaded_data_dict
+        print(f"Visualization manager received {len(preloaded_data_dict)} preloaded files")
+
+    def get_preloaded_data(self, index):
+        """Get preloaded data for specific index"""
+        return self.preloaded_data.get(index)

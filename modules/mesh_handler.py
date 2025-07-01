@@ -8,6 +8,7 @@ import os
 import sys
 from PyQt5.QtWidgets import QMessageBox, QFileDialog
 import re
+from .preloader_manager import PreloaderManager
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parser_dir = os.path.join(current_dir, 'parser')
@@ -19,6 +20,11 @@ class MeshHandler:
     def __init__(self, main_window):
         self.main_window = main_window
         self.current_neutral_file = None
+        
+        # Initialize preloader manager
+        self.preloader_manager = PreloaderManager(main_window.visualization_manager)
+        self.neu_files = []
+        self.working_directory = None
         
     def initial_mesh(self):
         """Load initial mesh (FEM1.NEU)"""
@@ -55,12 +61,42 @@ class MeshHandler:
         # Display loaded filename
         filename = os.path.basename(file_path)
         print(f"Mesh loaded: {filename}")
+    
+    def _fast_load_and_display_mesh(self, file_index):
+        """Fast load using preloaded data"""
+        preloaded_data = self.preloader_manager.get_preloaded_data(file_index)
+        
+        if preloaded_data:
+            print(f"Using preloaded data for file {file_index + 1}")
+            self.current_neutral_file = preloaded_data
+            self.main_window.visualization_manager.load_neutral_file(self.current_neutral_file)
+            filename = self.neu_files[file_index] if file_index < len(self.neu_files) else "Unknown"
+            print(f"Fast mesh loaded: {filename}")
+        else:
+            if file_index < len(self.neu_files):
+                file_path = os.path.join(self.working_directory, self.neu_files[file_index])
+                print(f"Preload not ready, loading from disk: {self.neu_files[file_index]}")
+                self._load_and_display_mesh(file_path)
+
+    def _smart_load_callback(self, file_path):
+        """Smart loading callback that uses preloaded data when available"""
+        try:
+            filename = os.path.basename(file_path)
+            if filename in self.neu_files:
+                file_index = self.neu_files.index(filename)
+                self._fast_load_and_display_mesh(file_index)
+            else:
+                self._load_and_display_mesh(file_path)
+        except Exception as e:
+            print(f"Error in smart load: {e}")
+            self._load_and_display_mesh(file_path)
             
     def deformed_mesh(self):
         """Display deformed mesh"""
         working_directory = None
         if hasattr(self.main_window, 'file_handler') and self.main_window.file_handler.working_directory:
             working_directory = self.main_window.file_handler.working_directory
+            self.working_directory = working_directory
 
             # Search for all .NEU files in directory
             try:
@@ -82,10 +118,18 @@ class MeshHandler:
                     return [int(part) if part.isdigit() else part for part in parts]
                 
                 neu_files.sort(key=natural_sort_key)
+                self.neu_files = neu_files
+                
+                # Start preloading other files in background
+                if len(neu_files) > 1:
+                    print("Starting background preloading...")
+                    self.preloader_manager.start_preloading(
+                        neu_files, working_directory, first_file_loaded_index=0
+                    )
                 
                 # Add navigation controls in toolbar
                 self.main_window.visualization_manager.add_deformed_mesh_controls(
-                    neu_files, working_directory, self._load_and_display_mesh, 
+                    neu_files, working_directory, self._smart_load_callback
                 )
                 
                 self.main_window.visualization_manager.reset_view()

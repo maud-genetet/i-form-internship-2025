@@ -3,6 +3,7 @@ from Element import Element
 from Node import Node
 from NeutralFile import NeutralFile
 from Die import Die
+import time
 
 class ParserNeutralFile:
 
@@ -16,6 +17,7 @@ class ParserNeutralFile:
 
     @staticmethod
     def parser_file(nom_fichier):
+        t1 = time.time()
         try:
             with open(nom_fichier, 'r', encoding='utf-8') as fichier:
 
@@ -320,6 +322,8 @@ class ParserNeutralFile:
                 else:
                     print(f"Aucune donnée de temps trouvée à la ligne {actual_ligne + 1}.")
 
+                t2 = time.time()
+                print(f"Temps de traitement du fichier : {t2 - t1:.2f} secondes")
                 return neu
 
 
