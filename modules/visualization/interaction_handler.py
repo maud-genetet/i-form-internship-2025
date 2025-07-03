@@ -5,6 +5,8 @@ User Interaction Management Module (click zoom, keyboard shortcuts, cell picking
 import numpy as np
 import vtk
 from PyQt5.QtCore import QTimer
+import pyvista as pv
+from PyQt5.QtWidgets import QButtonGroup, QRadioButton, QHBoxLayout, QLabel
 import time
 
 class InteractionHandler:
@@ -20,6 +22,9 @@ class InteractionHandler:
         self.picking_enabled = False
         self.last_click_time = 0
         self.click_debounce_delay = 0.2  # 200ms delay between clicks
+        
+        self.pick_mode = "elements"  # elements or "nodes
+        self.mode_controls = None
     
     def setup(self, plotter):
         """Configure interactions on plotter"""
@@ -35,7 +40,56 @@ class InteractionHandler:
         self.info_panel = info_panel
         self.info_content = info_content
         self.info_title = info_title
+        
+        # Add mode selection controls to the info panel
+        self._add_mode_controls()
     
+    def _add_mode_controls(self):
+        """Add radio buttons to select between element and node picking"""
+        if not self.info_panel:
+            return
+            
+        # Create mode selection controls
+        mode_layout = QHBoxLayout()
+        
+        mode_label = QLabel("Pick Mode:")
+        mode_layout.addWidget(mode_label)
+        
+        # Create radio buttons
+        self.element_radio = QRadioButton("Elements")
+        self.node_radio = QRadioButton("Nodes")
+        
+        # Set default selection
+        self.element_radio.setChecked(True)
+        
+        # Create button group for mutual exclusion
+        self.mode_button_group = QButtonGroup()
+        self.mode_button_group.addButton(self.element_radio, 0)
+        self.mode_button_group.addButton(self.node_radio, 1)
+        
+        # Connect signals
+        self.element_radio.toggled.connect(self._on_mode_changed)
+        self.node_radio.toggled.connect(self._on_mode_changed)
+        
+        mode_layout.addWidget(self.element_radio)
+        mode_layout.addWidget(self.node_radio)
+        
+        # Add to info panel layout
+        info_layout = self.info_panel.layout()
+        if info_layout and info_layout.count() > 0:
+            # Insert after the title
+            info_layout.insertLayout(1, mode_layout)
+    
+    def _on_mode_changed(self):
+        """Handle mode change between elements and nodes"""
+        if self.element_radio.isChecked():
+            self.pick_mode = "elements"
+        else:
+            self.pick_mode = "nodes"
+        
+        # Clear any current highlight
+        self._clear_highlight()
+        
     def enable_mesh_picking(self):
         """Enable mesh picking with direct VTK approach"""
         if not self.plotter or not self.current_mesh:
@@ -99,12 +153,18 @@ class InteractionHandler:
         # Get click position
         interactor = self.plotter.iren
         x, y = interactor.get_event_position()
-
         renderer = self.plotter.renderer
         
+        if self.pick_mode == "elements":
+            self._pick_element(x, y, renderer)
+        else:
+            self._pick_node(x, y, renderer)
+    
+    def _pick_element(self, x, y, renderer):
+        """Pick and display element information"""
         # Create a cell picker
         picker = vtk.vtkCellPicker()
-        picker.SetTolerance(0.001)  # Set picking tolerance
+        picker.SetTolerance(0.001)
         
         # Perform the pick
         result = picker.Pick(x, y, 0, renderer)
@@ -118,9 +178,25 @@ class InteractionHandler:
             else:
                 if self.info_content:
                     self.info_content.setText("No element found at click position")
-        else:
-            if self.info_content:
-                self.info_content.setText("Click on the mesh elements")
+    
+    def _pick_node(self, x, y, renderer):
+        """Pick and display node information"""
+        # Create a point picker
+        picker = vtk.vtkPointPicker()
+        picker.SetTolerance(0.01)  # Larger tolerance for points
+        
+        # Perform the pick
+        result = picker.Pick(x, y, 0, renderer)
+        if result:
+            point_id = picker.GetPointId()
+            
+            if point_id >= 0:
+                print(f"Picked node ID: {point_id}")
+                self._display_node_info(point_id)
+                self._highlight_picked_node(point_id)
+            else:
+                if self.info_content:
+                    self.info_content.setText("No node found at click position")
     
     def _highlight_picked_cell(self, cell_id):
         """Highlight the picked cell visually"""
@@ -138,13 +214,39 @@ class InteractionHandler:
                 opacity=0.8,
                 style='wireframe',
                 line_width=4,
-                name='picked_cell_highlight'  # Name it so we can manage it
+                name='picked_element_highlight'
+            )
+    
+    def _highlight_picked_node(self, point_id):
+        """Highlight the picked node visually"""
+        if self.current_mesh and point_id < self.current_mesh.n_points:
+            # Clear previous highlight
+            self._clear_highlight()
+            
+            # Get node position
+            node_position = self.current_mesh.points[point_id]
+            
+            # Create a sphere at the node position
+            sphere = pv.Sphere(radius=0.05, center=node_position)
+            
+            # Add it as a highlighted overlay
+            self.plotter.add_mesh(
+                sphere,
+                color='blue',
+                opacity=0.9,
+                name='picked_node_highlight'
             )
     
     def _clear_highlight(self):
-        """Clear cell highlight"""
-        if self.plotter and 'picked_cell_highlight' in self.plotter.actors:
-            self.plotter.remove_actor('picked_cell_highlight')
+        """Clear cell and node highlights"""
+        if self.plotter:
+            # Remove element highlight
+            if 'picked_element_highlight' in self.plotter.actors:
+                self.plotter.remove_actor('picked_element_highlight')
+            
+            # Remove node highlight  
+            if 'picked_node_highlight' in self.plotter.actors:
+                self.plotter.remove_actor('picked_node_highlight')
     
     def _display_cell_info(self, cell_index):
         """Display information for a specific cell index"""
@@ -155,15 +257,8 @@ class InteractionHandler:
             return
             
         try:
-            elements = self.current_data.get_elements()
+            element = self.current_data.get_element_by_id(cell_index + 1)
             
-            if cell_index >= len(elements) or cell_index < 0:
-                error_msg = f"Cell index {cell_index} out of range (0-{len(elements)-1})"
-                if self.info_content:
-                    self.info_content.setText(error_msg)
-                return
-                
-            element = elements[cell_index]
             element_id = element.get_id()
             
             # Get all available information
@@ -177,6 +272,31 @@ class InteractionHandler:
             
         except Exception as e:
             error_msg = f"Error getting element info: {e}"
+            if self.info_content:
+                self.info_content.setText(error_msg)
+    
+    def _display_node_info(self, point_index):
+        """Display information for a specific node/point index"""
+        
+        if not self.current_data:
+            if self.info_content:
+                self.info_content.setText("No mesh data available")
+            return
+            
+        try:
+            node = self.current_data.get_node_by_id(point_index + 1)
+            node_id = node.get_id()
+
+            # Get all available information
+            info_text = f"""NODE INFORMATION \n{node.get_info()}"""
+            # Update panel
+            if self.info_title:
+                self.info_title.setText(f"Node {node_id} Information")
+            if self.info_content:
+                self.info_content.setText(info_text)
+
+        except Exception as e:
+            error_msg = f"Error getting node info: {e}"
             if self.info_content:
                 self.info_content.setText(error_msg)
     

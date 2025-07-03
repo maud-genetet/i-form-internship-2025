@@ -91,7 +91,7 @@ class VisualizationManager:
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         
-        self.info_content = QLabel("Click on an element to see information")
+        self.info_content = QLabel("Select pick mode and click on the mesh")
         self.info_content.setWordWrap(True)
         self.info_content.setAlignment(Qt.AlignTop)
         
@@ -137,6 +137,7 @@ class VisualizationManager:
                 mesh_info_btn = QPushButton("Mesh Info")
                 mesh_info_btn.setCheckable(True)
                 mesh_info_btn.clicked.connect(self._on_mesh_info_clicked_fallback)
+                mesh_info_btn.setToolTip("Click to enable mesh information picking.\nUse buttons to switch between elements and nodes.")
                 toolbar_layout.addWidget(mesh_info_btn)
                 
                 # Store reference to button

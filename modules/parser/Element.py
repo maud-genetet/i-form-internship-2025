@@ -273,7 +273,7 @@ class Element:
             f"σ_zz: {self.stress_ozz}\n"
             f"σ_xy: {self.stress_oxy}\n"
             f"σ_eq (effective stress): {self.stress_o}\n"
-            f"Residual stress (σ_res): {self.stress_orr}\n\n"
+            f"Average stress (σ_res): {self.stress_orr}\n\n"
             
             f"--- Calculated Values ---\n"
             f"Pressure: {self.get_pressure():.6f}\n"
