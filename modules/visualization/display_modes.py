@@ -522,15 +522,15 @@ class DisplayModeManager:
         unique_codes, _ = np.unique(codes, return_counts=True)
         print(f"Unique codes: {unique_codes}")
         
-        # Check if we have constraint information stored as mesh attribute
-        if hasattr(mesh, '_constraint_info') and mesh._constraint_info:
-            constraint_info = mesh._constraint_info
-            node_ids = constraint_info['node_ids']
-            positions_x = constraint_info['positions_x']
-            positions_y = constraint_info['positions_y']
-            constraint_codes = constraint_info['codes']
-            
-            self._create_constraint_shapes_from_arrays(plotter, mesh, node_ids, positions_x, positions_y, constraint_codes)
+        constraint_info = mesh._constraint_info
+        node_ids = constraint_info['node_ids']
+        positions_x = constraint_info['positions_x']
+        positions_y = constraint_info['positions_y']
+        constraint_codes = constraint_info['codes']
+        
+        self._create_constraint_shapes_from_arrays(plotter, mesh, node_ids, positions_x, positions_y, constraint_codes)
+    
+        self._add_contact_nodes_visualization(plotter, mesh)
         
     def _create_constraint_shapes_from_arrays(self, plotter, mesh, node_ids, positions_x, positions_y, constraint_codes):
         """Create constraint shapes using arrays of node information"""
@@ -576,6 +576,28 @@ class DisplayModeManager:
                 sphere = pv.Sphere(radius=constraint_size, center=position)
                 plotter.add_mesh(sphere, color=color, opacity=1.0,
                                 name=f'{name_prefix}_{node_id}')
+    
+    def _add_contact_nodes_visualization(self, plotter, mesh):
+        """Add pink spheres for contact nodes"""
+        if not hasattr(mesh, '_original_data'):
+            return
+        
+        constraint_size = self._calculate_proportional_size(mesh, base_factor=0.01)
+        nodes = mesh._original_data.get_nodes()
+        contact_count = 0
+        
+        for node in nodes:
+            if node.is_contact_node():
+                position = [node.get_coordX(), node.get_coordY(), 0]
+                sphere = pv.Sphere(radius=constraint_size, center=position)
+                plotter.add_mesh(sphere, color='#ff69b4', opacity=1.0,
+                                name=f'contact_pink_sphere_{node.get_id()}')
+                contact_count += 1
+        
+        if contact_count > 0:
+            print(f"Displayed {contact_count} contact nodes (pink spheres)")
+        else:
+            print("No contact nodes found")
 
             
     def _apply_hd_contour(self, mesh, scalar_name):
