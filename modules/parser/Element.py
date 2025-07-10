@@ -1,38 +1,40 @@
+import math
+
 class Element:
     def __init__(self, id):
         self.id = id
         # Initialize other attributes to None
-        self.matno = None
-        self.lnods = []
-        self.rindx = None
-        self.densy = None
-        self.fract = None
+        self.matno = None # Material number
+        self.lnods = [] # List of nodes
+        self.rindx = None # Element quality
+        self.densy = None # Relative density
+        self.fract = None # Ductile damage
         
         # Strain rate attributes
-        self.srnrt_exx = None
-        self.srnrt_eyy = None
-        self.srnrt_ezz = None
-        self.srnrt_exy = None
-        self.srnrt_e = None
-        self.srnrt_ev = None
+        self.srnrt_exx = None # Strain rate x(r)
+        self.srnrt_eyy = None # Strain rate y(z)
+        self.srnrt_ezz = None # Strain rate z(theta)
+        self.srnrt_exy = None # Strain rate xy(rz)
+        self.srnrt_e = None # Effective strain rate
+        self.srnrt_ev = None # Volumetric strain rate
         
         # Strain attributes
-        self.strain_exx = None
-        self.strain_eyy = None
-        self.strain_ezz = None
-        self.strain_exy = None
-        self.strain_e = None
-        self.strain_e1 = None
-        self.strain_e3 = None
-        self.angle13 = None
+        self.strain_exx = None # Strain x(r)
+        self.strain_eyy = None # Strain y(z)
+        self.strain_ezz = None # Strain z(theta)
+        self.strain_exy = None # Strain xy(rz)
+        self.strain_e = None # Effective strain
+        self.strain_e1 = None # Strain 1
+        self.strain_e3 = None # Strain 3
+        self.angle13 = None # Angle rad
         
         # Stress attributes
-        self.stress_oxx = None
-        self.stress_oyy = None
-        self.stress_ozz = None
-        self.stress_oxy = None
-        self.stress_o = None
-        self.stress_orr = None
+        self.stress_oxx = None # Stress x(r)
+        self.stress_oyy = None # Stress y(z)
+        self.stress_ozz = None # Stress z(theta)
+        self.stress_oxy = None # Stress xy(rz)
+        self.stress_o = None # Effective stress
+        self.stress_orr = None # Average stress
 
     # ============== SETTERS ==============
     
@@ -179,9 +181,15 @@ class Element:
         
     def get_strain_E(self):
         return self.strain_e
+
+    def get_strain_volumetric(self):
+        return self.strain_exx + self.strain_eyy + self.strain_ezz
         
     def get_strain_E1(self):
         return self.strain_e1
+    
+    def get_strain_E2(self):
+        return 0 - self.strain_e1 - self.strain_e3
         
     def get_strain_E3(self):
         return self.strain_e3
@@ -208,6 +216,36 @@ class Element:
     def get_stress_Orr(self):
         return self.stress_orr
 
+    def calculate_stress(self):
+        
+        xgash = (self.stress_oxx + self.stress_oyy) * 0.5
+        xgish = (self.stress_oxx - self.stress_oyy) * 0.5
+        xgesh = self.stress_oxy
+        xgosh = math.sqrt(xgish*xgish + xgesh*xgesh)
+        
+        sts1 = xgash + xgosh
+        sts3 = xgash - xgosh
+        sts2 = self.stress_ozz
+        
+        stresses = [sts1, sts2, sts3]
+        stresses.sort(reverse=True)
+        return stresses
+
+    def get_stress_1(self):
+        """Get the maximum principal stress"""
+        stresses = self.calculate_stress()
+        return stresses[0] if stresses else 0.0
+    
+    def get_stress_2(self):
+        """Get the middle principal stress"""
+        stresses = self.calculate_stress()
+        return stresses[1] if len(stresses) > 1 else 0.0
+    
+    def get_stress_3(self):
+        """Get the minimum principal stress"""
+        stresses = self.calculate_stress()
+        return stresses[2] if len(stresses) > 2 else 0.0
+
     # ============== CALCULATED GETTERS ==============
     
     def get_stress_yy_on_effective_stress(self):
@@ -229,17 +267,20 @@ class Element:
         return 0.0
     
     def get_pressure(self):
-        """Calculate pressure as negative of average normal stress"""
-        oxx = self.stress_oxx or 0.0
-        oyy = self.stress_oyy or 0.0
-        ozz = self.stress_ozz or 0.0
-        return -(oxx + oyy + ozz) / 3.0
+        return 0.0
     
     def get_pressure_on_effective_stress(self):
         """Get pressure / effective_stress ratio"""
         if self.stress_o and self.stress_o != 0:
             return self.get_pressure() / self.stress_o
         return 0.0
+
+    def get_thickness_plane_stress(self):
+        return 0.0 # Temporary value, because i have only 2D example
+    
+    def get_surface_enlargement_ratio(self):
+        return 0.0
+            
     
     # ============== UTILITY METHODS ==============
     def get_info(self):

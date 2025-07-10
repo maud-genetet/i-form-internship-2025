@@ -34,11 +34,11 @@ class FieldVariablesHandler:
             "Effective_Strain_Rate": "Effective strain rate",
             "Volumetric_Strain_Rate": "Volumetric strain rate",
             
-            "Deformation_XX": "Strain x(r)",
-            "Deformation_YY": "Strain y(z)",
-            "Deformation_ZZ": "Strain z(theta)",
-            "Deformation_XY": "Strain xy(rz)",
-            "Deformation": "Effective strain",
+            "Strain_X": "Strain x(r)",
+            "Strain_Y": "Strain y(z)",
+            "Strain_Z": "Strain z(theta)",
+            "Strain_XY": "Strain xy(rz)",
+            "Effective_Strain": "Effective strain",
             "Volumetric_Strain": "Volumetric Strain",
             "Strain_1": "Strain 1",
             "Strain_2": "Strain 2",
@@ -48,7 +48,7 @@ class FieldVariablesHandler:
             "Stress_Y": "Stress y(z)",
             "Stress_ZZ": "Stress z(theta)",
             "Stress_XY": "Stress xy(rz)",
-            "Contrainte": "Effective stress",
+            "Effective_stress": "Effective stress",
             "Average_Stress": "Average stress",
             "Stress_1": "Stress 1",
             "Stress_2": "Stress 2",
@@ -205,7 +205,7 @@ class FieldVariablesHandler:
         self._apply_variable_to_mesh("Effective strain rate")
     
     def volumetric_strain_rate(self):
-        self._apply_variable_to_mesh("Volumetric Strain Rate")
+        self._apply_variable_to_mesh("Volumetric strain rate")
     
     # === STRAIN ===
     def strain_x_r(self):
@@ -263,7 +263,7 @@ class FieldVariablesHandler:
     def stress_3(self):
         self._apply_variable_to_mesh("Stress 3")
     
-    # === NEW VARIABLES ===
+    # === MATERIAL PROPERTIES ===
     def thickness_plane_stress(self):
         self._apply_variable_to_mesh("Thickness (Plane Stress)")
     

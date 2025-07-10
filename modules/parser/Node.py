@@ -98,7 +98,6 @@ class Node:
             f"Velocity: {self.vx}, {self.vy}\n"
             f"Force: {self.fx}, {self.fy}\n"
             f"Temperature: {self.temp} (Rate: {self.dtemp})\n"
-            f"Material Number: {self.n2met}\n"
             f"Code: {self.code}\n"
             f"Is Contact Node: {'Yes' if self.is_contact else 'No'}\n"
         )

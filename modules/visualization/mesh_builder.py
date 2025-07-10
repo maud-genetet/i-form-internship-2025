@@ -177,7 +177,7 @@ class MeshBuilder:
             'Strain z(theta)': [],
             'Strain xy(rz)': [],
             'Effective strain': [],
-            'Volumetric strain': [],
+            'Volumetric Strain': [],
             'Strain 1': [],
             'Strain 2': [],
             'Strain 3': [],
@@ -192,7 +192,7 @@ class MeshBuilder:
             'Stress 2': [],
             'Stress 3': [],
 
-            'Thickness': [],
+            'Thickness (Plane Stress)': [],
             'Relative Density': [],
             'Ductile Damage': [],
 
@@ -200,7 +200,6 @@ class MeshBuilder:
             'Electric Current Density': [],
             'Electric Resistivity': [],
 
-            'Relative Density': [],
             'Stress y(z)/Ef.Stress': [],
             'Stress xy(rz)/Ef.Stress': [],
             'Average Stress/Ef.Stress': [],
@@ -227,9 +226,9 @@ class MeshBuilder:
             element_data['Strain z(theta)'].append(element.get_strain_Ezz() or 0.0)
             element_data['Strain xy(rz)'].append(element.get_strain_Exy() or 0.0)
             element_data['Effective strain'].append(element.get_strain_E() or 0.0)
-            #element_data['Volumetric strain'].append(element.get
+            element_data['Volumetric Strain'].append(element.get_strain_volumetric() or 0.0)  # Fixed: matches key name
             element_data['Strain 1'].append(element.get_strain_E1() or 0.0)
-            #element_data['Strain 2'].append(0.0)
+            element_data['Strain 2'].append(element.get_strain_E2() or 0.0)
             element_data['Strain 3'].append(element.get_strain_E3() or 0.0)
 
             element_data['Stress x(r)'].append(element.get_stress_Oxx() or 0.0)
@@ -238,25 +237,20 @@ class MeshBuilder:
             element_data['Stress xy(rz)'].append(element.get_stress_Oxy() or 0.0)
             element_data['Effective stress'].append(element.get_stress_O() or 0.0)
             element_data['Average stress'].append(element.get_stress_Orr() or 0.0)
-            #element_data['Stress 1'].append(0.0)
-            #element_data['Stress 2'].append(0.0)
-            #element_data['Stress 3'].append(0.0)
+            element_data['Thickness (Plane Stress)'].append(element.get_thickness_plane_stress() or 0.0)
 
-            #element_data['Thickness'].append(element.get_
-            #element_data['Relative Density'].append(element.get_
-            #element_data['Ductile Damage'].append(element.get_
-
-            #element_data['Electric Potential'].append(element.get_
-            #element_data['Electric Current Density'].append(element.get_
-            #element_data['Electric Resistivity'].append(element.get_
-
+            element_data['Stress 1'].append(element.get_stress_1() or 0.0)
+            element_data['Stress 2'].append(element.get_stress_2() or 0.0)
+            element_data['Stress 3'].append(element.get_stress_3() or 0.0)
             element_data['Relative Density'].append(element.get_densy() or 0.0)
+            element_data['Ductile Damage'].append(element.get_fract() or 0.0)
+
             element_data['Stress y(z)/Ef.Stress'].append(element.get_stress_yy_on_effective_stress() or 0.0)
             element_data['Stress xy(rz)/Ef.Stress'].append(element.get_stress_xy_on_effective_stress() or 0.0)
-            element_data['Average Stress/Ef.Stress'].append(element.get_stress_yy_on_effective_stress() or 0.0)
+            element_data['Average Stress/Ef.Stress'].append(element.get_average_stress_on_effective_stress() or 0.0)
             element_data['Pressure'].append(element.get_pressure() or 0.0)
-            element_data['Pressure/Ef.Stress'].append((element.get_pressure() or 0.0) / (element.get_stress_O() or 1.0))
-            #element_data['Surface Enlargement Ratio'].append(element.get
+            element_data['Pressure/Ef.Stress'].append(element.get_pressure_on_effective_stress() or 0.0)
+            element_data['Surface Enlargement Ratio'].append(element.get_surface_enlargement_ratio() or 0.0)
             element_data['Element Quality'].append(element.get_rindx() or 0.0)
 
             nb_nodes = element.get_nb_lnods()        
