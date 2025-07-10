@@ -89,7 +89,36 @@ class InteractionHandler:
         
         # Clear any current highlight
         self._clear_highlight()
+    
+    def _calculate_proportional_size(self, mesh, base_factor=0.006):
+        """Calculate proportional size based on mesh dimensions and element density"""
+        if not mesh or not hasattr(mesh, 'bounds'):
+            return 0.01  # Default fallback size
         
+        bounds = mesh.bounds
+        # Calculate mesh dimensions
+        width = bounds[1] - bounds[0]   # X dimension
+        height = bounds[3] - bounds[2]  # Y dimension
+        depth = bounds[5] - bounds[4]   # Z dimension
+        
+        # Use the maximum dimension as reference
+        max_dimension = max(width, height, depth)
+        
+        # Element density factor (more elements = smaller spheres)
+        n_elements = mesh.n_cells if hasattr(mesh, 'n_cells') else 1000
+        density_factor = min(1.0, 1000.0 / n_elements) 
+        
+        # Calculate proportional size with density adjustment
+        proportional_size = max_dimension * base_factor * density_factor
+        
+        # Ensure minimum and maximum sizes
+        min_size = max_dimension * 0.0002
+        max_size = max_dimension * 0.03
+        
+        proportional_size = max(min_size, min(proportional_size, max_size))
+        
+        return proportional_size
+    
     def enable_mesh_picking(self):
         """Enable mesh picking with direct VTK approach"""
         if not self.plotter or not self.current_mesh:
@@ -226,14 +255,17 @@ class InteractionHandler:
             # Get node position
             node_position = self.current_mesh.points[point_id]
             
+            # Calculate proportional sphere size
+            sphere_radius = self._calculate_proportional_size(self.current_mesh, base_factor=0.011)
+            
             # Create a sphere at the node position
-            sphere = pv.Sphere(radius=0.05, center=node_position)
+            sphere = pv.Sphere(radius=sphere_radius, center=node_position)
             
             # Add it as a highlighted overlay
             self.plotter.add_mesh(
                 sphere,
                 color='blue',
-                opacity=0.9,
+                opacity=0.5,
                 name='picked_node_highlight'
             )
     

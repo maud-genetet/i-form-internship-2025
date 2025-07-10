@@ -17,6 +17,40 @@ class DisplayModeManager:
         """Enable/disable wireframe mode"""
         self.wireframe_mode = enabled
     
+    def _calculate_proportional_size(self, mesh, base_factor=0.005):
+        """Calculate proportional size based on mesh dimensions and element density"""
+        if not mesh or not hasattr(mesh, 'bounds'):
+            return 0.01  # Default fallback size
+        
+        bounds = mesh.bounds
+        # Calculate mesh dimensions
+        width = bounds[1] - bounds[0]   # X dimension
+        height = bounds[3] - bounds[2]  # Y dimension
+        depth = bounds[5] - bounds[4]   # Z dimension
+        
+        # Use the maximum dimension as reference
+        max_dimension = max(width, height, depth)
+        
+        # Calculate mesh area for density calculation
+        mesh_area = width * height
+        if mesh_area <= 0:
+            mesh_area = 1
+        
+        # Element density factor (more elements = smaller spheres)
+        n_elements = mesh.n_cells if hasattr(mesh, 'n_cells') else 1000
+        density_factor = min(1.0, 1000.0 / n_elements)  # Normalize by 1000 elements
+        
+        # Calculate proportional size (default 0.5% of max dimension, adjusted by density)
+        proportional_size = max_dimension * base_factor * density_factor
+        
+        # Ensure minimum and maximum sizes
+        min_size = max_dimension * 0.0001  # 0.01% minimum
+        max_size = max_dimension * 0.02    # 2% maximum
+        
+        proportional_size = max(min_size, min(proportional_size, max_size))
+        
+        return proportional_size
+    
     def display_mesh(self, plotter, mesh, mesh_color, edge_color, show_edges=True):
         """Display main mesh - MODIFIED to use material colors when available"""
         
@@ -371,6 +405,8 @@ class DisplayModeManager:
         except Exception as e:
             print(f"Error interpolating velocity to nodes: {e}")
             return None, None
+    
+    def _fallback_display(self, plotter, mesh, scalar_name, variable_name):
         """Fallback to normal scalar display when vector display fails"""
         if scalar_name in mesh.cell_data:
             plotter.add_mesh(
@@ -494,11 +530,12 @@ class DisplayModeManager:
             positions_y = constraint_info['positions_y']
             constraint_codes = constraint_info['codes']
             
-            self._create_constraint_shapes_from_arrays(plotter, node_ids, positions_x, positions_y, constraint_codes)
+            self._create_constraint_shapes_from_arrays(plotter, mesh, node_ids, positions_x, positions_y, constraint_codes)
         
-    def _create_constraint_shapes_from_arrays(self, plotter, node_ids, positions_x, positions_y, constraint_codes):
+    def _create_constraint_shapes_from_arrays(self, plotter, mesh, node_ids, positions_x, positions_y, constraint_codes):
         """Create constraint shapes using arrays of node information"""
-        constraint_size = 0.15
+        
+        constraint_size = self._calculate_proportional_size(mesh, base_factor=0.01)
 
         code_groups = {
             0: [],    # No constraint (nothing displayed)
