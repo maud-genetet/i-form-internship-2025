@@ -10,12 +10,72 @@ import pyvista as pv
 class DisplayModeManager:
     """Unified manager for all display modes and options"""
     
+    # Configuration centralisée des contraintes
+    CONSTRAINT_CONFIG = {
+        1: {'color': [1.0, 0.0, 0.0], 'name': 'red_constraints', 'description': 'Fixed X constraint'},
+        2: {'color': [0.0, 0.0, 1.0], 'name': 'blue_constraints', 'description': 'Fixed Y constraint'},
+        3: {'color': [0.0, 0.0, 0.0], 'name': 'black_constraints', 'description': 'Fixed XY constraint'},
+        -1: {'color': [0.95, 0.95, 0.95], 'name': 'white_constraints_1', 'description': 'Special constraint -1'},
+        -2: {'color': [0.95, 0.95, 0.95], 'name': 'white_constraints_2', 'description': 'Special constraint -2'},
+        'below_-10': {'color': [0.0, 0.0, 0.0], 'name': 'special_constraints', 'description': 'Special constraints (code <= -10)'},
+        'contact': {'color': [1.0, 0.41, 0.71], 'name': 'contact_constraints', 'description': 'Contact nodes'}
+    }
+    
+    # Configuration du niveau de détail
+    LOD_SETTINGS = {
+        'ultra_high': {'subdivisions': 16, 'max_count': 100},
+        'high': {'subdivisions': 12, 'max_count': 500},
+        'medium': {'subdivisions': 8, 'max_count': 2000},
+        'low': {'subdivisions': 6, 'max_count': 10000},
+        'ultra_low': {'subdivisions': 4, 'max_count': float('inf')}
+    }
+    
     def __init__(self):
         self.wireframe_mode = False
+        self.cached_spheres = {}
     
     def set_wireframe_mode(self, enabled):
         """Enable/disable wireframe mode"""
         self.wireframe_mode = enabled
+    
+    def _get_constraint_config(self, code):
+        """Obtenir la configuration pour un code de contrainte"""
+        if code == 0:
+            return None
+        elif code in self.CONSTRAINT_CONFIG:
+            return self.CONSTRAINT_CONFIG[code]
+        elif code <= -10:
+            return self.CONSTRAINT_CONFIG['below_-10']
+        else:
+            return {'color': [0.5, 0.5, 0.5], 'name': f'unknown_constraint_{code}', 'description': f'Unknown constraint code {code}'}
+    
+    def _get_optimal_lod(self, total_constraints):
+        """Déterminer le niveau de détail optimal"""
+        for lod_name, settings in self.LOD_SETTINGS.items():
+            if total_constraints <= settings['max_count']:
+                return settings['subdivisions'], lod_name
+        return self.LOD_SETTINGS['ultra_low']['subdivisions'], 'ultra_low'
+    
+    def _get_cached_sphere(self, radius, subdivisions=8):
+        """Obtenir une sphère depuis le cache"""
+        key = (radius, subdivisions)
+        if key not in self.cached_spheres:
+            self.cached_spheres[key] = pv.Sphere(
+                radius=radius, 
+                phi_resolution=subdivisions, 
+                theta_resolution=subdivisions
+            )
+        return self.cached_spheres[key]
+    
+    def _create_batched_spheres(self, positions, radius, subdivisions=8):
+        """Créer des sphères en batch avec glyph"""
+        if not positions:
+            return None
+            
+        positions = np.array(positions)
+        points = pv.PolyData(positions)
+        sphere_source = self._get_cached_sphere(radius, subdivisions)
+        return points.glyph(geom=sphere_source, scale=False)
     
     def _calculate_proportional_size(self, mesh, base_factor=0.005):
         """Calculate proportional size based on mesh dimensions and element density"""
@@ -517,10 +577,6 @@ class DisplayModeManager:
     
     def _add_constraints_visualization(self, plotter, mesh):
         """Add constraint visualizations based on node codes"""
-        codes = mesh.point_data['Node_Code']
-
-        unique_codes, _ = np.unique(codes, return_counts=True)
-        print(f"Unique codes: {unique_codes}")
         
         constraint_info = mesh._constraint_info
         node_ids = constraint_info['node_ids']
@@ -528,78 +584,89 @@ class DisplayModeManager:
         positions_y = constraint_info['positions_y']
         constraint_codes = constraint_info['codes']
         
-        self._create_constraint_shapes_from_arrays(plotter, mesh, node_ids, positions_x, positions_y, constraint_codes)
-    
-        self._add_contact_nodes_visualization(plotter, mesh)
-        
-    def _create_constraint_shapes_from_arrays(self, plotter, mesh, node_ids, positions_x, positions_y, constraint_codes):
-        """Create constraint shapes using arrays of node information"""
-        
         constraint_size = self._calculate_proportional_size(mesh, base_factor=0.01)
-
-        code_groups = {
-            0: [],    # No constraint (nothing displayed)
-            1: [],    # Red sphere
-            2: [],    # Blue sphere
-            3: [],    # black sphere
-            -1: [],   # white sphere
-            -2: [],   # white sphere
-            'below_-10': []  # grey sphere
-        }
+        
+        # Déterminer le niveau de détail optimal
+        total_constraints = len([code for code in constraint_codes if code != 0])
+        subdivisions, _ = self._get_optimal_lod(total_constraints)
+        
+        # Grouper les contraintes par type
+        constraint_groups = {}
         
         for i in range(len(node_ids)):
-            node_id = node_ids[i]
             code = constraint_codes[i]
             position = [positions_x[i], positions_y[i], 0]
             
             if code == 0:
-                continue # nothing to display
-            elif code in [1, 2, 3, -1, -2]:
-                code_groups[code].append((node_id, position))
-            elif code <= -10:
-                code_groups['below_-10'].append((node_id, position))
-            else:
-                print(f"Unknown constraint code {code} for node {node_id}")
+                continue
+                
+            config = self._get_constraint_config(code)
+            if config:
+                group_key = config['name']
+                if group_key not in constraint_groups:
+                    constraint_groups[group_key] = {
+                        'positions': [],
+                        'config': config,
+                        'codes': []
+                    }
+                constraint_groups[group_key]['positions'].append(position)
+                constraint_groups[group_key]['codes'].append(code)
         
-        # Mapping of codes to colors and names
-        code_settings = {
-            1: ('red', 'constraint_red_sphere'),
-            2: ('blue', 'constraint_blue_sphere'),
-            3: ('black', 'constraint_sphere'),
-            -1: ('#f2f2f2', 'constraint_white_sphere'),
-            -2: ('#f2f2f2', 'constraint_white_sphere'),
-            'below_-10': ('black', 'constraint_black_sphere'),
-        }
-
-        for code, (color, name_prefix) in code_settings.items():
-            for node_id, position in code_groups[code]:
-                sphere = pv.Sphere(radius=constraint_size, center=position)
-                plotter.add_mesh(sphere, color=color, opacity=1.0,
-                                name=f'{name_prefix}_{node_id}')
+        self._create_batched_constraint_spheres(plotter, constraint_groups, constraint_size, subdivisions)
+        
+        # Ajouter les nœuds de contact
+        self._add_contact_nodes_visualization(plotter, mesh, constraint_size, subdivisions)
+        
+        
+    def _create_batched_constraint_spheres(self, plotter, constraint_groups, radius, subdivisions):
+        """Créer des sphères de contraintes par batch"""
+        
+        for group_name, group_data in constraint_groups.items():
+            positions = group_data['positions']
+            config = group_data['config']
+            
+            if positions:
+                # Créer les sphères en batch
+                glyphs = self._create_batched_spheres(positions, radius, subdivisions)
+                
+                if glyphs:
+                    plotter.add_mesh(
+                        glyphs,
+                        color=config['color'],
+                        opacity=1.0,
+                        name=group_name,
+                        render=False  # Ne pas rendre immédiatement
+                    )
+                    print(f"Added {len(positions)} {config['description']} ({group_name})")
+        
+        # !!! just render all at once
+        plotter.render()
     
-    def _add_contact_nodes_visualization(self, plotter, mesh):
+    def _add_contact_nodes_visualization(self, plotter, mesh, constraint_size, subdivisions):
         """Add pink spheres for contact nodes"""
-        if not hasattr(mesh, '_original_data'):
-            return
-        
-        constraint_size = self._calculate_proportional_size(mesh, base_factor=0.01)
         nodes = mesh._original_data.get_nodes()
-        contact_count = 0
+        contact_positions = []
         
         for node in nodes:
             if node.is_contact_node():
-                position = [node.get_coordX(), node.get_coordY(), 0]
-                sphere = pv.Sphere(radius=constraint_size, center=position)
-                plotter.add_mesh(sphere, color='#ff69b4', opacity=1.0,
-                                name=f'contact_pink_sphere_{node.get_id()}')
-                contact_count += 1
+                contact_positions.append([node.get_coordX(), node.get_coordY(), 0])
         
-        if contact_count > 0:
-            print(f"Displayed {contact_count} contact nodes (pink spheres)")
-        else:
-            print("No contact nodes found")
-
+        if contact_positions:
+            # Utiliser la configuration centralisée pour les contacts
+            contact_config = self.CONSTRAINT_CONFIG['contact']
             
+            # Créer toutes les sphères de contact en batch
+            glyphs = self._create_batched_spheres(contact_positions, constraint_size, subdivisions)
+            
+            if glyphs:
+                plotter.add_mesh(
+                    glyphs,
+                    color=contact_config['color'],
+                    opacity=1.0,
+                    name=contact_config['name'],
+                    render=False
+                )
+    
     def _apply_hd_contour(self, mesh, scalar_name):
         """Apply high definition contour"""
         mesh_copy = mesh.copy()
