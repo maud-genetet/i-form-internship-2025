@@ -1,5 +1,5 @@
 """
-User Interaction Management Module (click zoom, keyboard shortcuts, cell picking)
+User Interaction Management Module (click, keyboard shortcuts, cell picking)
 """
 
 import numpy as np
@@ -408,7 +408,7 @@ class InteractionHandler:
         """Callback called on click with track_click_position"""
         if point is not None:
             print(f"Click at: {point}")
-            self.zoom_to_point_coordinates(point)
+            self.go_to_point_coordinates(point)
     
     def _on_left_click(self):
         """Alternative callback for clicks (VTK method)"""
@@ -422,13 +422,13 @@ class InteractionHandler:
             if picker.Pick(x, y, 0, self.plotter.renderer):
                 world_pos = picker.GetPickPosition()
                 print(f"Click detected at: {world_pos}")
-                self.zoom_to_point_coordinates(world_pos)
+                self.go_to_point_coordinates(world_pos)
             
         except Exception as e:
             print(f"Click error: {e}")
     
-    def zoom_to_point_coordinates(self, target_point):
-        """Zoom to specific point in 3D coordinates"""
+    def go_to_point_coordinates(self, target_point):
+        """Go to specific point in 3D coordinates"""
         if not target_point or len(target_point) < 2:
             return
         
@@ -448,4 +448,4 @@ class InteractionHandler:
             self.plotter.render()
             
         except Exception as e:
-            print(f"Zoom to point error: {e}")
+            print(f"Go to point error: {e}")

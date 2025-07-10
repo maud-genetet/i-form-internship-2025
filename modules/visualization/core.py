@@ -111,7 +111,7 @@ class VisualizationManager:
         self.interaction_handler.disable_mesh_picking()
     
     def _configure_plotter(self):
-        """Configure plotter with automatic click zoom"""
+        """Configure plotter with automatic click"""
         self.plotter.show_axes()
         self.plotter.view_xy()
         
@@ -401,14 +401,14 @@ class VisualizationManager:
             self.plotter.view_xy()
     
     def set_front_view(self):
-        """Set front view (XY plane) keeping current zoom"""
+        """Set front view (XY plane) """
         if self.plotter:
-            # Save current camera position to keep zoom
+            # Save current camera position to keep
             camera = self.plotter.camera
             current_position = camera.position
             current_focal_point = camera.focal_point
             
-            # Calculate current distance (to keep zoom)
+            # Calculate current distance
             current_distance = np.linalg.norm(
                 np.array(current_position) - np.array(current_focal_point)
             )
@@ -428,7 +428,6 @@ class VisualizationManager:
             
             # Render
             self.plotter.render()
-            print("Front view activated (zoom preserved)")
     
     def get_current_data(self):
         """Return currently loaded data"""

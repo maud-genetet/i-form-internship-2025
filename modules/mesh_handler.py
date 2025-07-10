@@ -120,17 +120,19 @@ class MeshHandler:
                 neu_files.sort(key=natural_sort_key)
                 self.neu_files = neu_files
                 
-                # Start preloading other files in background
-                if len(neu_files) > 1:
-                    print("Starting background preloading...")
-                    self.preloader_manager.start_preloading(
-                        neu_files, working_directory, first_file_loaded_index=0
-                    )
+                first_file_path = os.path.join(working_directory, neu_files[0])
+                self._load_and_display_mesh(first_file_path)
                 
                 # Add navigation controls in toolbar
                 self.main_window.visualization_manager.add_deformed_mesh_controls(
                     neu_files, working_directory, self._smart_load_callback
                 )
+                
+                # Start preloading other files in background (starting from index 1)
+                if len(neu_files) > 1:
+                    self.preloader_manager.start_preloading(
+                        neu_files, working_directory, first_file_loaded_index=1
+                    )
                 
                 self.main_window.visualization_manager.reset_view()
                         
