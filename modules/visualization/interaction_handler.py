@@ -210,22 +210,46 @@ class InteractionHandler:
     
     def _pick_node(self, x, y, renderer):
         """Pick and display node information"""
-        # Create a point picker
-        picker = vtk.vtkPointPicker()
-        picker.SetTolerance(0.01)  # Larger tolerance for points
-        
-        # Perform the pick
-        result = picker.Pick(x, y, 0, renderer)
-        if result:
-            point_id = picker.GetPointId()
+        if not self.current_mesh:
+            return
             
-            if point_id >= 0:
-                print(f"Picked node ID: {point_id}")
-                self._display_node_info(point_id)
-                self._highlight_picked_node(point_id)
+        try:
+            # Use a cell picker first to get approximate location
+            cell_picker = vtk.vtkCellPicker()
+            cell_picker.SetTolerance(0.01)
+            
+            cell_result = cell_picker.Pick(x, y, 0, renderer)
+            if cell_result:
+                # Get the picked position in world coordinates
+                world_pos = cell_picker.GetPickPosition()
+                
+                # Find the closest node in the main mesh
+                points = self.current_mesh.points
+                distances = np.linalg.norm(points - np.array(world_pos), axis=1)
+                closest_point_id = np.argmin(distances)
+                
+                # Calculate reasonable distance threshold
+                bounds = self.current_mesh.bounds
+                max_dimension = max(bounds[1] - bounds[0], bounds[3] - bounds[2], bounds[5] - bounds[4])
+                distance_threshold = max_dimension * 0.02  # 2% of mesh size
+                
+                min_distance = distances[closest_point_id]
+                
+                if min_distance <= distance_threshold:
+                    print(f"Picked node ID: {closest_point_id}")
+                    self._display_node_info(closest_point_id)
+                    self._highlight_picked_node(closest_point_id)
+                else:
+                    if self.info_content:
+                        self.info_content.setText("No node found at click position")
             else:
                 if self.info_content:
-                    self.info_content.setText("No node found at click position")
+                    self.info_content.setText("No mesh found at click position")
+                    
+        except Exception as e:
+            print(f"Node picking error: {e}")
+            if self.info_content:
+                self.info_content.setText(f"Error in node picking: {e}")
     
     def _highlight_picked_cell(self, cell_id):
         """Highlight the picked cell visually"""
@@ -268,6 +292,41 @@ class InteractionHandler:
                 opacity=0.5,
                 name='picked_node_highlight'
             )
+    
+    def _pick_node_fallback(self, x, y, renderer):
+        """Fallback method for node picking using world coordinates"""
+        try:
+            # Use a generic picker to get world coordinates
+            picker = vtk.vtkWorldPointPicker()
+            result = picker.Pick(x, y, 0, renderer)
+            
+            if result and self.current_mesh:
+                world_pos = picker.GetPickPosition()
+                
+                # Find closest point manually
+                points = self.current_mesh.points
+                distances = np.linalg.norm(points - np.array(world_pos), axis=1)
+                closest_point_id = np.argmin(distances)
+                
+                # Check if the closest point is reasonably close
+                min_distance = distances[closest_point_id]
+                
+                # Calculate reasonable distance threshold
+                bounds = self.current_mesh.bounds
+                max_dimension = max(bounds[1] - bounds[0], bounds[3] - bounds[2], bounds[5] - bounds[4])
+                distance_threshold = max_dimension * 0.01  # 1% of mesh size
+                
+                if min_distance <= distance_threshold:
+                    self._display_node_info(closest_point_id)
+                    self._highlight_picked_node(closest_point_id)
+                else:
+                    if self.info_content:
+                        self.info_content.setText("No node found at click position (fallback)")
+                        
+        except Exception as e:
+            print(f"Fallback picking error: {e}")
+            if self.info_content:
+                self.info_content.setText("Error in node picking")
     
     def _clear_highlight(self):
         """Clear cell and node highlights"""
