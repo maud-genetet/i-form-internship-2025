@@ -311,12 +311,21 @@ class VisualizationManager:
         self.current_data = neutral_file
         self._update_data_info()
         
-        # Visualize mesh with dies
-        self.visualize_mesh(show_edges=True, show_nodes=False, show_dies=True)
+        # SUPPRESSION DE L'AFFICHAGE AUTOMATIQUE DU MESH DE BASE
+        # Ne plus faire visualize_mesh() ici pour éviter le flash jaune
+        
+        # Create mesh for later use but don't display it
+        mesh = self.mesh_builder.create_pyvista_mesh(self.current_data)
+        if mesh:
+            self.current_mesh = mesh
+            self.interaction_handler.set_mesh_data(mesh, self.current_data)
         
         # Reapply currently selected variable if exists
         if hasattr(self.main_window, 'field_variables_handler'):
             self.main_window.field_variables_handler.reapply_current_variable()
+        else:
+            # Si pas de variable sélectionnée, on affiche juste le mesh de base
+            self.visualize_mesh(show_edges=True, show_nodes=False, show_dies=True)
 
     def set_working_directory(self, dir_name):
         """Set working directory"""
@@ -350,11 +359,9 @@ class VisualizationManager:
         except Exception as e:
             print(f"Visualization error: {e}")
         
-        # Force rendering to ensure everything is displayed
-        if self.plotter:
-            self.plotter.render()
+        self.plotter.render()
 
-        # If we change time step or mesh, reapply picking
+        # Reapply picking
         self.reapply_mesh_picking_if_needed()
     
     def _update_data_info(self):
@@ -377,9 +384,10 @@ class VisualizationManager:
         
         for i, die in enumerate(dies):
             die_mesh = self.mesh_builder.create_die_mesh(die)
-            self.display_manager.display_die(
-                self.plotter, die_mesh, die.get_id()
-            )
+            if die_mesh:
+                self.display_manager.display_die(
+                    self.plotter, die_mesh, die.get_id()
+                )
     
     def clear(self):
         """Clear visualization"""

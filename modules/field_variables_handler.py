@@ -88,26 +88,228 @@ class FieldVariablesHandler:
         if not resolved_key:
             return
         
-        # Clear and display with all current options
-        visualization_manager.clear()
-        visualization_manager.display_manager.display_variable_with_options(
-            visualization_manager.plotter,
-            visualization_manager.current_mesh,
-            resolved_key,
-            variable_key,
-            visualization_manager.default_edge_color,
-            self.viz_options.get_current_options()
+        # PREPARE EVERYTHING BEFORE CLEARING
+        mesh = visualization_manager.current_mesh
+        options = self.viz_options.get_current_options()
+        
+        # Prepare variable mesh
+        prepared_meshes = self._prepare_all_meshes_for_display(
+            mesh, resolved_key, variable_key, 
+            visualization_manager.default_edge_color, options
         )
         
-        # Add dies
-        visualization_manager._add_dies_to_plot()
+        # Prepare dies
+        prepared_dies = self._prepare_dies_for_display(visualization_manager)
+        
+        # NOW DO EVERYTHING ATOMICALLY
+        visualization_manager.clear()
+        
+        # Add all prepared meshes in one go
+        for mesh_data in prepared_meshes:
+            visualization_manager.plotter.add_mesh(**mesh_data)
+        
+        # Add all prepared dies in one go
+        for die_data in prepared_dies:
+            visualization_manager.plotter.add_mesh(**die_data)
+        
+        # Single final render
+        visualization_manager.plotter.render()
         
         self.current_variable = resolved_key
-        print(f"Variable displayed: {variable_key}")
-        visualization_manager.plotter.render()
         
         # Reapply picking if needed
         visualization_manager.reapply_mesh_picking_if_needed()
+    
+    def _prepare_all_meshes_for_display(self, mesh, scalar_name, variable_name, edge_color, options):
+        """Prepare all meshes for atomic display"""
+        prepared_meshes = []
+        
+        # Get options
+        wireframe_mode = options.get('wireframe_mode', False)
+        show_mesh_edges = options.get('show_mesh_edges', True)
+        monochromatic_mode = options.get('monochromatic_mode', False)
+        high_definition_contour = options.get('high_definition_contour', False)
+        view_constraints = options.get('view_constraints', False)
+        
+        # Apply HD contour if needed
+        if high_definition_contour:
+            mesh = mesh.cell_data_to_point_data()
+        
+        # Choose colormap
+        cmap = 'Blues' if monochromatic_mode else 'turbo'
+        
+        # Get scalar data
+        if high_definition_contour and scalar_name in mesh.point_data:
+            scalars_array = mesh.point_data[scalar_name]
+        else:
+            scalars_array = mesh.cell_data[scalar_name]
+        
+        # Prepare main variable mesh
+        if wireframe_mode:
+            mesh_data = {
+                'mesh': mesh,
+                'scalars': scalars_array,
+                'show_edges': False,
+                'opacity': 1.0,
+                'cmap': cmap,
+                'show_scalar_bar': True,
+                'scalar_bar_args': {'title': variable_name},
+                'label': f"Mesh - {variable_name}"
+            }
+        else:
+            mesh_data = {
+                'mesh': mesh,
+                'scalars': scalars_array,
+                'show_edges': show_mesh_edges,
+                'edge_color': edge_color if show_mesh_edges else None,
+                'line_width': 1,
+                'opacity': 1.0,
+                'cmap': cmap,
+                'show_scalar_bar': True,
+                'scalar_bar_args': {'title': variable_name},
+                'label': f"Mesh - {variable_name}"
+            }
+        
+        prepared_meshes.append(mesh_data)
+        
+        # Prepare constraints if needed
+        if view_constraints and hasattr(mesh, '_constraint_info'):
+            constraint_mesh_data = self._prepare_constraints_mesh(mesh)
+            if constraint_mesh_data:
+                prepared_meshes.append(constraint_mesh_data)
+        
+        return prepared_meshes
+    
+    def _prepare_constraints_mesh(self, mesh):
+        try:
+            constraint_info = mesh._constraint_info
+            node_ids = constraint_info['node_ids']
+            positions_x = constraint_info['positions_x']
+            positions_y = constraint_info['positions_y']
+            constraint_codes = constraint_info['codes']
+            
+            # Collect ALL positions and colors
+            all_positions = []
+            all_colors = []
+            
+            # Calculate size
+            bounds = mesh.bounds
+            max_dimension = max(bounds[1] - bounds[0], bounds[3] - bounds[2], bounds[5] - bounds[4])
+            n_elements = mesh.n_cells if hasattr(mesh, 'n_cells') else 1000
+            density_factor = min(1.0, 1000.0 / n_elements)
+            constraint_size = max_dimension * 0.005 * density_factor
+            constraint_size = max(max_dimension * 0.0001, min(constraint_size, max_dimension * 0.02))
+            
+            # Add node constraints
+            for i in range(len(node_ids)):
+                code = constraint_codes[i]
+                if code == 0:
+                    continue
+                    
+                position = [positions_x[i], positions_y[i], 0]
+                
+                # Get color based on code
+                if code == 1:
+                    color = [1.0, 0.0, 0.0]  # red
+                elif code == 2:
+                    color = [0.0, 0.0, 1.0]  # blue
+                elif code == 3:
+                    color = [0.0, 0.0, 0.0]  # black
+                elif code == -1 or code == -2:
+                    color = [0.95, 0.95, 0.95]  # white
+                elif code <= -10:
+                    color = [0.0, 0.0, 0.0]  # black
+                else:
+                    color = [0.5, 0.5, 0.5]  # gray
+                
+                all_positions.append(position)
+                all_colors.append(color)
+            
+            # Add contact nodes
+            nodes = mesh._original_data.get_nodes()
+            contact_count = 0
+            for node in nodes:
+                if node.is_contact_node():
+                    all_positions.append([node.get_coordX(), node.get_coordY(), 0])
+                    all_colors.append([1.0, 0.41, 0.71])  # pink
+                    contact_count += 1
+            
+            # Create combined mesh
+            if all_positions:
+                import pyvista as pv
+                import numpy as np
+                
+                positions = np.array(all_positions)
+                points = pv.PolyData(positions)
+                
+                # Assign colors to the POINTS before glyphing
+                points.point_data['colors'] = np.array(all_colors)
+                
+                # Create simple spheres
+                sphere = pv.Sphere(radius=constraint_size, phi_resolution=8, theta_resolution=8)
+                combined_glyphs = points.glyph(geom=sphere, scale=False)
+                
+                # The colors should be automatically transferred to the glyph
+                if 'colors' in combined_glyphs.point_data:
+                    return {
+                        'mesh': combined_glyphs,
+                        'scalars': 'colors',
+                        'rgb': True,
+                        'opacity': 1.0,
+                        'name': 'all_constraints'
+                    }
+                else:
+                    # Manual color assignment fallback
+                    n_points_per_glyph = combined_glyphs.n_points // len(all_positions)
+                    expanded_colors = []
+                    for color in all_colors:
+                        for _ in range(n_points_per_glyph):
+                            expanded_colors.append(color)
+                    
+                    # Handle any remaining points
+                    while len(expanded_colors) < combined_glyphs.n_points:
+                        expanded_colors.append(all_colors[-1])
+                    
+                    combined_glyphs.point_data['colors'] = np.array(expanded_colors[:combined_glyphs.n_points])
+                    
+                    return {
+                        'mesh': combined_glyphs,
+                        'scalars': 'colors',
+                        'rgb': True,
+                        'opacity': 1.0,
+                        'name': 'all_constraints'
+                    }
+            
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+        
+        return None
+    
+    def _prepare_dies_for_display(self, visualization_manager):
+        """Prepare dies for atomic display"""
+        prepared_dies = []
+        
+        if not visualization_manager.current_data:
+            return prepared_dies
+        
+        dies = visualization_manager.current_data.get_dies()
+        
+        for die in dies:
+            die_mesh = visualization_manager.mesh_builder.create_die_mesh(die)
+            if die_mesh:
+                die_data = {
+                    'mesh': die_mesh,
+                    'color': 'lightgrey',
+                    'opacity': 1.0,
+                    'show_edges': True,
+                    'edge_color': 'black',
+                    'line_width': 1,
+                    'label': f"Die {die.get_id()}"
+                }
+                prepared_dies.append(die_data)
+        
+        return prepared_dies
     
     def _resolve_variable_key(self, variable_key):
         """Resolve and validate variable key"""
@@ -140,21 +342,73 @@ class FieldVariablesHandler:
         show_edges = options['show_mesh_edges']
         show_constraints = options['view_constraints']
         
-        # Use enhanced visualize_mesh method with constraints support
-        visualization_manager.visualize_mesh(
-            show_edges=show_edges, 
-            show_nodes=False, 
-            show_dies=True,
-            show_constraints=show_constraints
-        )
+        # PREPARE EVERYTHING BEFORE CLEARING pour éviter les saccades
+        mesh = visualization_manager.current_mesh
+        
+        # Prepare mesh de base
+        prepared_meshes = []
+        
+        # Check if we have material colors
+        if 'Material_Colors' in mesh.cell_data:
+            # Use material colors
+            mesh_data = {
+                'mesh': mesh,
+                'show_edges': show_edges,
+                'edge_color': visualization_manager.default_edge_color,
+                'line_width': 1,
+                'scalars': 'Material_Colors',
+                'rgb': True,
+                'opacity': 1.0,
+                'label': "Mesh - Materials"
+            }
+        else:
+            # Original behavior - fallback to single color
+            mesh_data = {
+                'mesh': mesh,
+                'show_edges': show_edges,
+                'edge_color': visualization_manager.default_edge_color,
+                'line_width': 1,
+                'color': visualization_manager.default_mesh_color,
+                'opacity': 1.0,
+                'label': "Mesh"
+            }
+        
+        prepared_meshes.append(mesh_data)
+        
+        # Prepare constraints if needed - FORCE CHECK
+        if show_constraints:
+            constraint_mesh_data = self._prepare_constraints_mesh(mesh)
+            if constraint_mesh_data:
+                prepared_meshes.append(constraint_mesh_data)
+        
+        # Prepare dies
+        prepared_dies = self._prepare_dies_for_display(visualization_manager)
+        
+        # NOW DO EVERYTHING ATOMICALLY
+        visualization_manager.clear()
+        
+        # Add all prepared meshes in one go
+        for mesh_data in prepared_meshes:
+            visualization_manager.plotter.add_mesh(**mesh_data)
+        
+        # Add all prepared dies in one go
+        for die_data in prepared_dies:
+            visualization_manager.plotter.add_mesh(**die_data)
+        
+        # Single final render
+        visualization_manager.plotter.render()
+        
         self.current_variable = None
-        print("Displaying geometry only")
+        
+        # Reapply picking if needed
+        visualization_manager.reapply_mesh_picking_if_needed()
     
     def reapply_current_variable(self):
         """Reapply current variable with current options"""
         if self.current_variable:
             self._apply_variable_to_mesh(self.current_variable)
         else:
+            # Si pas de variable active, afficher juste la géométrie
             self._show_geometry_only()
     
     # === STANDARD OPTIONS ===
