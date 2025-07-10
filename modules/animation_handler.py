@@ -29,6 +29,10 @@ class AnimationHandler:
         # Animation dialog
         self.animation_dialog = None
     
+    def animation_controls(self):
+        """Show animation control dialog - main entry point"""
+        self.show_animation_dialog()
+    
     def show_animation_dialog(self):
         """Show animation control dialog"""
         if not self._check_animation_available():
@@ -176,10 +180,6 @@ class AnimationHandler:
         
         layout.addLayout(step_layout)
         
-        # Info label
-        self.info_label = QLabel("Ready to animate")
-        layout.addWidget(self.info_label)
-        
         self.animation_dialog.setLayout(layout)
     
     def _update_dialog_values(self):
@@ -206,8 +206,6 @@ class AnimationHandler:
             self._update_frame_display()
             self._update_fps_display()
             
-            self.info_label.setText(f"Ready to animate {max_frames} frames")
-    
     def _on_start_frame_changed(self, value):
         """Handle start frame change"""
         self.start_frame = value
@@ -272,8 +270,6 @@ class AnimationHandler:
             self.play_button.setText("Pause")
         self.animation_timer.setInterval(self.frame_delay)
         self.animation_timer.start()
-        if hasattr(self, 'info_label'):
-            self.info_label.setText("Animation playing...")
         print(f"Animation started: frames {self.start_frame}-{self.end_frame}, delay={self.frame_delay}ms")
     
     def _pause_animation(self):
@@ -282,9 +278,6 @@ class AnimationHandler:
         if hasattr(self, 'play_button'):
             self.play_button.setText("Play")
         self.animation_timer.stop()
-        if hasattr(self, 'info_label'):
-            self.info_label.setText("Animation paused")
-        print("Animation paused")
     
     def _stop_animation(self):
         """Stop animation"""
@@ -341,26 +334,6 @@ class AnimationHandler:
             self._load_frame(self.current_frame - 1)
             self._update_frame_display()
     
-    def _go_to_first_frame(self):
-        """Go to first frame"""
-        if not hasattr(self, 'start_frame'):
-            self._initialize_frame_values()
-            
-        self.current_frame = self.start_frame
-        self._load_frame(self.current_frame - 1)
-        self._update_frame_display()
-        print("Moved to first frame")
-    
-    def _go_to_last_frame(self):
-        """Go to last frame"""
-        if not hasattr(self, 'end_frame'):
-            self._initialize_frame_values()
-            
-        self.current_frame = self.end_frame
-        self._load_frame(self.current_frame - 1)
-        self._update_frame_display()
-        print("Moved to last frame")
-    
     def _initialize_frame_values(self):
         """Initialize frame values if not set"""
         visualization_manager = self.main_window.visualization_manager
@@ -373,18 +346,6 @@ class AnimationHandler:
             self.start_frame = 1
             self.end_frame = 1
             self.current_frame = 1
-    
-    def _toggle_animation(self):
-        """Toggle animation play/pause - accessible from menu"""
-        if not self._check_animation_available():
-            return
-        
-        if self.is_animating:
-            self._pause_animation()
-        else:
-            # Initialize if needed
-            self._initialize_frame_values()
-            self._start_animation()
     
     def _next_animation_frame(self):
         """Next frame in animation sequence"""
@@ -431,36 +392,6 @@ class AnimationHandler:
                     visualization_manager.mesh_spinbox.setValue(frame_index + 1)
                     visualization_manager.mesh_spinbox.blockSignals(False)
                     visualization_manager._update_mesh_controls_state()
-   
-    # Public interface methods for menu integration
-    def animation_controls(self):
-        """Show animation controls (called from menu)"""
-        self.show_animation_dialog()
-    
-    def quick_play(self):
-        """Quick play animation with default settings"""
-        if not self._check_animation_available():
-            return
-            
-        # Set default values
-        visualization_manager = self.main_window.visualization_manager
-        max_frames = len(visualization_manager.neu_files)
-        
-        self.start_frame = 1
-        self.end_frame = max_frames
-        self.current_frame = 1
-        self.frame_delay = 500
-        self.loop_animation = True
-        self.reverse_direction = False
-        self.animation_direction = 1
-        
-        # Load first frame
-        self._load_frame(0)
-        
-        # Start animation
-        self._start_animation()
-        
-        print(f"Quick animation started: {max_frames} frames, 500ms delay")
     
     def close_dialog(self):
         """Close animation dialog"""

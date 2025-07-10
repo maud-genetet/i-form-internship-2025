@@ -91,7 +91,7 @@ class MainWindow(QMainWindow):
         self.connect_field_variables_signals()
         
         # Animation Menu
-        self.connect_animation_signals()  # Add this line
+        self.ui.actionAnimation_Controls.triggered.connect(self.animation_handler.animation_controls)
         
         '''
         # Edit Menu
@@ -193,28 +193,6 @@ class MainWindow(QMainWindow):
         
         # Element Quality
         self.ui.actionElement_Quality.triggered.connect(fv.element_quality)
-    
-    def connect_animation_signals(self):
-        """Connect Animation menu signals"""
-        ah = self.animation_handler
-        
-        # Main animation controls
-        self.ui.actionAnimation_Controls.triggered.connect(ah.animation_controls)
-        self.ui.actionQuick_Play.triggered.connect(ah.quick_play)
-        self.ui.actionAnimation_Settings.triggered.connect(ah.animation_controls)
-        
-        # Playback controls
-        self.ui.actionPlay_Pause.triggered.connect(ah._toggle_animation)
-        self.ui.actionStop_Animation.triggered.connect(ah._stop_animation)
-        self.ui.actionReset_Animation.triggered.connect(ah._reset_animation)
-        
-        # Frame navigation
-        self.ui.actionFirst_Frame.triggered.connect(ah._go_to_first_frame)
-        self.ui.actionPrevious_Frame.triggered.connect(ah._previous_frame)
-        self.ui.actionNext_Frame.triggered.connect(ah._next_frame)
-        self.ui.actionLast_Frame.triggered.connect(ah._go_to_last_frame)
-        
-        print("Animation menu signals connected")
     
     def get_visualization_manager(self):
         """Return visualization manager for other modules"""
