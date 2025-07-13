@@ -13,33 +13,14 @@ class PreloaderManager:
     def __init__(self, visualization_manager):
         self.visualization_manager = visualization_manager
         self.preloader_thread = None
-        self.progress_bar = None
-        self.progress_label = None
         self.preloaded_files = {}
         self.setup_progress_ui()
     
     def setup_progress_ui(self):
-        """Setup progress bar in the toolbar"""
-        try:
-            main_layout = self.visualization_manager.visualization_widget.layout()
-            if main_layout.count() > 0:
-                toolbar_widget = main_layout.itemAt(0).widget()
-                toolbar_layout = toolbar_widget.layout()
-                
-                self.progress_label = QLabel("Ready")
-                self.progress_label.setMinimumWidth(150)
-                self.progress_label.setVisible(False)
-                toolbar_layout.addWidget(self.progress_label)
-                
-                self.progress_bar = QProgressBar()
-                self.progress_bar.setMinimumWidth(200)
-                self.progress_bar.setMaximumHeight(20)
-                self.progress_bar.setVisible(False)
-                toolbar_layout.addWidget(self.progress_bar)
-                
-        except Exception as e:
-            print(f"Could not setup progress UI: {e}")
-    
+        """Setup progress bar"""
+        self.progress_bar = self.visualization_manager.progress_bar
+        self.progress_label = self.visualization_manager.progress_label
+
     def start_preloading(self, neu_files, working_directory, first_file_loaded_index=0):
         """Start preloading files in background"""
         if self.preloader_thread and self.preloader_thread.isRunning():
@@ -75,6 +56,7 @@ class PreloaderManager:
         """Called when all files are loaded"""
         print(f"All files preloaded! Total: {len(self.preloaded_files)} files")
         
+        # Hide progress components
         if self.progress_bar:
             self.progress_bar.setVisible(False)
         if self.progress_label:
@@ -99,6 +81,7 @@ class PreloaderManager:
             self.preloader_thread.stop()
             self.preloader_thread.wait(3000)
             
+        # Hide progress components
         if self.progress_bar:
             self.progress_bar.setVisible(False)
         if self.progress_label:

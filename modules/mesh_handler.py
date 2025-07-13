@@ -87,9 +87,14 @@ class MeshHandler:
                 self._fast_load_and_display_mesh(file_index)
             else:
                 self._load_and_display_mesh(file_path)
+            
+            self.main_window.visualization_manager._update_data_info()
+            
         except Exception as e:
             print(f"Error in smart load: {e}")
             self._load_and_display_mesh(file_path)
+            # Update data info even on error
+            self.main_window.visualization_manager._update_data_info()
             
     def deformed_mesh(self):
         """Display deformed mesh"""

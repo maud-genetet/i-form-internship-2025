@@ -4,7 +4,7 @@ Main Visualization Module - Configuration and Main Controls
 
 import numpy as np
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
-                             QPushButton, QCheckBox, QSpinBox)
+                             QPushButton, QCheckBox, QSpinBox, QProgressBar)
 from pyvistaqt import QtInteractor
 import pyvista as pv
 import vtk
@@ -65,6 +65,10 @@ class VisualizationManager:
         self.info_panel.setVisible(False)
         
         main_layout.addLayout(content_layout)
+        
+        # Bottom Toolbar
+        self._create_bottom_toolbar(main_layout)
+        
         self.visualization_widget.setLayout(main_layout)
         
         # Plotter configuration
@@ -219,7 +223,30 @@ class VisualizationManager:
         toolbar_widget.setLayout(toolbar_layout)
         toolbar_widget.setMaximumHeight(40)
         main_layout.addWidget(toolbar_widget)
-    
+
+    def _create_bottom_toolbar(self, main_layout):
+        """Create bottom toolbar"""
+        bottom_toolbar_layout = QHBoxLayout()
+        
+        # Progress controls
+        self.progress_label = QLabel("Ready")
+        self.progress_label.setMinimumWidth(50)
+        self.progress_label.setVisible(False)
+        bottom_toolbar_layout.addWidget(self.progress_label)
+        
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setMaximumWidth(200)
+        self.progress_bar.setMaximumHeight(20)
+        self.progress_bar.setVisible(False)
+        bottom_toolbar_layout.addWidget(self.progress_bar)
+        
+        bottom_toolbar_layout.addStretch()
+        
+        bottom_toolbar_widget = QWidget()
+        bottom_toolbar_widget.setLayout(bottom_toolbar_layout)
+        bottom_toolbar_widget.setMaximumHeight(40) 
+        main_layout.addWidget(bottom_toolbar_widget)
+        
     # === DEFORMED MESH METHODS ===
     
     def add_deformed_mesh_controls(self, neu_files, working_directory, load_callback):
@@ -284,6 +311,8 @@ class VisualizationManager:
             else:
                 print(f"Loading file {self.current_mesh_index + 1}/{len(self.neu_files)}: {current_file} (from disk)")
                 self.load_mesh_callback(file_path)
+            
+            self._update_data_info()
     
     def _update_mesh_controls_state(self):
         """Update navigation controls state"""
@@ -367,8 +396,14 @@ class VisualizationManager:
     def _update_data_info(self):
         """Update displayed information"""
         if self.current_data and self.current_dir:
+            # Get current filename if available
+            filename = ""
+            if hasattr(self, 'neu_files') and self.neu_files and hasattr(self, 'current_mesh_index'):
+                if 0 <= self.current_mesh_index < len(self.neu_files):
+                    filename = f" - {self.neu_files[self.current_mesh_index]}"
+            
             info = (f"Nodes: {self.current_data.get_nb_nodes()} | "
-                   f"Elements: {self.current_data.get_nb_elements()}")
+                f"Elements: {self.current_data.get_nb_elements()}{filename}")
             self.data_info_label.setText(info)
         elif self.current_dir:
             self.data_info_label.setText(f"No data loaded")
