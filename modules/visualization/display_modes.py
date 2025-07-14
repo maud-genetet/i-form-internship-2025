@@ -604,125 +604,67 @@ class DisplayModeManager:
     def _calculate_vectors_from_variable(self, mesh, scalar_name, variable_name):
         """Calculate vector components based on the variable type"""
         
-        # For stress and strain variables, try to get tensor components
-        if "Stress" in variable_name or "Strain" in variable_name:
-            return self._calculate_stress_strain_vectors(mesh, variable_name)
-        elif "Velocity" in variable_name:
-            return self._calculate_velocity_vectors(mesh)
-        elif "Force" in variable_name:
-            return self._calculate_force_vectors(mesh)
-        else:
-            # For scalar variables, create normal vectors scaled by the scalar value
-            return self._calculate_scalar_normal_vectors(mesh, scalar_name)
-    
-    def _calculate_stress_strain_vectors(self, mesh, variable_name):
-        """Calculate stress or strain vectors from tensor components"""
         try:
-            # Try to get principal stress/strain components
-            if "Stress" in variable_name:
-                if 'Stress x(r)' in mesh.cell_data and 'Stress y(z)' in mesh.cell_data:
-                    stress_x = mesh.cell_data['Stress x(r)']
-                    stress_y = mesh.cell_data['Stress y(z)']
-                    stress_z = np.zeros_like(stress_x)  # 2D case
-                    
-                    vectors = np.column_stack([stress_x, stress_y, stress_z])
-                    return vectors
-                    
-            elif "Strain" in variable_name:
-                if 'Strain x(r)' in mesh.cell_data and 'Strain y(z)' in mesh.cell_data:
-                    strain_x = mesh.cell_data['Strain x(r)']
-                    strain_y = mesh.cell_data['Strain y(z)']
-                    strain_z = np.zeros_like(strain_x)  # 2D case
-                    
-                    vectors = np.column_stack([strain_x, strain_y, strain_z])
-                    return vectors
+            # If not a vector variable, return None
+            if not ("Velocity" in variable_name or "Force" in variable_name):
+                return None
             
-            return None
-            
-        except Exception as e:
-            print(f"Error calculating stress/strain vectors: {e}")
-            return None
-    
-    def _calculate_velocity_vectors(self, mesh):
-        """Calculate velocity vectors"""
-        try:
-            if 'Velocity X(r)' in mesh.cell_data and 'Velocity Y(z)' in mesh.cell_data:
-                vel_x = mesh.cell_data['Velocity X(r)']
-                vel_y = mesh.cell_data['Velocity Y(z)']
-                vel_z = np.zeros_like(vel_x)  # 2D case
-                
-                # For velocity, the vectors represent direction of movement
-                vectors = np.column_stack([vel_x, vel_y, vel_z])
-                return vectors
-            return None
-            
-        except Exception as e:
-            print(f"Error calculating velocity vectors: {e}")
-            return None
-    
-    def _calculate_force_vectors(self, mesh):
-        """Calculate force vectors"""
-        try:
-            if 'Force X(r)' in mesh.cell_data and 'Force Y(z)' in mesh.cell_data:
-                force_x = mesh.cell_data['Force X(r)']
-                force_y = mesh.cell_data['Force Y(z)']
-                force_z = np.zeros_like(force_x)  # 2D case
-                
-                vectors = np.column_stack([force_x, force_y, force_z])
-                return vectors
-            return None
-            
-        except Exception as e:
-            print(f"Error calculating force vectors: {e}")
-            return None
-    
-    def _calculate_scalar_normal_vectors(self, mesh, scalar_name):
-        """Calculate normal vectors scaled by scalar values"""
-        try:
-            if scalar_name in mesh.cell_data:
+            # scalar_name est l'array des valeurs scalaires
+            if isinstance(scalar_name, str) and scalar_name in mesh.cell_data:
                 scalar_values = mesh.cell_data[scalar_name]
-                
-                # For 2D case, create vectors in Z direction scaled by scalar value
+            elif hasattr(scalar_name, '__len__'):
+                scalar_values = scalar_name
+            else:
+                return None
+            
+            if "Total" in variable_name:
+                if "Velocity" in variable_name:
+                    if 'Velocity X(r)' in mesh.cell_data and 'Velocity Y(z)' in mesh.cell_data:
+                        vel_x = mesh.cell_data['Velocity X(r)']
+                        vel_y = mesh.cell_data['Velocity Y(z)']
+                        vectors = np.column_stack([vel_x, vel_y, np.zeros_like(vel_x)])
+                        return vectors
+                elif "Force" in variable_name:
+                    if 'Force X(r)' in mesh.cell_data and 'Force Y(z)' in mesh.cell_data:
+                        force_x = mesh.cell_data['Force X(r)']
+                        force_y = mesh.cell_data['Force Y(z)']
+                        vectors = np.column_stack([force_x, force_y, np.zeros_like(force_x)])
+                        return vectors
+                return None
+            
+            elif "X" in variable_name or "(r)" in variable_name:
                 vectors = np.column_stack([
-                    np.zeros_like(scalar_values),  # X component
-                    np.zeros_like(scalar_values),  # Y component  
-                    scalar_values * 0.1  # Z component (scaled)
+                    scalar_values,
+                    np.zeros_like(scalar_values),
+                    np.zeros_like(scalar_values)
                 ])
-                return vectors
-            return None
+            elif "Y" in variable_name or "(z)" in variable_name:
+                # Direction Y verticale
+                vectors = np.column_stack([
+                    np.zeros_like(scalar_values),
+                    scalar_values,
+                    np.zeros_like(scalar_values)
+                ])
+            else:
+                return None
+            
+            return vectors
             
         except Exception as e:
-            print(f"Error calculating scalar normal vectors: {e}")
+            print(f"Error calculating vectors: {e}")
             return None
     
     def _get_velocity_vectors_from_nodes(self, mesh):
-        """Get velocity vectors directly from node data"""
+        """Get velocity vectors"""
         try:
-            # Get mesh points (node positions)
-            points = mesh.points
+            cell_centers = mesh.cell_centers()
+            points = cell_centers.points
             
-            # Try to get velocity data from the original mesh data
-            if hasattr(mesh, '_original_data') and hasattr(mesh, '_node_id_to_index'):
-                nodes = mesh._original_data.get_nodes()
-                node_id_to_index = mesh._node_id_to_index
-                
-                # Create velocity array matching mesh points order
-                velocities = np.zeros((len(points), 3))
-                
-                for node in nodes:
-                    if node.get_id() in node_id_to_index:
-                        index = node_id_to_index[node.get_id()]
-                        vx = node.get_Vx() or 0.0
-                        vy = node.get_Vy() or 0.0
-                        velocities[index] = [vx, vy, 0.0]
-                
-                return points, velocities
-            else:
-                return self._interpolate_velocity_to_nodes(mesh)
+            return points, None
                 
         except Exception as e:
-            print(f"Error getting velocity vectors from nodes: {e}")
-            return self._interpolate_velocity_to_nodes(mesh)
+            print(f"Error getting velocity vectors: {e}")
+            return None, None
     
     def _interpolate_velocity_to_nodes(self, mesh):
         """Interpolate velocity from cell data to node positions"""

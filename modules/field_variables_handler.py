@@ -132,6 +132,7 @@ class FieldVariablesHandler:
         high_definition_contour = options.get('high_definition_contour', False)
         view_constraints = options.get('view_constraints', False)
         line_contour_mode = options.get('line_contour_mode', False)
+        vector_mode = options.get('vector_mode', False)
         
         # Apply HD contour if needed
         if high_definition_contour:
@@ -147,7 +148,9 @@ class FieldVariablesHandler:
             scalars_array = mesh.cell_data[scalar_name]
         
         # Prepare main variable mesh
-        if line_contour_mode:
+        if vector_mode:
+            return self._prepare_vector_meshes(mesh, scalars_array, variable_name, options)
+        elif line_contour_mode:
             return self._prepare_line_contour_meshes(mesh, scalars_array, variable_name, cmap, options)
         elif wireframe_mode:
             mesh_data = {
@@ -183,6 +186,107 @@ class FieldVariablesHandler:
                 prepared_meshes.append(constraint_mesh_data)
         
         return prepared_meshes
+    
+    def _prepare_vector_meshes(self, mesh, scalars_array, variable_name, options):
+        """Prepare meshes for vector display"""
+        prepared_meshes = []
+        
+        # Get options
+        show_mesh_edges = options.get('show_mesh_edges', True)
+        edge_color = self.get_visualization_manager().default_edge_color
+        
+        # Add base mesh with transparency
+        base_mesh_data = {
+            'mesh': mesh,
+            'color': 'lightgray',
+            'show_edges': show_mesh_edges,
+            'edge_color': edge_color if show_mesh_edges else None,
+            'line_width': 1,
+            'opacity': 0.1,
+            'label': "Base Mesh"
+        }
+        prepared_meshes.append(base_mesh_data)
+        
+        try:
+            vector_mesh_data = self._prepare_vector_field(mesh, scalars_array, variable_name)
+            if vector_mesh_data:
+                prepared_meshes.append(vector_mesh_data)
+        except Exception as e:
+            print(f"Error generating vectors: {e}")
+            # Fallback to normal display
+            fallback_mesh_data = {
+                'mesh': mesh,
+                'scalars': scalars_array,
+                'cmap': 'turbo',
+                'show_scalar_bar': True,
+                'scalar_bar_args': {'title': variable_name},
+                'label': f"Mesh - {variable_name} (fallback)"
+            }
+            prepared_meshes.append(fallback_mesh_data)
+        
+        return prepared_meshes
+
+    def _prepare_vector_field(self, mesh, scalars_array, variable_name):
+        """Prepare vector field data"""
+        try:
+            display_manager = self.get_visualization_manager().display_manager
+            
+            cell_centers = mesh.cell_centers()
+            points = cell_centers.points
+            vectors = display_manager._calculate_vectors_from_variable(mesh, scalars_array, variable_name)
+            
+            if vectors is not None and len(vectors) == len(points):
+                # Create vector field
+                import pyvista as pv
+                import numpy as np
+                
+                vector_mesh = pv.PolyData(points)
+                vector_mesh['vectors'] = vectors
+                magnitudes = np.linalg.norm(vectors, axis=1)
+                vector_mesh['magnitude'] = magnitudes
+                
+                # Filter out zero vectors
+                non_zero_mask = magnitudes > 1e-10
+                if np.any(non_zero_mask):
+                    filtered_points = points[non_zero_mask]
+                    filtered_vectors = vectors[non_zero_mask]
+                    filtered_magnitudes = magnitudes[non_zero_mask]
+                    
+                    vector_mesh = pv.PolyData(filtered_points)
+                    vector_mesh['vectors'] = filtered_vectors
+                    vector_mesh['magnitude'] = filtered_magnitudes
+                    
+                    # Calculate scale factor
+                    mesh_bounds = mesh.bounds
+                    mesh_size = max(mesh_bounds[1] - mesh_bounds[0], mesh_bounds[3] - mesh_bounds[2])
+                    max_magnitude = np.max(filtered_magnitudes)
+                    
+                    if max_magnitude > 0:
+                        scale_factor = (mesh_size * 0.03) / max_magnitude
+                    else:
+                        scale_factor = mesh_size * 0.01
+                    
+                    arrows = vector_mesh.glyph(
+                        orient='vectors',
+                        scale='magnitude',
+                        factor=scale_factor,
+                        geom=pv.Arrow(shaft_radius=0.05, tip_radius=0.1)
+                    )
+                    
+                    return {
+                        'mesh': arrows,
+                        'scalars': 'magnitude',
+                        'cmap': 'plasma',
+                        'show_scalar_bar': True,
+                        'scalar_bar_args': {'title': f"{variable_name} Vectors"},
+                        'label': f"Vectors - {variable_name}"
+                    }
+            
+            return None
+            
+        except Exception as e:
+            print(f"Error in vector preparation: {e}")
+            return None
     
     def _prepare_line_contour_meshes(self, mesh, scalars_array, variable_name, cmap, options):
         """Prepare meshes for line contour display"""
