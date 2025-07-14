@@ -3,6 +3,7 @@ Field Variables Menu Handler
 """
 
 from PyQt5.QtWidgets import QMessageBox
+import numpy as np
 
 from modules.visualization_options import VisualizationOptions
 
@@ -130,6 +131,7 @@ class FieldVariablesHandler:
         monochromatic_mode = options.get('monochromatic_mode', False)
         high_definition_contour = options.get('high_definition_contour', False)
         view_constraints = options.get('view_constraints', False)
+        line_contour_mode = options.get('line_contour_mode', False)
         
         # Apply HD contour if needed
         if high_definition_contour:
@@ -145,7 +147,9 @@ class FieldVariablesHandler:
             scalars_array = mesh.cell_data[scalar_name]
         
         # Prepare main variable mesh
-        if wireframe_mode:
+        if line_contour_mode:
+            return self._prepare_line_contour_meshes(mesh, scalars_array, variable_name, cmap, options)
+        elif wireframe_mode:
             mesh_data = {
                 'mesh': mesh,
                 'scalars': scalars_array,
@@ -177,6 +181,64 @@ class FieldVariablesHandler:
             constraint_mesh_data = self._prepare_constraints_mesh(mesh)
             if constraint_mesh_data:
                 prepared_meshes.append(constraint_mesh_data)
+        
+        return prepared_meshes
+    
+    def _prepare_line_contour_meshes(self, mesh, scalars_array, variable_name, cmap, options):
+        """Prepare meshes for line contour display"""
+        prepared_meshes = []
+        
+        # Add base mesh with transparency
+        show_mesh_edges = options.get('show_mesh_edges', True)
+        edge_color = self.get_visualization_manager().default_edge_color
+        
+        base_mesh_data = {
+            'mesh': mesh,
+            'color': 'white',
+            'show_edges': show_mesh_edges,
+            'edge_color': edge_color if show_mesh_edges else None,
+            'line_width': 1,
+            'opacity': 0.1,
+            'label': "Base Mesh"
+        }
+        prepared_meshes.append(base_mesh_data)
+        
+        # Generate contours
+        try:
+            n_contours = 10
+            scalar_min = np.min(scalars_array)
+            scalar_max = np.max(scalars_array)
+            
+            if scalar_min != scalar_max:
+                contour_levels = np.linspace(scalar_min, scalar_max, n_contours)
+                mesh_with_scalars = mesh.copy()
+                
+                if len(scalars_array) == mesh.n_cells:
+                    mesh_with_scalars.cell_data['scalars'] = scalars_array
+                    mesh_with_scalars = mesh_with_scalars.cell_data_to_point_data()
+                else:
+                    mesh_with_scalars.point_data['scalars'] = scalars_array
+                
+                contours = mesh_with_scalars.contour(
+                    scalars='scalars',
+                    isosurfaces=contour_levels
+                )
+                
+                if contours.n_cells > 0:
+                    contour_mesh_data = {
+                        'mesh': contours,
+                        'scalars': 'scalars',
+                        'cmap': cmap,
+                        'line_width': 2,
+                        'style': 'surface',
+                        'show_scalar_bar': True,
+                        'scalar_bar_args': {'title': variable_name},
+                        'label': f"Contours - {variable_name}"
+                    }
+                    prepared_meshes.append(contour_mesh_data)
+                    
+        except Exception as e:
+            print(f"Error generating contours: {e}")
         
         return prepared_meshes
     
