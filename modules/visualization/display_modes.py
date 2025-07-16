@@ -75,7 +75,7 @@ class DisplayModeManager:
         positions = np.array(positions)
         points = pv.PolyData(positions)
         sphere_source = self._get_cached_sphere(radius, subdivisions)
-        return points.glyph(geom=sphere_source, scale=False)
+        return points.glyph(geom=sphere_source, scale=False, orient=False)
     
     def _calculate_proportional_size(self, mesh, base_factor=0.005):
         """Calculate proportional size based on mesh dimensions and element density"""
@@ -211,6 +211,10 @@ class DisplayModeManager:
         all_colors = []
         
         constraint_size = self._calculate_proportional_size(mesh, base_factor=0.01)
+
+        if hasattr(mesh, '_size_options') and mesh._size_options:
+            constraint_size *= mesh._size_options.get('constraint_size_factor', 1.0)
+
         total_constraints = len([code for code in constraint_codes if code != 0])
         subdivisions, _ = self._get_optimal_lod(total_constraints)
         
@@ -240,8 +244,25 @@ class DisplayModeManager:
             combined_glyphs = self._create_batched_spheres(all_positions, constraint_size, subdivisions)
             
             if combined_glyphs:
+                n_positions = len(all_positions)
+                n_glyph_points = combined_glyphs.n_points
+                points_per_sphere = n_glyph_points // n_positions
+                
+                # Expand colors to match all glyph points
+                expanded_colors = []
+                for i, color in enumerate(all_colors):
+                    for _ in range(points_per_sphere):
+                        expanded_colors.append(color)
+                
+                # Handle any remaining points
+                while len(expanded_colors) < n_glyph_points:
+                    expanded_colors.append(all_colors[-1])
+                
+                # Truncate if too many
+                expanded_colors = expanded_colors[:n_glyph_points]
+                
                 # Add colors to points
-                combined_glyphs.point_data['constraint_colors'] = np.array(all_colors)
+                combined_glyphs.point_data['constraint_colors'] = np.array(expanded_colors)
                 
                 # Add everything in ONE add_mesh call
                 plotter.add_mesh(
@@ -287,6 +308,9 @@ class DisplayModeManager:
                         scale_factor = (mesh_size * 0.03) / max_magnitude
                     else:
                         scale_factor = mesh_size * 0.01
+
+                    if hasattr(mesh, '_size_options'):
+                        scale_factor *= mesh._size_options.get('vector_size_factor', 1.0)
                     
                     arrows = vector_mesh.glyph(
                         orient='vectors',
@@ -347,259 +371,6 @@ class DisplayModeManager:
                 
         except Exception as e:
             print(f"Error in contour display: {e}")
-    
-    def _add_constraints_visualization(self, plotter, mesh):
-        """Add constraint visualizations - FALLBACK VERSION"""
-        # Use the single operation version
-        self._add_all_constraints(plotter, mesh)
-    
-    def _display_vector_field_simple(self, plotter, mesh, scalar_name, variable_name, show_mesh_edges, edge_color):
-        """Display vector field SANS mesh de base"""
-        
-        try:
-            # For velocity vectors, try different approaches
-            if "Velocity" in variable_name:
-                print(f"Processing velocity variable: {variable_name}")
-                
-                # Method 1: Try node data first
-                points, vectors = self._get_velocity_vectors_from_nodes(mesh)
-                
-            else:
-                # For other variables, use cell centers
-                cell_centers = mesh.cell_centers()
-                points = cell_centers.points
-                vectors = self._calculate_vectors_from_variable(mesh, scalar_name, variable_name)
-            
-            if vectors is not None and len(vectors) == len(points):
-                # Create vector field
-                vector_mesh = pv.PolyData(points)
-                vector_mesh['vectors'] = vectors
-                
-                # Calculate vector magnitudes for coloring
-                magnitudes = np.linalg.norm(vectors, axis=1)
-                vector_mesh['magnitude'] = magnitudes
-                
-                # Filter out zero vectors for better visualization
-                non_zero_mask = magnitudes > 1e-10
-                if np.any(non_zero_mask):
-                    filtered_points = points[non_zero_mask]
-                    filtered_vectors = vectors[non_zero_mask]
-                    filtered_magnitudes = magnitudes[non_zero_mask]
-                    
-                    vector_mesh = pv.PolyData(filtered_points)
-                    vector_mesh['vectors'] = filtered_vectors
-                    vector_mesh['magnitude'] = filtered_magnitudes
-                    
-                    # Calculate appropriate scale factor
-                    mesh_bounds = mesh.bounds
-                    mesh_size = max(mesh_bounds[1] - mesh_bounds[0], mesh_bounds[3] - mesh_bounds[2])
-                    max_magnitude = np.max(filtered_magnitudes)
-                    
-                    if max_magnitude > 0:
-                        # Scale arrows to be about 3% of mesh size at maximum
-                        scale_factor = (mesh_size * 0.03) / max_magnitude
-                    else:
-                        scale_factor = mesh_size * 0.01
-                    
-                    # Add arrows with automatic scaling
-                    arrows = vector_mesh.glyph(
-                        orient='vectors',
-                        scale='magnitude',
-                        factor=scale_factor,
-                        geom=pv.Arrow()
-                    )
-                    
-                    plotter.add_mesh(
-                        arrows,
-                        scalars='magnitude',
-                        cmap='plasma',
-                        show_scalar_bar=True,
-                        scalar_bar_args={
-                            'title': f"{variable_name} Vectors",
-                        },
-                        label=f"Vectors - {variable_name}"
-                    )
-                    
-                    print(f"Generated {len(filtered_vectors)} vectors for {variable_name} (scale: {scale_factor:.6f})")
-                else:
-                    print(f"No significant vectors found for {variable_name}")
-                    self._fallback_display(plotter, mesh, scalar_name, variable_name)
-            else:
-                print(f"Could not generate vectors for {variable_name}")
-                # Fallback to normal display
-                self._fallback_display(plotter, mesh, scalar_name, variable_name)
-                
-        except Exception as e:
-            print(f"Error generating vectors for {variable_name}: {e}")
-            # Fallback to normal display
-            self._fallback_display(plotter, mesh, scalar_name, variable_name)
-    
-    def _display_line_contours_simple(self, plotter, mesh, scalars_array, variable_name, cmap, show_mesh_edges, edge_color):
-        """Display contours SANS mesh de base"""
-        
-        # Generate contour lines
-        try:
-            # Determine number of contour levels
-            n_contours = 10
-            
-            # Get scalar range
-            scalar_min = np.min(scalars_array)
-            scalar_max = np.max(scalars_array)
-            
-            if scalar_min == scalar_max:
-                print(f"Warning: Constant scalar values for {variable_name}")
-                return
-            
-            # Generate contour levels
-            contour_levels = np.linspace(scalar_min, scalar_max, n_contours)
-            
-            # Create mesh copy with scalars
-            mesh_with_scalars = mesh.copy()
-            if len(scalars_array) == mesh.n_cells:
-                mesh_with_scalars.cell_data['scalars'] = scalars_array
-                # Convert to point data for better contours
-                mesh_with_scalars = mesh_with_scalars.cell_data_to_point_data()
-            else:
-                mesh_with_scalars.point_data['scalars'] = scalars_array
-            
-            # Generate contours
-            contours = mesh_with_scalars.contour(
-                scalars='scalars',
-                isosurfaces=contour_levels
-            )
-            
-            if contours.n_cells > 0:
-                # Add contour lines with colors
-                plotter.add_mesh(
-                    contours,
-                    scalars='scalars',
-                    cmap=cmap,
-                    line_width=2,
-                    style='surface',
-                    show_scalar_bar=True,
-                    scalar_bar_args={
-                        'title': variable_name,
-                    },
-                    label=f"Contours - {variable_name}"
-                )
-                print(f"Generated {contours.n_cells} contour lines for {variable_name}")
-            else:
-                print(f"No contour lines generated for {variable_name}")
-                
-        except Exception as e:
-            print(f"Error generating contours for {variable_name}: {e}")
-            # Fallback to normal display
-            plotter.add_mesh(
-                mesh,
-                scalars=scalars_array,
-                cmap=cmap,
-                show_scalar_bar=True,
-                scalar_bar_args={
-                    'title': variable_name,
-                },
-                label=f"Mesh - {variable_name} (fallback)"
-            )
-    
-    def _display_vector_field(self, plotter, mesh, scalar_name, variable_name, show_mesh_edges, edge_color):
-        """Display vector field for stress/strain variables"""
-        
-        # First, add the base mesh with light transparency
-        if show_mesh_edges:
-            plotter.add_mesh(
-                mesh,
-                color='lightgray',
-                show_edges=True,
-                edge_color=edge_color,
-                line_width=1,
-                opacity=0.3,
-                label="Base Mesh"
-            )
-        else:
-            plotter.add_mesh(
-                mesh,
-                color='lightgray',
-                opacity=0.3,
-                show_edges=False,
-                label="Base Mesh"
-            )
-        
-        try:
-            # For velocity vectors, try different approaches
-            if "Velocity" in variable_name:
-                print(f"Processing velocity variable: {variable_name}")
-                
-                # Method 1: Try node data first
-                points, vectors = self._get_velocity_vectors_from_nodes(mesh)
-                
-            else:
-                # For other variables, use cell centers
-                cell_centers = mesh.cell_centers()
-                points = cell_centers.points
-                vectors = self._calculate_vectors_from_variable(mesh, scalar_name, variable_name)
-            
-            if vectors is not None and len(vectors) == len(points):
-                # Create vector field
-                vector_mesh = pv.PolyData(points)
-                vector_mesh['vectors'] = vectors
-                
-                # Calculate vector magnitudes for coloring
-                magnitudes = np.linalg.norm(vectors, axis=1)
-                vector_mesh['magnitude'] = magnitudes
-                
-                # Filter out zero vectors for better visualization
-                non_zero_mask = magnitudes > 1e-10
-                if np.any(non_zero_mask):
-                    filtered_points = points[non_zero_mask]
-                    filtered_vectors = vectors[non_zero_mask]
-                    filtered_magnitudes = magnitudes[non_zero_mask]
-                    
-                    vector_mesh = pv.PolyData(filtered_points)
-                    vector_mesh['vectors'] = filtered_vectors
-                    vector_mesh['magnitude'] = filtered_magnitudes
-                    
-                    # Calculate appropriate scale factor
-                    mesh_bounds = mesh.bounds
-                    mesh_size = max(mesh_bounds[1] - mesh_bounds[0], mesh_bounds[3] - mesh_bounds[2])
-                    max_magnitude = np.max(filtered_magnitudes)
-                    
-                    if max_magnitude > 0:
-                        # Scale arrows to be about 3% of mesh size at maximum
-                        scale_factor = (mesh_size * 0.03) / max_magnitude
-                    else:
-                        scale_factor = mesh_size * 0.01
-                    
-                    # Add arrows with automatic scaling
-                    arrows = vector_mesh.glyph(
-                        orient='vectors',
-                        scale='magnitude',
-                        factor=scale_factor,
-                        geom=pv.Arrow()
-                    )
-                    
-                    plotter.add_mesh(
-                        arrows,
-                        scalars='magnitude',
-                        cmap='plasma',
-                        show_scalar_bar=True,
-                        scalar_bar_args={
-                            'title': f"{variable_name} Vectors",
-                        },
-                        label=f"Vectors - {variable_name}"
-                    )
-                    
-                    print(f"Generated {len(filtered_vectors)} vectors for {variable_name} (scale: {scale_factor:.6f})")
-                else:
-                    print(f"No significant vectors found for {variable_name}")
-                    self._fallback_display(plotter, mesh, scalar_name, variable_name)
-            else:
-                print(f"Could not generate vectors for {variable_name}")
-                # Fallback to normal display
-                self._fallback_display(plotter, mesh, scalar_name, variable_name)
-                
-        except Exception as e:
-            print(f"Error generating vectors for {variable_name}: {e}")
-            # Fallback to normal display
-            self._fallback_display(plotter, mesh, scalar_name, variable_name)
     
     def _calculate_vectors_from_variable(self, mesh, scalar_name, variable_name):
         """Calculate vector components based on the variable type"""
@@ -693,92 +464,6 @@ class DisplayModeManager:
                 mesh,
                 scalars=mesh.cell_data[scalar_name],
                 cmap='turbo',
-                show_scalar_bar=True,
-                scalar_bar_args={
-                    'title': variable_name,
-                },
-                label=f"Mesh - {variable_name} (fallback)"
-            )
-    
-    def _display_line_contours(self, plotter, mesh, scalars_array, variable_name, cmap, show_mesh_edges, edge_color):
-        """Display contours as colored lines instead of filled regions"""
-        
-        # First, add the base mesh
-        if show_mesh_edges:
-            plotter.add_mesh(
-                mesh,
-                color='white',
-                show_edges=True,
-                edge_color=edge_color,
-                line_width=1,
-                opacity=0.1,
-                label="Base Mesh"
-            )
-        else:
-            plotter.add_mesh(
-                mesh,
-                color='white',
-                opacity=0.1,
-                show_edges=False,
-                label="Base Mesh"
-            )
-        
-        # Generate contour lines
-        try:
-            # Determine number of contour levels
-            n_contours = 10
-            
-            # Get scalar range
-            scalar_min = np.min(scalars_array)
-            scalar_max = np.max(scalars_array)
-            
-            if scalar_min == scalar_max:
-                print(f"Warning: Constant scalar values for {variable_name}")
-                return
-            
-            # Generate contour levels
-            contour_levels = np.linspace(scalar_min, scalar_max, n_contours)
-            
-            # Create mesh copy with scalars
-            mesh_with_scalars = mesh.copy()
-            if len(scalars_array) == mesh.n_cells:
-                mesh_with_scalars.cell_data['scalars'] = scalars_array
-                # Convert to point data for better contours
-                mesh_with_scalars = mesh_with_scalars.cell_data_to_point_data()
-            else:
-                mesh_with_scalars.point_data['scalars'] = scalars_array
-            
-            # Generate contours
-            contours = mesh_with_scalars.contour(
-                scalars='scalars',
-                isosurfaces=contour_levels
-            )
-            
-            if contours.n_cells > 0:
-                # Add contour lines with colors
-                plotter.add_mesh(
-                    contours,
-                    scalars='scalars',
-                    cmap=cmap,
-                    line_width=2,
-                    style='surface',
-                    show_scalar_bar=True,
-                    scalar_bar_args={
-                        'title': variable_name,
-                    },
-                    label=f"Contours - {variable_name}"
-                )
-                print(f"Generated {contours.n_cells} contour lines for {variable_name}")
-            else:
-                print(f"No contour lines generated for {variable_name}")
-                
-        except Exception as e:
-            print(f"Error generating contours for {variable_name}: {e}")
-            # Fallback to normal display
-            plotter.add_mesh(
-                mesh,
-                scalars=scalars_array,
-                cmap=cmap,
                 show_scalar_bar=True,
                 scalar_bar_args={
                     'title': variable_name,

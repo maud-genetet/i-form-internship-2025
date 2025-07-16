@@ -124,6 +124,11 @@ class FieldVariablesHandler:
     def _prepare_all_meshes_for_display(self, mesh, scalar_name, variable_name, edge_color, options):
         """Prepare all meshes for atomic display"""
         prepared_meshes = []
+
+        mesh._size_options = {
+            'constraint_size_factor': options.get('constraint_size_factor', 1.0),
+            'vector_size_factor': options.get('vector_size_factor', 1.0)
+        }
         
         # Get options
         wireframe_mode = options.get('wireframe_mode', False)
@@ -178,13 +183,7 @@ class FieldVariablesHandler:
             }
         
         prepared_meshes.append(mesh_data)
-        
-        # Prepare constraints if needed
-        if view_constraints and hasattr(mesh, '_constraint_info'):
-            constraint_mesh_data = self._prepare_constraints_mesh(mesh)
-            if constraint_mesh_data:
-                prepared_meshes.append(constraint_mesh_data)
-        
+    
         return prepared_meshes
     
     def _prepare_vector_meshes(self, mesh, scalars_array, variable_name, options):
@@ -266,6 +265,13 @@ class FieldVariablesHandler:
                     else:
                         scale_factor = mesh_size * 0.01
                     
+                    if hasattr(mesh, '_size_options') and mesh._size_options:
+                        vector_size_factor = mesh._size_options.get('vector_size_factor', 1.0)
+                    else:
+                        vector_size_factor = 1.0
+                    
+                    scale_factor *= vector_size_factor
+                    
                     arrows = vector_mesh.glyph(
                         orient='vectors',
                         scale='magnitude',
@@ -346,112 +352,6 @@ class FieldVariablesHandler:
         
         return prepared_meshes
     
-    def _prepare_constraints_mesh(self, mesh):
-        try:
-            constraint_info = mesh._constraint_info
-            node_ids = constraint_info['node_ids']
-            positions_x = constraint_info['positions_x']
-            positions_y = constraint_info['positions_y']
-            constraint_codes = constraint_info['codes']
-            
-            # Collect ALL positions and colors
-            all_positions = []
-            all_colors = []
-            
-            # Calculate size
-            bounds = mesh.bounds
-            max_dimension = max(bounds[1] - bounds[0], bounds[3] - bounds[2], bounds[5] - bounds[4])
-            n_elements = mesh.n_cells if hasattr(mesh, 'n_cells') else 1000
-            density_factor = min(1.0, 1000.0 / n_elements)
-            constraint_size = max_dimension * 0.005 * density_factor
-            constraint_size = max(max_dimension * 0.0001, min(constraint_size, max_dimension * 0.02))
-            
-            # Add node constraints
-            for i in range(len(node_ids)):
-                code = constraint_codes[i]
-                if code == 0:
-                    continue
-                    
-                position = [positions_x[i], positions_y[i], 0]
-                
-                # Get color based on code
-                if code == 1:
-                    color = [1.0, 0.0, 0.0]  # red
-                elif code == 2:
-                    color = [0.0, 0.0, 1.0]  # blue
-                elif code == 3:
-                    color = [0.0, 0.0, 0.0]  # black
-                elif code == -1 or code == -2:
-                    color = [0.95, 0.95, 0.95]  # white
-                elif code <= -10:
-                    color = [0.0, 0.0, 0.0]  # black
-                else:
-                    color = [0.5, 0.5, 0.5]  # gray
-                
-                all_positions.append(position)
-                all_colors.append(color)
-            
-            # Add contact nodes
-            nodes = mesh._original_data.get_nodes()
-            contact_count = 0
-            for node in nodes:
-                if node.is_contact_node():
-                    all_positions.append([node.get_coordX(), node.get_coordY(), 0])
-                    all_colors.append([1.0, 0.41, 0.71])  # pink
-                    contact_count += 1
-            
-            # Create combined mesh
-            if all_positions:
-                import pyvista as pv
-                import numpy as np
-                
-                positions = np.array(all_positions)
-                points = pv.PolyData(positions)
-                
-                # Assign colors to the POINTS before glyphing
-                points.point_data['colors'] = np.array(all_colors)
-                
-                # Create simple spheres
-                sphere = pv.Sphere(radius=constraint_size, phi_resolution=8, theta_resolution=8)
-                combined_glyphs = points.glyph(geom=sphere, scale=False)
-                
-                # The colors should be automatically transferred to the glyph
-                if 'colors' in combined_glyphs.point_data:
-                    return {
-                        'mesh': combined_glyphs,
-                        'scalars': 'colors',
-                        'rgb': True,
-                        'opacity': 1.0,
-                        'name': 'all_constraints'
-                    }
-                else:
-                    # Manual color assignment fallback
-                    n_points_per_glyph = combined_glyphs.n_points // len(all_positions)
-                    expanded_colors = []
-                    for color in all_colors:
-                        for _ in range(n_points_per_glyph):
-                            expanded_colors.append(color)
-                    
-                    # Handle any remaining points
-                    while len(expanded_colors) < combined_glyphs.n_points:
-                        expanded_colors.append(all_colors[-1])
-                    
-                    combined_glyphs.point_data['colors'] = np.array(expanded_colors[:combined_glyphs.n_points])
-                    
-                    return {
-                        'mesh': combined_glyphs,
-                        'scalars': 'colors',
-                        'rgb': True,
-                        'opacity': 1.0,
-                        'name': 'all_constraints'
-                    }
-            
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-        
-        return None
-    
     def _prepare_dies_for_display(self, visualization_manager):
         """Prepare dies for atomic display"""
         prepared_dies = []
@@ -511,6 +411,12 @@ class FieldVariablesHandler:
         # PREPARE EVERYTHING BEFORE CLEARING pour éviter les saccades
         mesh = visualization_manager.current_mesh
         
+        # Store size options in mesh
+        mesh._size_options = {
+            'constraint_size_factor': options.get('constraint_size_factor', 1.0),
+            'vector_size_factor': options.get('vector_size_factor', 1.0)
+        }
+        
         # Prepare mesh de base
         prepared_meshes = []
         
@@ -541,12 +447,6 @@ class FieldVariablesHandler:
         
         prepared_meshes.append(mesh_data)
         
-        # Prepare constraints if needed - FORCE CHECK
-        if show_constraints:
-            constraint_mesh_data = self._prepare_constraints_mesh(mesh)
-            if constraint_mesh_data:
-                prepared_meshes.append(constraint_mesh_data)
-        
         # Prepare dies
         prepared_dies = self._prepare_dies_for_display(visualization_manager)
         
@@ -560,6 +460,9 @@ class FieldVariablesHandler:
         # Add all prepared dies in one go
         for die_data in prepared_dies:
             visualization_manager.plotter.add_mesh(**die_data)
+        
+        if show_constraints and hasattr(mesh, '_constraint_info'):
+            visualization_manager.display_manager._add_all_constraints(visualization_manager.plotter, mesh)
         
         # Single final render
         visualization_manager.plotter.render()

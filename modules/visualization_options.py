@@ -3,7 +3,7 @@ Unified Visualization Options Manager
 Handles all visualization options including wireframe and line contour
 """
 
-from PyQt5.QtWidgets import QCheckBox, QLabel
+from PyQt5.QtWidgets import QCheckBox, QLabel, QSpinBox
 
 
 class VisualizationOptions:
@@ -29,6 +29,9 @@ class VisualizationOptions:
         self.constraints_checkbox = None
         self.line_contour_checkbox = None
         self.vector_checkbox = None
+
+        self.constraint_size_factor = 1.0
+        self.vector_size_factor = 1.0
         
         self._setup_controls()
     
@@ -69,6 +72,18 @@ class VisualizationOptions:
         self.constraints_checkbox.setChecked(self.view_constraints)
         self.constraints_checkbox.toggled.connect(self._on_constraints_toggled)
         toolbar_layout.addWidget(self.constraints_checkbox)
+
+        # Add constraint size control
+        constraint_size_label = QLabel("Size:")
+        toolbar_layout.addWidget(constraint_size_label)
+        
+        self.constraint_size_spinbox = QSpinBox()
+        self.constraint_size_spinbox.setRange(1, 500)  
+        self.constraint_size_spinbox.setValue(50) 
+        self.constraint_size_spinbox.setSuffix("%")
+        self.constraint_size_spinbox.valueChanged.connect(self._on_constraint_size_changed)
+        toolbar_layout.addWidget(self.constraint_size_spinbox)
+        
         
         # Add monochromatic mode checkbox
         self.monochromatic_checkbox = QCheckBox("Monochromatic")
@@ -93,6 +108,17 @@ class VisualizationOptions:
         self.vector_checkbox.setChecked(self.vector_mode)
         self.vector_checkbox.toggled.connect(self._on_vector_toggled)
         toolbar_layout.addWidget(self.vector_checkbox)
+    
+        # Add vector size control
+        vector_size_label = QLabel("Size:")
+        toolbar_layout.addWidget(vector_size_label)
+        
+        self.vector_size_spinbox = QSpinBox()
+        self.vector_size_spinbox.setRange(1, 500)
+        self.vector_size_spinbox.setValue(50)
+        self.vector_size_spinbox.setSuffix("%")
+        self.vector_size_spinbox.valueChanged.connect(self._on_vector_size_changed)
+        toolbar_layout.addWidget(self.vector_size_spinbox)
         
         # Add remove variables button
         from PyQt5.QtWidgets import QPushButton
@@ -168,5 +194,17 @@ class VisualizationOptions:
             'high_definition_contour': self.high_definition_contour,
             'view_constraints': self.view_constraints,
             'line_contour_mode': self.line_contour_mode,
-            'vector_mode': self.vector_mode
+            'vector_mode': self.vector_mode,
+            'constraint_size_factor': self.constraint_size_factor,
+            'vector_size_factor': self.vector_size_factor
         }
+    
+    def _on_constraint_size_changed(self, value):
+        """Handle constraint size change"""
+        self.constraint_size_factor = value / 100.0
+        self._refresh_display()
+
+    def _on_vector_size_changed(self, value):
+        """Handle vector size change"""
+        self.vector_size_factor = value / 100.0
+        self._refresh_display()
