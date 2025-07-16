@@ -437,40 +437,6 @@ class DisplayModeManager:
             print(f"Error getting velocity vectors: {e}")
             return None, None
     
-    def _interpolate_velocity_to_nodes(self, mesh):
-        """Interpolate velocity from cell data to node positions"""
-        try:
-            # Convert cell data to point data for better node-based visualization
-            mesh_with_point_data = mesh.cell_data_to_point_data()
-            
-            if 'Velocity X(r)' in mesh_with_point_data.point_data and 'Velocity Y(z)' in mesh_with_point_data.point_data:
-                vel_x = mesh_with_point_data.point_data['Velocity X(r)']
-                vel_y = mesh_with_point_data.point_data['Velocity Y(z)']
-                vel_z = np.zeros_like(vel_x)
-                
-                vectors = np.column_stack([vel_x, vel_y, vel_z])
-                return mesh.points, vectors
-            else:
-                return None, None
-                
-        except Exception as e:
-            print(f"Error interpolating velocity to nodes: {e}")
-            return None, None
-    
-    def _fallback_display(self, plotter, mesh, scalar_name, variable_name):
-        """Fallback to normal scalar display when vector display fails"""
-        if scalar_name in mesh.cell_data:
-            plotter.add_mesh(
-                mesh,
-                scalars=mesh.cell_data[scalar_name],
-                cmap='turbo',
-                show_scalar_bar=True,
-                scalar_bar_args={
-                    'title': variable_name,
-                },
-                label=f"Mesh - {variable_name} (fallback)"
-            )
-    
     def display_mesh_with_constraints(self, plotter, mesh, mesh_color, edge_color, show_edges=True, show_constraints=False):
         """Display mesh with optional constraints"""
         # Display normal mesh first

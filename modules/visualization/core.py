@@ -224,46 +224,10 @@ class VisualizationManager:
         # Reapply currently selected variable if exists
         if hasattr(self.main_window, 'field_variables_handler'):
             self.main_window.field_variables_handler.reapply_current_variable()
-        else:
-            # Si pas de variable sélectionnée, on affiche juste le mesh de base
-            self.visualize_mesh(show_edges=True, show_nodes=False, show_dies=True)
 
     def set_working_directory(self, dir_name):
         """Set working directory"""
         self.current_dir = dir_name
-    
-    def visualize_mesh(self, show_edges=True, show_nodes=False, show_dies=True, show_constraints=False):
-        """Visualize mesh with specified options"""
-        if not self.current_data:
-            return
-        
-        self.clear()
-        
-        try:
-            # Create mesh via builder
-            mesh = self.mesh_builder.create_pyvista_mesh(self.current_data)
-            if mesh:
-                self.current_mesh = mesh
-                
-                self.interaction_handler.set_mesh_data(mesh, self.current_data)
-                
-                # Display according to mode
-                self.display_manager.display_mesh_with_constraints(
-                    self.plotter, mesh, 
-                    self.default_mesh_color, self.default_edge_color,
-                    show_edges, show_constraints
-                )
-                
-                if show_dies:
-                    self._add_dies_to_plot()
-
-        except Exception as e:
-            print(f"Visualization error: {e}")
-        
-        self.plotter.render()
-
-        # Reapply picking
-        self.reapply_mesh_picking_if_needed()
     
     def _update_data_info(self):
         """Update displayed information"""

@@ -5,16 +5,11 @@ Field Variables Menu Handler
 from PyQt5.QtWidgets import QMessageBox
 import numpy as np
 
-from modules.visualization_options import VisualizationOptions
-
 
 class FieldVariablesHandler:
     def __init__(self, main_window):
         self.main_window = main_window
         self.current_variable = None
-        
-        # Initialize unified visualization options
-        self.viz_options = VisualizationOptions(main_window)
         
         self.variable_mapping = {
             "Velocity_X": "Velocity X(r)",
