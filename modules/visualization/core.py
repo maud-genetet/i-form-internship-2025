@@ -15,6 +15,7 @@ import numpy as np
 from .mesh_builder import MeshBuilder
 from .interaction_handler import InteractionHandler
 from .display_modes import DisplayModeManager
+from .toolbar_manager import ToolbarManager
 
 class VisualizationManager:
     """
@@ -40,7 +41,15 @@ class VisualizationManager:
         self.interaction_handler = InteractionHandler()
         self.display_manager = DisplayModeManager()
         
+        # Toolbar manager
+        self.toolbar_manager = ToolbarManager(main_window, self)
+        
         self.preloaded_data = {}
+        
+        self.neu_files = []
+        self.working_directory = None
+        self.load_mesh_callback = None
+        self.current_mesh_index = 0
         
         self._setup_visualization_widget()
     
@@ -49,8 +58,8 @@ class VisualizationManager:
         self.visualization_widget = QWidget()
         main_layout = QVBoxLayout()
         
-        # Toolbar
-        self._create_toolbar(main_layout)
+        # Create toolbars using ToolbarManager
+        self.toolbar_manager.create_toolbars(main_layout)
         
         # Create horizontal layout for plotter + info panel
         content_layout = QHBoxLayout()
@@ -66,20 +75,13 @@ class VisualizationManager:
         
         main_layout.addLayout(content_layout)
         
-        # Bottom Toolbar
-        self._create_bottom_toolbar(main_layout)
-        
         self.visualization_widget.setLayout(main_layout)
         
         # Plotter configuration
         self._configure_plotter()
-        
-        # Initialize mesh info system after plotter is ready
-        self._add_mesh_info_button_fallback()
     
     def _create_info_panel(self):
         """Create info panel for mesh information"""
-        
         self.info_panel = QFrame()
         self.info_panel.setFixedWidth(300)
         
@@ -111,7 +113,7 @@ class VisualizationManager:
     def _hide_info_panel(self):
         """Hide the info panel and disable picking"""
         self.info_panel.setVisible(False)
-        self._mesh_info_button.setChecked(False)
+        self.toolbar_manager.mesh_info_btn.setChecked(False)
         self.interaction_handler.disable_mesh_picking()
     
     def _configure_plotter(self):
@@ -126,127 +128,12 @@ class VisualizationManager:
             self.info_content, 
             self.info_title
         )
-    
-    def _add_mesh_info_button_fallback(self):
-        """Add mesh info button manually as fallback"""
-        try:
-            main_layout = self.visualization_widget.layout()
-            if main_layout.count() > 0:
-                toolbar_widget = main_layout.itemAt(0).widget()
-                toolbar_layout = toolbar_widget.layout()
-                
-                separator = QLabel(" | ")
-                toolbar_layout.addWidget(separator)
-                
-                mesh_info_btn = QPushButton("Mesh Info")
-                mesh_info_btn.setCheckable(True)
-                mesh_info_btn.clicked.connect(self._on_mesh_info_clicked_fallback)
-                mesh_info_btn.setToolTip("Click to enable mesh information picking.\nUse buttons to switch between elements and nodes.")
-                toolbar_layout.addWidget(mesh_info_btn)
-                
-                # Store reference to button
-                self._mesh_info_button = mesh_info_btn
-                
-        except Exception as e:
-            print(f"Error adding fallback button: {e}")
-    
-    def _on_mesh_info_clicked_fallback(self, checked):
-        """Fallback mesh info button handler"""
-        if checked:
-            print("Enabling mesh info mode...")
-            self._show_info_panel()
-            self.interaction_handler.enable_mesh_picking()
-        else:
-            print("Disabling mesh info mode...")
-            self.info_panel.setVisible(False)
-            self.interaction_handler.disable_mesh_picking()
 
     def reapply_mesh_picking_if_needed(self):
         """Reapply mesh picking after mesh operations"""
         self.interaction_handler.reapply_mesh_picking_if_needed()
     
-    def _create_toolbar(self, main_layout):
-        """Create control toolbar"""
-        toolbar_layout = QHBoxLayout()
-        
-        # Data information
-        self.data_info_label = QLabel("No data")
-        toolbar_layout.addWidget(self.data_info_label)
-        
-        toolbar_layout.addStretch()
-        
-        # Control buttons
-        reset_btn = QPushButton("Reset View")
-        reset_btn.clicked.connect(self.reset_view)
-        toolbar_layout.addWidget(reset_btn)
-        
-        # Front view button
-        front_view_btn = QPushButton("Front View")
-        front_view_btn.clicked.connect(self.set_front_view)
-        toolbar_layout.addWidget(front_view_btn)
-        
-        # Deformed mesh controls (hidden by default)
-        self.deformed_controls_layout = QHBoxLayout()
-        
-        # Previous button
-        self.prev_mesh_btn = QPushButton("◀")
-        self.prev_mesh_btn.setMaximumWidth(30)
-        self.prev_mesh_btn.clicked.connect(self._previous_mesh)
-        self.prev_mesh_btn.setVisible(False)
-        self.deformed_controls_layout.addWidget(self.prev_mesh_btn)
-        
-        # SpinBox for direct selection
-        self.mesh_spinbox = QSpinBox()
-        self.mesh_spinbox.setMinimumWidth(50)
-        self.mesh_spinbox.setMaximumWidth(60)
-        self.mesh_spinbox.valueChanged.connect(self._on_mesh_spinbox_changed)
-        self.mesh_spinbox.setVisible(False)
-        self.deformed_controls_layout.addWidget(self.mesh_spinbox)
-        
-        # Next button
-        self.next_mesh_btn = QPushButton("▶")
-        self.next_mesh_btn.setMaximumWidth(30)
-        self.next_mesh_btn.clicked.connect(self._next_mesh)
-        self.next_mesh_btn.setVisible(False)
-        self.deformed_controls_layout.addWidget(self.next_mesh_btn)
-        
-        # Variables for deformed mesh
-        self.neu_files = []
-        self.working_directory = None
-        self.load_mesh_callback = None
-        self.current_mesh_index = 0
-        
-        toolbar_layout.addLayout(self.deformed_controls_layout)
-        
-        # Assembly
-        toolbar_widget = QWidget()
-        toolbar_widget.setLayout(toolbar_layout)
-        toolbar_widget.setMaximumHeight(40)
-        main_layout.addWidget(toolbar_widget)
-
-    def _create_bottom_toolbar(self, main_layout):
-        """Create bottom toolbar"""
-        bottom_toolbar_layout = QHBoxLayout()
-        
-        # Progress controls
-        self.progress_label = QLabel("Ready")
-        self.progress_label.setMinimumWidth(50)
-        self.progress_label.setVisible(False)
-        bottom_toolbar_layout.addWidget(self.progress_label)
-        
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setMaximumWidth(200)
-        self.progress_bar.setMaximumHeight(20)
-        self.progress_bar.setVisible(False)
-        bottom_toolbar_layout.addWidget(self.progress_bar)
-        
-        bottom_toolbar_layout.addStretch()
-        
-        bottom_toolbar_widget = QWidget()
-        bottom_toolbar_widget.setLayout(bottom_toolbar_layout)
-        bottom_toolbar_widget.setMaximumHeight(40) 
-        main_layout.addWidget(bottom_toolbar_widget)
-        
+    
     # === DEFORMED MESH METHODS ===
     
     def add_deformed_mesh_controls(self, neu_files, working_directory, load_callback):
@@ -256,24 +143,16 @@ class VisualizationManager:
         self.load_mesh_callback = load_callback
         self.current_mesh_index = 0
         
-        # Configure spinbox
-        self.mesh_spinbox.setMinimum(1)
-        self.mesh_spinbox.setMaximum(len(neu_files))
-        self.mesh_spinbox.setValue(1)
-        
-        # Show controls
-        self.prev_mesh_btn.setVisible(True)
-        self.mesh_spinbox.setVisible(True)
-        self.next_mesh_btn.setVisible(True)
+        # Use toolbar manager
+        self.toolbar_manager.show_navigation_controls(neu_files)
         
         # Update button states
         self._update_mesh_controls_state()
         
     def hide_deformed_mesh_controls(self):
         """Hide deformed mesh navigation controls"""
-        self.prev_mesh_btn.setVisible(False)
-        self.mesh_spinbox.setVisible(False)
-        self.next_mesh_btn.setVisible(False)
+        # Use toolbar manager
+        self.toolbar_manager.hide_navigation_controls()
     
     def _previous_mesh(self):
         """Load previous mesh file"""
@@ -316,14 +195,10 @@ class VisualizationManager:
     
     def _update_mesh_controls_state(self):
         """Update navigation controls state"""
-        # Previous/next buttons
-        self.prev_mesh_btn.setEnabled(self.current_mesh_index > 0)
-        self.next_mesh_btn.setEnabled(self.current_mesh_index < len(self.neu_files) - 1)
-        
-        # SpinBox (block signals to avoid recursion)
-        self.mesh_spinbox.blockSignals(True)
-        self.mesh_spinbox.setValue(self.current_mesh_index + 1)
-        self.mesh_spinbox.blockSignals(False)
+        self.toolbar_manager.update_navigation_state(
+            self.current_mesh_index, 
+            len(self.neu_files)
+        )
     
     # === PUBLIC METHODS ===
     
@@ -339,9 +214,6 @@ class VisualizationManager:
         """Load neutral file for visualization"""
         self.current_data = neutral_file
         self._update_data_info()
-        
-        # SUPPRESSION DE L'AFFICHAGE AUTOMATIQUE DU MESH DE BASE
-        # Ne plus faire visualize_mesh() ici pour éviter le flash jaune
         
         # Create mesh for later use but don't display it
         mesh = self.mesh_builder.create_pyvista_mesh(self.current_data)
@@ -395,6 +267,8 @@ class VisualizationManager:
     
     def _update_data_info(self):
         """Update displayed information"""
+        info_text = ""
+        
         if self.current_data and self.current_dir:
             # Get current filename if available
             filename = ""
@@ -402,13 +276,15 @@ class VisualizationManager:
                 if 0 <= self.current_mesh_index < len(self.neu_files):
                     filename = f" - {self.neu_files[self.current_mesh_index]}"
             
-            info = (f"Nodes: {self.current_data.get_nb_nodes()} | "
+            info_text = (f"Nodes: {self.current_data.get_nb_nodes()} | "
                 f"Elements: {self.current_data.get_nb_elements()}{filename}")
-            self.data_info_label.setText(info)
         elif self.current_dir:
-            self.data_info_label.setText(f"No data loaded")
+            info_text = f"No data loaded"
         else:
-            self.data_info_label.setText("No directory set")
+            info_text = "No directory set"
+        
+        # Use toolbar manager
+        self.toolbar_manager.update_data_info(info_text)
     
     def _add_dies_to_plot(self):
         """Add dies to visualization"""
@@ -476,3 +352,14 @@ class VisualizationManager:
     def get_preloaded_data(self, index):
         """Get preloaded data for specific index"""
         return self.preloaded_data.get(index)
+    
+    # Methods to access toolbar manager properties for backward compatibility
+    @property
+    def progress_bar(self):
+        """Access progress bar through toolbar manager"""
+        return self.toolbar_manager.progress_bar
+    
+    @property
+    def progress_label(self):
+        """Access progress label through toolbar manager"""
+        return self.toolbar_manager.progress_label

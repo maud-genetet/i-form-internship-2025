@@ -76,6 +76,17 @@ class FieldVariablesHandler:
         """Get visualization manager"""
         return self.main_window.visualization_manager
     
+    def _get_current_options(self):
+        """Get current options from toolbar manager"""
+        visualization_manager = self.get_visualization_manager()
+        
+        # Try to get options from toolbar manager first
+        if hasattr(visualization_manager, 'toolbar_manager'):
+            return visualization_manager.toolbar_manager.get_current_options()
+        else:
+            # Fallback to local viz_options for backward compatibility
+            return self.viz_options.get_current_options()
+    
     def _apply_variable_to_mesh(self, variable_key):
         """Apply variable to current mesh"""
         visualization_manager = self.get_visualization_manager()
@@ -91,7 +102,7 @@ class FieldVariablesHandler:
         
         # PREPARE EVERYTHING BEFORE CLEARING
         mesh = visualization_manager.current_mesh
-        options = self.viz_options.get_current_options()
+        options = self._get_current_options()
         
         # Prepare variable mesh
         prepared_meshes = self._prepare_all_meshes_for_display(
@@ -404,7 +415,7 @@ class FieldVariablesHandler:
             return
         
         # Get current options
-        options = self.viz_options.get_current_options()
+        options = self._get_current_options()
         show_edges = options['show_mesh_edges']
         show_constraints = options['view_constraints']
         
