@@ -19,7 +19,6 @@ from ParserNeutralFile import ParserNeutralFile
 class MeshHandler:
     def __init__(self, main_window):
         self.main_window = main_window
-        self.current_neutral_file = None
         
         # Initialize preloader manager
         self.preloader_manager = PreloaderManager(main_window.visualization_manager)
@@ -44,38 +43,52 @@ class MeshHandler:
     
     def _load_and_display_mesh(self, file_path):
         """Load and display mesh file"""
-        self.current_neutral_file = ParserNeutralFile.parser_file(file_path)
-        
-        if not self.current_neutral_file:
-            QMessageBox.warning(
+        try:
+            neutral_file = ParserNeutralFile.parser_file(file_path)
+            
+            if not neutral_file:
+                QMessageBox.warning(
+                    self.main_window,
+                    "Parsing Error",
+                    "Cannot parse selected file.\n"
+                    "Check that file is in correct .neu format"
+                )
+                return
+            
+            self.main_window.visualization_manager.load_neutral_file(neutral_file)    
+            self.main_window.visualization_manager.set_as_central_widget()
+            
+            # Display loaded filename
+            filename = os.path.basename(file_path)
+            print(f"Mesh loaded: {filename}")
+            
+        except Exception as e:
+            QMessageBox.critical(
                 self.main_window,
-                "Parsing Error",
-                "Cannot parse selected file.\n"
-                "Check that file is in correct .neu format"
+                "Loading Error",
+                f"Error loading mesh file:\n{str(e)}"
             )
-            return
-        
-        self.main_window.visualization_manager.load_neutral_file(self.current_neutral_file)    
-        self.main_window.visualization_manager.set_as_central_widget()
-        
-        # Display loaded filename
-        filename = os.path.basename(file_path)
-        print(f"Mesh loaded: {filename}")
     
     def _fast_load_and_display_mesh(self, file_index):
         """Fast load using preloaded data"""
-        preloaded_data = self.preloader_manager.get_preloaded_data(file_index)
-        
-        if preloaded_data:
-            print(f"Using preloaded data for file {file_index + 1}")
-            self.current_neutral_file = preloaded_data
-            self.main_window.visualization_manager.load_neutral_file(self.current_neutral_file)
-            filename = self.neu_files[file_index] if file_index < len(self.neu_files) else "Unknown"
-            print(f"Fast mesh loaded: {filename}")
-        else:
+        try:
+            preloaded_data = self.preloader_manager.get_preloaded_data(file_index)
+            
+            if preloaded_data:
+                print(f"Using preloaded data for file {file_index + 1}")
+                self.main_window.visualization_manager.load_neutral_file(preloaded_data)
+                filename = self.neu_files[file_index] if file_index < len(self.neu_files) else "Unknown"
+                print(f"Fast mesh loaded: {filename}")
+            else:
+                if file_index < len(self.neu_files):
+                    file_path = os.path.join(self.working_directory, self.neu_files[file_index])
+                    print(f"Preload not ready, loading from disk: {self.neu_files[file_index]}")
+                    self._load_and_display_mesh(file_path)
+        except Exception as e:
+            print(f"Error in fast load: {e}")
+            # Fallback to normal loading
             if file_index < len(self.neu_files):
                 file_path = os.path.join(self.working_directory, self.neu_files[file_index])
-                print(f"Preload not ready, loading from disk: {self.neu_files[file_index]}")
                 self._load_and_display_mesh(file_path)
 
     def _smart_load_callback(self, file_path):

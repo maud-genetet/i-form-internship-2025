@@ -87,7 +87,7 @@ class FieldVariablesHandler:
             # Fallback to local viz_options for backward compatibility
             return self.viz_options.get_current_options()
     
-    def _apply_variable_to_mesh(self, variable_key):
+    def apply_variable(self, variable_key):
         """Apply variable to current mesh"""
         visualization_manager = self.get_visualization_manager()
         
@@ -100,13 +100,51 @@ class FieldVariablesHandler:
         if not resolved_key:
             return
         
+        # Apply the resolved variable
+        self._apply_variable_to_mesh(resolved_key, variable_key)
+    
+    def _resolve_variable_key(self, variable_key):
+        mesh = self.get_visualization_manager().current_mesh
+        
+        if variable_key in self.variable_mapping:
+            mapped_name = self.variable_mapping[variable_key]
+            if mapped_name in mesh.cell_data:
+                return mapped_name
+            else:
+                # Show error with mapped name
+                available_list = list(mesh.cell_data.keys())
+                QMessageBox.information(
+                    self.main_window,
+                    "Variable Not Available",
+                    f"The variable '{mapped_name}' (mapped from '{variable_key}') is not available in the mesh data.\n"
+                    f"Available: {', '.join(available_list[:5])}{'...' if len(available_list) > 5 else ''}"
+                )
+                return None
+        
+        # Fallback: check if key is directly in mesh data (for backward compatibility)
+        if variable_key in mesh.cell_data:
+            return variable_key
+        
+        # Not found anywhere
+        available_list = list(mesh.cell_data.keys())
+        QMessageBox.information(
+            self.main_window,
+            "Variable Not Available",
+            f"The variable key '{variable_key}' is not found in mapping or mesh data.\n"
+            f"Available mesh data: {', '.join(available_list[:5])}{'...' if len(available_list) > 5 else ''}"
+        )
+        return None
+    
+    def _apply_variable_to_mesh(self, resolved_variable_name, original_key):
+        visualization_manager = self.get_visualization_manager()
+        
         # PREPARE EVERYTHING BEFORE CLEARING
         mesh = visualization_manager.current_mesh
         options = self._get_current_options()
         
         # Prepare variable mesh
         prepared_meshes = self._prepare_all_meshes_for_display(
-            mesh, resolved_key, variable_key, 
+            mesh, resolved_variable_name, original_key, 
             visualization_manager.default_edge_color, options
         )
         
@@ -127,12 +165,12 @@ class FieldVariablesHandler:
         # Single final render
         visualization_manager.plotter.render()
         
-        self.current_variable = resolved_key
+        self.current_variable = resolved_variable_name
         
         # Reapply picking if needed
         visualization_manager.reapply_mesh_picking_if_needed()
     
-    def _prepare_all_meshes_for_display(self, mesh, scalar_name, variable_name, edge_color, options):
+    def _prepare_all_meshes_for_display(self, mesh, scalar_name, variable_display_name, edge_color, options):
         """Prepare all meshes for atomic display"""
         prepared_meshes = []
 
@@ -165,9 +203,9 @@ class FieldVariablesHandler:
         
         # Prepare main variable mesh
         if vector_mode:
-            return self._prepare_vector_meshes(mesh, scalars_array, variable_name, options)
+            return self._prepare_vector_meshes(mesh, scalars_array, variable_display_name, options)
         elif line_contour_mode:
-            return self._prepare_line_contour_meshes(mesh, scalars_array, variable_name, cmap, options)
+            return self._prepare_line_contour_meshes(mesh, scalars_array, variable_display_name, cmap, options)
         elif wireframe_mode:
             mesh_data = {
                 'mesh': mesh,
@@ -176,8 +214,8 @@ class FieldVariablesHandler:
                 'opacity': 1.0,
                 'cmap': cmap,
                 'show_scalar_bar': True,
-                'scalar_bar_args': {'title': variable_name},
-                'label': f"Mesh - {variable_name}"
+                'scalar_bar_args': {'title': variable_display_name},
+                'label': f"Mesh - {variable_display_name}"
             }
         else:
             mesh_data = {
@@ -189,11 +227,14 @@ class FieldVariablesHandler:
                 'opacity': 1.0,
                 'cmap': cmap,
                 'show_scalar_bar': True,
-                'scalar_bar_args': {'title': variable_name},
-                'label': f"Mesh - {variable_name}"
+                'scalar_bar_args': {'title': variable_display_name},
+                'label': f"Mesh - {variable_display_name}"
             }
         
         prepared_meshes.append(mesh_data)
+        
+        if view_constraints and hasattr(mesh, '_constraint_info'):
+            pass
     
         return prepared_meshes
     
@@ -388,26 +429,8 @@ class FieldVariablesHandler:
         
         return prepared_dies
     
-    def _resolve_variable_key(self, variable_key):
-        """Resolve and validate variable key"""
-        mesh = self.get_visualization_manager().current_mesh
-        
-        if variable_key not in mesh.cell_data:
-            mesh_key = self.variable_mapping.get(variable_key)
-            if mesh_key not in mesh.cell_data:
-                available_list = list(mesh.cell_data.keys())
-                QMessageBox.information(
-                    self.main_window,
-                    "Variable Not Available",
-                    f"The variable '{variable_key}' is not available.\n"
-                    f"Available: {', '.join(available_list[:5])}{'...' if len(available_list) > 5 else ''}"
-                )
-                return None
-            variable_key = mesh_key
-        return variable_key
-    
-    def _show_geometry_only(self):
-        """Display only geometry"""
+    def standard_options(self):
+        """Display only geometry - Standard Options"""
         visualization_manager = self.get_visualization_manager()
         
         if not visualization_manager.current_data:
@@ -445,7 +468,7 @@ class FieldVariablesHandler:
                 'label': "Mesh - Materials"
             }
         else:
-            # Original behavior - fallback to single color
+            # Fallback to single color
             mesh_data = {
                 'mesh': mesh,
                 'show_edges': show_edges,
@@ -486,155 +509,44 @@ class FieldVariablesHandler:
     def reapply_current_variable(self):
         """Reapply current variable with current options"""
         if self.current_variable:
-            self._apply_variable_to_mesh(self.current_variable)
+            # Find the original key that corresponds to current variable
+            original_key = None
+            for key, value in self.variable_mapping.items():
+                if value == self.current_variable:
+                    original_key = key
+                    break
+            
+            if original_key:
+                self.apply_variable(original_key)
+            else:
+                # Direct application if not found in mapping (backward compatibility)
+                self._apply_variable_to_mesh(self.current_variable, self.current_variable)
         else:
-            # Si pas de variable active, afficher juste la géométrie
-            self._show_geometry_only()
+            # No variable active, display geometry only
+            self.standard_options()
     
-    # === STANDARD OPTIONS ===
-    def standard_options(self):
-        self._show_geometry_only()
+    def get_available_variables(self):
+        visualization_manager = self.get_visualization_manager()
+        
+        if not visualization_manager.current_mesh:
+            return {}
+        
+        mesh = visualization_manager.current_mesh
+        available_vars = {}
+        
+        for key, mapped_name in self.variable_mapping.items():
+            is_available = mapped_name in mesh.cell_data
+            available_vars[key] = (mapped_name, is_available)
+        
+        return available_vars
     
-    # === VELOCITY ===
-    def velocity_x_r(self):
-        self._apply_variable_to_mesh("Velocity X(r)")
-    
-    def velocity_y_z(self):
-        self._apply_variable_to_mesh("Velocity Y(z)")
-    
-    def total_velocity(self):
-        self._apply_variable_to_mesh("Total Velocity")
-    
-    # === FORCE ===
-    def force_x_r(self):
-        self._apply_variable_to_mesh("Force X(r)")
-    
-    def force_y_z(self):
-        self._apply_variable_to_mesh("Force Y(z)")
-    
-    def total_force(self):
-        self._apply_variable_to_mesh("Total Force")
-    
-    # === TEMPERATURE ===
-    def temperature_rate(self):
-        self._apply_variable_to_mesh("Temperature Rate")
-    
-    def temperature(self):
-        self._apply_variable_to_mesh("Temperature")
-    
-    # === STRAIN RATE ===
-    def strain_rate_x_r(self):
-        self._apply_variable_to_mesh("Strain rate x(r)")
-    
-    def strain_rate_y_z(self):
-        self._apply_variable_to_mesh("Strain rate y(z)")
-    
-    def strain_rate_z_theta(self):
-        self._apply_variable_to_mesh("Strain rate z(theta)")
-    
-    def strain_rate_xy_rz(self):
-        self._apply_variable_to_mesh("Strain rate xy(rz)")
-    
-    def effective_strain_rate(self):
-        self._apply_variable_to_mesh("Effective strain rate")
-    
-    def volumetric_strain_rate(self):
-        self._apply_variable_to_mesh("Volumetric strain rate")
-    
-    # === STRAIN ===
-    def strain_x_r(self):
-        self._apply_variable_to_mesh("Strain x(r)")
-    
-    def strain_y_z(self):
-        self._apply_variable_to_mesh("Strain y(z)")
-    
-    def strain_z_theta(self):
-        self._apply_variable_to_mesh("Strain z(theta)")
-    
-    def strain_xy_rz(self):
-        self._apply_variable_to_mesh("Strain xy(rz)")
-    
-    def effective_strain(self):
-        self._apply_variable_to_mesh("Effective strain")
-    
-    def volumetric_strain(self):
-        self._apply_variable_to_mesh("Volumetric Strain")
-    
-    def strain_1(self):
-        self._apply_variable_to_mesh("Strain 1")
-    
-    def strain_2(self):
-        self._apply_variable_to_mesh("Strain 2")
-    
-    def strain_3(self):
-        self._apply_variable_to_mesh("Strain 3")
-    
-    # === STRESS ===
-    def stress_x_r(self):
-        self._apply_variable_to_mesh("Stress x(r)")
-    
-    def stress_y_z(self):
-        self._apply_variable_to_mesh("Stress y(z)")
-    
-    def stress_z_theta(self):
-        self._apply_variable_to_mesh("Stress z(theta)")
-    
-    def stress_xy_rz(self):
-        self._apply_variable_to_mesh("Stress xy(rz)")
-    
-    def effective_stress(self):
-        self._apply_variable_to_mesh("Effective stress")
-    
-    def average_stress(self):
-        self._apply_variable_to_mesh("Average stress")
-    
-    def stress_1(self):
-        self._apply_variable_to_mesh("Stress 1")
-    
-    def stress_2(self):
-        self._apply_variable_to_mesh("Stress 2")
-    
-    def stress_3(self):
-        self._apply_variable_to_mesh("Stress 3")
-    
-    # === MATERIAL PROPERTIES ===
-    def thickness_plane_stress(self):
-        self._apply_variable_to_mesh("Thickness (Plane Stress)")
-    
-    def relative_density(self):
-        self._apply_variable_to_mesh("Relative Density")
-    
-    def ductile_damage(self):
-        self._apply_variable_to_mesh("Ductile Damage")
-    
-    # === ELECTRIC ===
-    def electric_potential(self):
-        self._apply_variable_to_mesh("Electric Potential")
-    
-    def electric_current_density(self):
-        self._apply_variable_to_mesh("Electric Current Density")
-    
-    def electric_resistivity(self):
-        self._apply_variable_to_mesh("Electric Resistivity")
-    
-    # === SPECIAL OPTIONS ===
-    def stress_y_z_ef_stress(self):
-        self._apply_variable_to_mesh("Stress y(z)/Ef.Stress")
-    
-    def stress_xy_rz_ef_stress(self):
-        self._apply_variable_to_mesh("Stress xy(rz)/Ef.Stress")
-    
-    def average_stress_ef_stress(self):
-        self._apply_variable_to_mesh("Average Stress/Ef.Stress")
-    
-    def pressure(self):
-        self._apply_variable_to_mesh("Pressure")
-    
-    def pressure_ef_stress(self):
-        self._apply_variable_to_mesh("Pressure/Ef.Stress")
-    
-    def surface_enlargement_ratio(self):
-        self._apply_variable_to_mesh("Surface Enlargement Ratio")
-    
-    def element_quality(self):
-        self._apply_variable_to_mesh("Element Quality")
+    def get_current_variable_key(self):
+        if not self.current_variable:
+            return None
+            
+        # Find the key that maps to current variable
+        for key, value in self.variable_mapping.items():
+            if value == self.current_variable:
+                return key
+        
+        return None

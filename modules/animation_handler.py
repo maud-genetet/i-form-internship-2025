@@ -392,9 +392,3 @@ class AnimationHandler:
                     visualization_manager.mesh_spinbox.setValue(frame_index + 1)
                     visualization_manager.mesh_spinbox.blockSignals(False)
                     visualization_manager._update_mesh_controls_state()
-    
-    def close_dialog(self):
-        """Close animation dialog"""
-        if self.animation_dialog:
-            self._stop_animation()
-            self.animation_dialog.close()

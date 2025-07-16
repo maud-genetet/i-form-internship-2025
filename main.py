@@ -131,68 +131,69 @@ class MainWindow(QMainWindow):
         self.ui.actionStandard_Options_4.triggered.connect(fv.standard_options)
         
         # Velocity
-        self.ui.actionVelocity_x_r_2.triggered.connect(fv.velocity_x_r)
-        self.ui.actionVelocity_y_z_2.triggered.connect(fv.velocity_y_z)
-        self.ui.actionTotal_Velocity_2.triggered.connect(fv.total_velocity)
+        self.ui.actionVelocity_x_r_2.triggered.connect(lambda: fv.apply_variable("Velocity_X"))
+        self.ui.actionVelocity_y_z_2.triggered.connect(lambda: fv.apply_variable("Velocity_Y"))
+        self.ui.actionTotal_Velocity_2.triggered.connect(lambda: fv.apply_variable("Total_Velocity"))
         
         # Force
-        self.ui.actionForce_x_r_2.triggered.connect(fv.force_x_r)
-        self.ui.actionForce_y_y.triggered.connect(fv.force_y_z)
-        self.ui.actionTotal_Force_2.triggered.connect(fv.total_force)
+        self.ui.actionForce_x_r_2.triggered.connect(lambda: fv.apply_variable("Force_X"))
+        self.ui.actionForce_y_y.triggered.connect(lambda: fv.apply_variable("Force_Y"))
+        self.ui.actionTotal_Force_2.triggered.connect(lambda: fv.apply_variable("Total_Force"))
         
         # Temperature
-        self.ui.actionTemperature_Rate.triggered.connect(fv.temperature_rate)
-        self.ui.actionTemperature.triggered.connect(fv.temperature)
+        self.ui.actionTemperature_Rate.triggered.connect(lambda: fv.apply_variable("Temperature_Rate"))
+        self.ui.actionTemperature.triggered.connect(lambda: fv.apply_variable("Temperature"))
         
         # Strain Rate
-        self.ui.actionStrain_Rate_x_r_2.triggered.connect(fv.strain_rate_x_r)
-        self.ui.actionStrain_Rate_y_z.triggered.connect(fv.strain_rate_y_z)
-        self.ui.actionStrain_Rate_z_theta.triggered.connect(fv.strain_rate_z_theta)
-        self.ui.actionStrain_Rate_xy_z.triggered.connect(fv.strain_rate_xy_rz)
-        self.ui.actionEffective_Strain_Rate_2.triggered.connect(fv.effective_strain_rate)
-        self.ui.actionVolumetric_Strain_Rate.triggered.connect(fv.volumetric_strain_rate)
+        self.ui.actionStrain_Rate_x_r_2.triggered.connect(lambda: fv.apply_variable("Strain_Rate_X"))
+        self.ui.actionStrain_Rate_y_z.triggered.connect(lambda: fv.apply_variable("Strain_Rate_Y"))
+        self.ui.actionStrain_Rate_z_theta.triggered.connect(lambda: fv.apply_variable("Strain_Rate_Z"))
+        self.ui.actionStrain_Rate_xy_z.triggered.connect(lambda: fv.apply_variable("Strain_Rate_XY"))
+        self.ui.actionEffective_Strain_Rate_2.triggered.connect(lambda: fv.apply_variable("Effective_Strain_Rate"))
+        self.ui.actionVolumetric_Strain_Rate.triggered.connect(lambda: fv.apply_variable("Volumetric_Strain_Rate"))
         
         # Strain
-        self.ui.actionStrain_x_r_2.triggered.connect(fv.strain_x_r)
-        self.ui.actionStrain_y_z.triggered.connect(fv.strain_y_z)
-        self.ui.actionStrain_z_theta_2.triggered.connect(fv.strain_z_theta)
-        self.ui.actionStrain_xy_rz_2.triggered.connect(fv.strain_xy_rz)
-        self.ui.actionEffective_Strain_2.triggered.connect(fv.effective_strain)
-        self.ui.actionVolumetric_Strain_2.triggered.connect(fv.volumetric_strain)
-        self.ui.actionStrain_4.triggered.connect(fv.strain_1)
-        self.ui.actionStrain_5.triggered.connect(fv.strain_2)
-        self.ui.actionStrain_6.triggered.connect(fv.strain_3)
+        self.ui.actionStrain_x_r_2.triggered.connect(lambda: fv.apply_variable("Strain_X"))
+        self.ui.actionStrain_y_z.triggered.connect(lambda: fv.apply_variable("Strain_Y"))
+        self.ui.actionStrain_z_theta_2.triggered.connect(lambda: fv.apply_variable("Strain_Z"))
+        self.ui.actionStrain_xy_rz_2.triggered.connect(lambda: fv.apply_variable("Strain_XY"))
+        self.ui.actionEffective_Strain_2.triggered.connect(lambda: fv.apply_variable("Effective_Strain"))
+        self.ui.actionVolumetric_Strain_2.triggered.connect(lambda: fv.apply_variable("Volumetric_Strain"))
+        self.ui.actionStrain_4.triggered.connect(lambda: fv.apply_variable("Strain_1"))
+        self.ui.actionStrain_5.triggered.connect(lambda: fv.apply_variable("Strain_2"))
+        self.ui.actionStrain_6.triggered.connect(lambda: fv.apply_variable("Strain_3"))
         
         # Stress
-        self.ui.actionStress_x_r_2.triggered.connect(fv.stress_x_r)
-        self.ui.actionStress_y_z_2.triggered.connect(fv.stress_y_z)
-        self.ui.actionStress_z_theta_2.triggered.connect(fv.stress_z_theta)
-        self.ui.actionStress_xy_rz_2.triggered.connect(fv.stress_xy_rz)
-        self.ui.actionEffective_Stress_2.triggered.connect(fv.effective_stress)
-        self.ui.actionAverage_Stress_2.triggered.connect(fv.average_stress)
-        self.ui.actionStress_3.triggered.connect(fv.stress_1)
-        self.ui.actionStress_4.triggered.connect(fv.stress_2)
-        self.ui.actionStress_5.triggered.connect(fv.stress_3)
+        self.ui.actionStress_x_r_2.triggered.connect(lambda: fv.apply_variable("Stress_X"))
+        self.ui.actionStress_y_z_2.triggered.connect(lambda: fv.apply_variable("Stress_Y"))
+        self.ui.actionStress_z_theta_2.triggered.connect(lambda: fv.apply_variable("Stress_ZZ"))
+        self.ui.actionStress_xy_rz_2.triggered.connect(lambda: fv.apply_variable("Stress_XY"))
+        self.ui.actionEffective_Stress_2.triggered.connect(lambda: fv.apply_variable("Effective_stress"))
+        self.ui.actionAverage_Stress_2.triggered.connect(lambda: fv.apply_variable("Average_Stress"))
+        self.ui.actionStress_3.triggered.connect(lambda: fv.apply_variable("Stress_1"))
+        self.ui.actionStress_4.triggered.connect(lambda: fv.apply_variable("Stress_2"))
+        self.ui.actionStress_5.triggered.connect(lambda: fv.apply_variable("Stress_3"))
         
-        self.ui.actionThickness_Plane_Stress.triggered.connect(fv.thickness_plane_stress)
-        self.ui.actionRelative_Density.triggered.connect(fv.relative_density)
-        self.ui.actionDuctile_Damage.triggered.connect(fv.ductile_damage)
+        # Material Properties
+        self.ui.actionThickness_Plane_Stress.triggered.connect(lambda: fv.apply_variable("Thickness_Plane_Stress"))
+        self.ui.actionRelative_Density.triggered.connect(lambda: fv.apply_variable("Relative_Density"))
+        self.ui.actionDuctile_Damage.triggered.connect(lambda: fv.apply_variable("Ductile_Damage"))
         
         # Electric
-        self.ui.actionElectric_Potential.triggered.connect(fv.electric_potential)
-        self.ui.actionElectric_Current_Density.triggered.connect(fv.electric_current_density)
-        self.ui.actionElectric_Resistivity.triggered.connect(fv.electric_resistivity)
+        self.ui.actionElectric_Potential.triggered.connect(lambda: fv.apply_variable("Electric_Potential"))
+        self.ui.actionElectric_Current_Density.triggered.connect(lambda: fv.apply_variable("Electric_Current_Density"))
+        self.ui.actionElectric_Resistivity.triggered.connect(lambda: fv.apply_variable("Electric_Resistivity"))
         
         # Special Options
-        self.ui.actionStress_y_z_Ef_Stress.triggered.connect(fv.stress_y_z_ef_stress)
-        self.ui.actionStress_xy_rz_Ef_Stress.triggered.connect(fv.stress_xy_rz_ef_stress)
-        self.ui.actionAverage_Stress_Ef_Stress.triggered.connect(fv.average_stress_ef_stress)
-        self.ui.actionPressure.triggered.connect(fv.pressure)
-        self.ui.actionPressure_Ef_Stress.triggered.connect(fv.pressure_ef_stress)
-        self.ui.actionSurface_Enlargement_Ratio.triggered.connect(fv.surface_enlargement_ratio)
+        self.ui.actionStress_y_z_Ef_Stress.triggered.connect(lambda: fv.apply_variable("Stress_Y_Ef_Stress"))
+        self.ui.actionStress_xy_rz_Ef_Stress.triggered.connect(lambda: fv.apply_variable("Stress_XY_Ef_Stress"))
+        self.ui.actionAverage_Stress_Ef_Stress.triggered.connect(lambda: fv.apply_variable("Average_Stress_Ef_Stress"))
+        self.ui.actionPressure.triggered.connect(lambda: fv.apply_variable("Pressure"))
+        self.ui.actionPressure_Ef_Stress.triggered.connect(lambda: fv.apply_variable("Pressure_Ef_Stress"))
+        self.ui.actionSurface_Enlargement_Ratio.triggered.connect(lambda: fv.apply_variable("Surface_Enlargement_Ratio"))
         
         # Element Quality
-        self.ui.actionElement_Quality.triggered.connect(fv.element_quality)
+        self.ui.actionElement_Quality.triggered.connect(lambda: fv.apply_variable("Element_Quality"))
     
     def get_visualization_manager(self):
         """Return visualization manager for other modules"""
