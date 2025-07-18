@@ -3,6 +3,7 @@ Field Variables Menu Handler
 """
 
 from PyQt5.QtWidgets import QMessageBox
+import pyvista as pv
 import numpy as np
 
 
@@ -282,9 +283,6 @@ class FieldVariablesHandler:
             vectors = display_manager._calculate_vectors_from_variable(mesh, scalars_array, variable_name)
             
             if vectors is not None and len(vectors) == len(points):
-                # Create vector field
-                import pyvista as pv
-                import numpy as np
                 
                 vector_mesh = pv.PolyData(points)
                 vector_mesh['vectors'] = vectors
