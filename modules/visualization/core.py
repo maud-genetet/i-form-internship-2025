@@ -50,7 +50,9 @@ class VisualizationManager:
         self.working_directory = None
         self.load_mesh_callback = None
         self.current_mesh_index = 0
-        
+
+        self.scales_cache = {}
+            
         self._setup_visualization_widget()
     
     def _setup_visualization_widget(self):
@@ -303,7 +305,121 @@ class VisualizationManager:
             
             # Render
             self.plotter.render()
+
+    def get_global_scale_range_for_variable(self, variable_name):
+        """Calcule min/max UNIQUEMENT pour la variable demandée - VERSION SIMPLIFIÉE"""
+        # Si auto-scale n'est pas activé, retourner None
+        options = self.toolbar_manager.get_current_options()
+        if not options.get('auto_scale_mode', False):
+            return None, None
+        
+        # Vérifier le cache
+        if variable_name in self.scales_cache:
+            cached_scales = self.scales_cache[variable_name]
+            print(f"Using cached scales for {variable_name}: {cached_scales['min']}, {cached_scales['max']}")
+            return cached_scales['min'], cached_scales['max']
+        
+        # Calculer pour cette variable spécifique
+        total_available_files = len(self.preloaded_data) + (1 if self.current_mesh else 0)
+        print(f"Computing scales for {variable_name} from {total_available_files} files...")
+        
+        global_min = None
+        global_max = None
+        
+        for file_index in sorted(self.preloaded_data.keys()):
+            neutral_data = self.preloaded_data[file_index]
+            
+            try:
+                var_min, var_max = self._extract_variable_range(neutral_data, variable_name)
+                
+                if var_min is not None and var_max is not None:
+                    if global_min is None:
+                        global_min = var_min
+                        global_max = var_max
+                    else:
+                        global_min = min(global_min, var_min)
+                        global_max = max(global_max, var_max)
+                    
+            except Exception as e:
+                print(f"Error processing file {file_index}: {e}")
+        
+        if global_min is not None and global_max is not None:
+            # Mettre en cache
+            self.scales_cache[variable_name] = {'min': global_min, 'max': global_max}
+            
+            return global_min, global_max
+        else:
+            print(f"No data found for variable {variable_name}")
+            return None, None
     
+    def _extract_variable_range(self, neutral_data, target_variable):
+        """Extrait min/max pour UNE SEULE variable spécifique"""
+        if not neutral_data:
+            return None, None
+        
+        elements = list(neutral_data.get_elements())
+        if not elements:
+            return None, None
+        
+        var_min = None
+        var_max = None
+        
+        var_extractors = {
+            'Effective strain rate': lambda el: el.get_strain_rate_E(),
+            'Effective strain': lambda el: el.get_strain_E(),
+            'Effective stress': lambda el: el.get_stress_O(),
+            'Average stress': lambda el: el.get_stress_Orr(),
+            'Relative Density': lambda el: el.get_densy(),
+            'Element Quality': lambda el: el.get_rindx(),
+            'Strain rate x(r)': lambda el: el.get_strain_rate_Exx(),
+            'Strain rate y(z)': lambda el: el.get_strain_rate_Eyy(),
+            'Strain rate z(theta)': lambda el: el.get_strain_rate_Ezz(),
+            'Strain rate xy(rz)': lambda el: el.get_strain_rate_Exy(),
+            'Volumetric strain rate': lambda el: el.get_strain_rate_Ev(),
+            'Strain x(r)': lambda el: el.get_strain_Exx(),
+            'Strain y(z)': lambda el: el.get_strain_Eyy(),
+            'Strain z(theta)': lambda el: el.get_strain_Ezz(),
+            'Strain xy(rz)': lambda el: el.get_strain_Exy(),
+            'Volumetric Strain': lambda el: el.get_strain_volumetric(),
+            'Strain 1': lambda el: el.get_strain_E1(),
+            'Strain 2': lambda el: el.get_strain_E2(),
+            'Strain 3': lambda el: el.get_strain_E3(),
+            'Stress x(r)': lambda el: el.get_stress_Oxx(),
+            'Stress y(z)': lambda el: el.get_stress_Oyy(),
+            'Stress z(theta)': lambda el: el.get_stress_Ozz(),
+            'Stress xy(rz)': lambda el: el.get_stress_Oxy(),
+            'Stress 1': lambda el: el.get_stress_1(),
+            'Stress 2': lambda el: el.get_stress_2(),
+            'Stress 3': lambda el: el.get_stress_3(),
+            'Thickness (Plane Stress)': lambda el: el.get_thickness_plane_stress(),
+            'Ductile Damage': lambda el: el.get_fract(),
+            'Velocity X(r)': lambda el: el.get_velocity_x(),
+            'Velocity Y(z)': lambda el: el.get_velocity_y(),
+            'Total Velocity': lambda el: el.get_total_velocity(),
+            'Force X(r)': lambda el: el.get_force_x(),
+            'Force Y(z)': lambda el: el.get_force_y(),
+            'Total Force': lambda el: el.get_total_force(),
+            'Temperature': lambda el: el.get_temperature(),
+            'Temperature Rate': lambda el: el.get_temperature_rate(),
+        }
+        
+        if target_variable in var_extractors:
+            extractor = var_extractors[target_variable]
+            for element in elements:
+                try:
+                    value = extractor(element)
+                    if value is not None:
+                        fval = float(value)
+                        if var_min is None:
+                            var_min = var_max = fval
+                        else:
+                            var_min = min(var_min, fval)
+                            var_max = max(var_max, fval)
+                except (ValueError, TypeError):
+                    pass
+        
+        return var_min, var_max
+
     def get_current_data(self):
         """Return currently loaded data"""
         return self.current_data

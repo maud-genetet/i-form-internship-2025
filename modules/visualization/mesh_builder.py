@@ -252,38 +252,14 @@ class MeshBuilder:
             element_data['Pressure/Ef.Stress'].append(element.get_pressure_on_effective_stress() or 0.0)
             element_data['Surface Enlargement Ratio'].append(element.get_surface_enlargement_ratio() or 0.0)
             element_data['Element Quality'].append(element.get_rindx() or 0.0)
-
-            nb_nodes = element.get_nb_lnods()        
-            vx_sum = vy_sum = fx_sum = fy_sum = temp_sum = dtemp_sum = 0.0           
-                
-            for i in range(nb_nodes):
-                node = element.get_lnods_by_index(i)
-                        
-                vx_sum += (node.get_Vx() or 0.0)
-                vy_sum += (node.get_Vy() or 0.0)
-                fx_sum += (node.get_Fx() or 0.0)
-                fy_sum += (node.get_Fy() or 0.0)
-                temp_sum += (node.get_Temp() or 0.0)
-                dtemp_sum += (node.get_DTemp() or 0.0)
-                    
-            if nb_nodes > 0:
-                avg_vx = vx_sum / nb_nodes
-                avg_vy = vy_sum / nb_nodes
-                avg_fx = fx_sum / nb_nodes
-                avg_fy = fy_sum / nb_nodes
-                avg_temp = temp_sum / nb_nodes
-                avg_dtemp = dtemp_sum / nb_nodes
-            else:
-                avg_vx = avg_vy = avg_fx = avg_fy = avg_temp = avg_dtemp = 0.0
-
-            element_data['Velocity X(r)'].append(avg_vx)
-            element_data['Velocity Y(z)'].append(avg_vy)
-            element_data['Total Velocity'].append(np.sqrt(avg_vx**2 + avg_vy**2))
-            element_data['Force X(r)'].append(avg_fx)
-            element_data['Force Y(z)'].append(avg_fy)
-            element_data['Total Force'].append(np.sqrt(avg_fx**2 + avg_fy**2))
-            element_data['Temperature'].append(avg_temp)
-            element_data['Temperature Rate'].append(avg_dtemp)
+            element_data['Velocity X(r)'].append(element.get_velocity_x() or 0.0)
+            element_data['Velocity Y(z)'].append(element.get_velocity_y() or 0.0)
+            element_data['Total Velocity'].append(element.get_total_velocity() or 0.0)
+            element_data['Force X(r)'].append(element.get_force_x() or 0.0)
+            element_data['Force Y(z)'].append(element.get_force_y() or 0.0)
+            element_data['Total Force'].append(element.get_total_force() or 0.0)
+            element_data['Temperature'].append(element.get_temperature() or 0.0)
+            element_data['Temperature Rate'].append(element.get_temperature_rate() or 0.0)
 
         for key, values in element_data.items():
             if len(values) != 0:

@@ -68,9 +68,6 @@ class ToolbarManager:
         # === RIGHT SECTION: View Controls ===
         self._add_view_controls_section(toolbar_layout)
         
-        # === VISUALIZATION OPTIONS ===
-        self._add_visualization_options_section(toolbar_layout)
-        
         # Assembly
         self.top_toolbar_widget = QWidget()
         self.top_toolbar_widget.setLayout(toolbar_layout)
@@ -126,9 +123,6 @@ class ToolbarManager:
     
     def _add_visualization_options_section(self, toolbar_layout):
         """Add all visualization options"""
-        # Separator
-        separator = QLabel(" | ")
-        toolbar_layout.addWidget(separator)
         
         # Wireframe mode
         self.wireframe_checkbox = QCheckBox("Wireframe")
@@ -153,7 +147,6 @@ class ToolbarManager:
         self.constraint_size_spinbox = QSpinBox()
         self.constraint_size_spinbox.setRange(1, 500)
         self.constraint_size_spinbox.setValue(50)
-        self.constraint_size_spinbox.setSuffix("%")
         self.constraint_size_spinbox.valueChanged.connect(self._on_constraint_size_changed)
         toolbar_layout.addWidget(self.constraint_size_spinbox)
         
@@ -184,9 +177,13 @@ class ToolbarManager:
         self.vector_size_spinbox = QSpinBox()
         self.vector_size_spinbox.setRange(1, 500)
         self.vector_size_spinbox.setValue(50)
-        self.vector_size_spinbox.setSuffix("%")
         self.vector_size_spinbox.valueChanged.connect(self._on_vector_size_changed)
         toolbar_layout.addWidget(self.vector_size_spinbox)
+
+        # Auto Scale mode
+        self.auto_scale_checkbox = QCheckBox("Auto Scale")
+        self.auto_scale_checkbox.toggled.connect(self._on_auto_scale_toggled)
+        toolbar_layout.addWidget(self.auto_scale_checkbox)
         
         # Remove variables button
         self.remove_variables_btn = QPushButton("Remove Variables")
@@ -215,6 +212,9 @@ class ToolbarManager:
         self.bottom_toolbar_widget.setLayout(bottom_toolbar_layout)
         self.bottom_toolbar_widget.setMaximumHeight(40)
         main_layout.addWidget(self.bottom_toolbar_widget)
+
+        # === VISUALIZATION OPTIONS ===
+        self._add_visualization_options_section(bottom_toolbar_layout)
     
     # === EVENT HANDLERS ===
     
@@ -297,6 +297,21 @@ class ToolbarManager:
         """Handle remove variables button"""
         if hasattr(self.main_window, 'field_variables_handler'):
             self.main_window.field_variables_handler.standard_options()
+
+    def disable_auto_scale_during_loading(self):
+        """Désactiver auto-scale pendant le chargement"""
+        if self.auto_scale_checkbox:
+            self.auto_scale_checkbox.setEnabled(False)
+
+    def enable_auto_scale_after_loading(self):
+        """Réactiver auto-scale après le chargement"""
+        if self.auto_scale_checkbox:
+            self.auto_scale_checkbox.setEnabled(True)
+
+    def _on_auto_scale_toggled(self, checked):
+        """Handle auto scale toggle"""
+        self.visualization_options['auto_scale_mode'] = checked
+        self._refresh_display()
     
     def _refresh_display(self):
         """Refresh display when options change"""
@@ -315,6 +330,7 @@ class ToolbarManager:
             'view_constraints': self.constraints_checkbox.isChecked() if self.constraints_checkbox else False,
             'line_contour_mode': self.line_contour_checkbox.isChecked() if self.line_contour_checkbox else False,
             'vector_mode': self.vector_checkbox.isChecked() if self.vector_checkbox else False,
+            'auto_scale_mode': self.auto_scale_checkbox.isChecked() if self.auto_scale_checkbox else False,
             'constraint_size_factor': self.constraint_size_spinbox.value() / 100.0 if self.constraint_size_spinbox else 1.0,
             'vector_size_factor': self.vector_size_spinbox.value() / 100.0 if self.vector_size_spinbox else 1.0
         }

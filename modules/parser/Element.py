@@ -280,7 +280,44 @@ class Element:
     
     def get_surface_enlargement_ratio(self):
         return 0.0
-            
+    
+    # ============== CALCULATED PROPERTIES NODES ==============
+
+    def get_velocity_x(self):
+        if self.lnods:
+            return sum(node.get_Vx() for node in self.lnods) / len(self.lnods)
+        return 0.0
+    
+    def get_velocity_y(self):
+        if self.lnods:
+            return sum(node.get_Vy() for node in self.lnods) / len(self.lnods)
+        return 0.0
+    
+    def get_total_velocity(self):
+        return ( self.get_velocity_x()**2 + self.get_velocity_y()**2 ) 
+    
+    def get_force_x(self):
+        if self.lnods:
+            return sum(node.get_Fx() for node in self.lnods) / len(self.lnods)
+        return 0.0
+    
+    def get_force_y(self):
+        if self.lnods:
+            return sum(node.get_Fy() for node in self.lnods) / len(self.lnods)
+        return 0.0
+    
+    def get_total_force(self):
+        return ( self.get_force_x()**2 + self.get_force_y()**2 )
+    
+    def get_temperature(self):
+        if self.lnods:
+            return sum(node.get_Temp() for node in self.lnods) / len(self.lnods)
+        return 0.0
+    
+    def get_temperature_rate(self):
+        if self.lnods:
+            return sum(node.get_DTemp() for node in self.lnods) / len(self.lnods)
+        return 0.0
     
     # ============== UTILITY METHODS ==============
     def get_info(self):

@@ -183,6 +183,7 @@ class FieldVariablesHandler:
         view_constraints = options.get('view_constraints', False)
         line_contour_mode = options.get('line_contour_mode', False)
         vector_mode = options.get('vector_mode', False)
+        auto_scale_mode = options.get('auto_scale_mode', False)
         
         # Apply HD contour if needed
         if high_definition_contour:
@@ -196,6 +197,14 @@ class FieldVariablesHandler:
             scalars_array = mesh.point_data[scalar_name]
         else:
             scalars_array = mesh.cell_data[scalar_name]
+
+        clim = None
+        if auto_scale_mode:
+            visualization_manager = self.get_visualization_manager()
+            global_min, global_max = visualization_manager.get_global_scale_range_for_variable(scalar_name)
+            if global_min is not None and global_max is not None:
+                clim = [global_min, global_max]
+                print(f"Using auto-scale for {scalar_name}: [{global_min:.6f}, {global_max:.6f}]")
         
         # Prepare main variable mesh
         if vector_mode:
@@ -209,6 +218,7 @@ class FieldVariablesHandler:
                 'show_edges': False,
                 'opacity': 1.0,
                 'cmap': cmap,
+                'clim': clim,
                 'show_scalar_bar': True,
                 'scalar_bar_args': {'title': variable_display_name},
                 'label': f"Mesh - {variable_display_name}"
@@ -222,6 +232,7 @@ class FieldVariablesHandler:
                 'line_width': 1,
                 'opacity': 1.0,
                 'cmap': cmap,
+                'clim': clim,
                 'show_scalar_bar': True,
                 'scalar_bar_args': {'title': variable_display_name},
                 'label': f"Mesh - {variable_display_name}"

@@ -151,6 +151,9 @@ class MeshHandler:
                     self.preloader_manager.start_preloading(
                         neu_files, working_directory, first_file_loaded_index=1
                     )
+                else:
+                    if hasattr(self.main_window.visualization_manager, 'toolbar_manager'):
+                        self.main_window.visualization_manager.toolbar_manager.enable_auto_scale_after_loading()
                 
                 self.main_window.visualization_manager.reset_view()
                         

@@ -33,11 +33,11 @@ class FilePreloader(QThread):
         
     def run(self):
         """Run the preloading process"""
-        total_files = len(self.neu_files) - self.start_index
+        total_files = len(self.neu_files)
         loaded_count = 0
         
         try:
-            for i in range(self.start_index, len(self.neu_files)):
+            for i in range(0, len(self.neu_files)):
                 if self.should_stop:
                     break
                     

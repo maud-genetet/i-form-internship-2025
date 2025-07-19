@@ -59,6 +59,9 @@ class FileHandler:
         # Reset field variables handler current variable
         self.main_window.field_variables_handler.current_variable = None
         
+        if hasattr(visualization_manager, 'scales_cache'):
+            visualization_manager.scales_cache = {}
+        
     def print_document(self):
         """Print current document"""
         pass

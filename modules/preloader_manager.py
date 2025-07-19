@@ -3,7 +3,6 @@ Preloader Manager
 Manages the file preloading system with UI progress
 """
 
-from PyQt5.QtWidgets import QProgressBar, QLabel
 from .file_preloader import FilePreloader
 
 
@@ -28,6 +27,9 @@ class PreloaderManager:
         
         print(f"Starting preload of {len(neu_files)} files")
         
+        if hasattr(self.visualization_manager, 'toolbar_manager'):
+            self.visualization_manager.toolbar_manager.disable_auto_scale_during_loading()
+        
         if self.progress_bar:
             self.progress_bar.setVisible(True)
             self.progress_bar.setValue(0)
@@ -45,7 +47,7 @@ class PreloaderManager:
         
         self.preloader_thread.start()
     
-    def _on_file_loaded(self, index, filename):
+    def _on_file_loaded(self, index):
         """Called when a single file is loaded"""
         if self.preloader_thread:
             data = self.preloader_thread.get_preloaded_data(index)
@@ -63,7 +65,10 @@ class PreloaderManager:
             self.progress_label.setVisible(False)
         
         self.visualization_manager.set_preloaded_data(self.preloaded_files)
-    
+        
+        if hasattr(self.visualization_manager, 'toolbar_manager'):
+            self.visualization_manager.toolbar_manager.enable_auto_scale_after_loading()
+
     def _on_progress_updated(self, percentage, message):
         """Called when progress is updated"""
         if self.progress_bar:
@@ -80,6 +85,9 @@ class PreloaderManager:
         if self.preloader_thread and self.preloader_thread.isRunning():
             self.preloader_thread.stop()
             self.preloader_thread.wait(3000)
+        
+        if hasattr(self.visualization_manager, 'toolbar_manager'):
+            self.visualization_manager.toolbar_manager.enable_auto_scale_after_loading()
             
         # Hide progress components
         if self.progress_bar:
