@@ -9,11 +9,12 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 from PyQt5.QtCore import Qt
 
 from main_ui import Ui_MainWindow
-from modules.file_handler import FileHandler
-from modules.mesh_handler import MeshHandler
-from modules.visualization import VisualizationManager # We import the module thanks to the __init__.py file
-from modules.field_variables_handler import FieldVariablesHandler
-from modules.animation_handler import AnimationHandler  # Add this import
+from handlers.file_handler import FileHandler
+from handlers.mesh_handler import MeshHandler
+from visualization import VisualizationManager
+from handlers.field_variables_handler import FieldVariablesHandler
+from handlers.animation_handler import AnimationHandler
+
 
 '''
 from modules.edit_handler import EditHandler
@@ -55,7 +56,8 @@ class MainWindow(QMainWindow):
         self.file_handler = FileHandler(self)
         self.mesh_handler = MeshHandler(self)
         self.field_variables_handler = FieldVariablesHandler(self)
-        self.animation_handler = AnimationHandler(self)  # Add this line
+        self.animation_handler = AnimationHandler(self)
+        self.graphics_handler = GraphicsHandler(self)
 
         '''
         self.edit_handler = EditHandler(self)
@@ -92,6 +94,13 @@ class MainWindow(QMainWindow):
         
         # Animation Menu
         self.ui.actionAnimation_Controls.triggered.connect(self.animation_handler.animation_controls)
+
+        self.ui.actionXY_Graphics.triggered.connect(self.graphics_handler.xy_graphics)
+        self.ui.actionPrincipal_Strain_Space.triggered.connect(self.graphics_handler.principal_strain_space)
+        self.ui.actionStrain_Stress_Triaxiality.triggered.connect(self.graphics_handler.strain_stress_triaxiality)
+        self.ui.actionEvolution_of_Element_Center_or_Field_Variable_with_Time.triggered.connect(self.graphics_handler.evolution_of_element_center_or_field_variable_with_time)
+        self.ui.actionMesh_Quality_Assessment.triggered.connect(self.graphics_handler.mesh_quality_assessment)
+        self.ui.actionXY_Graphics_of_Electrical_Variables.triggered.connect(self.graphics_handler.xy_graphics_of_electrical_variables)
         
         '''
         # Edit Menu

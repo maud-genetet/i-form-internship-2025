@@ -3,13 +3,10 @@ Main Visualization Module - Configuration and Main Controls
 """
 
 import numpy as np
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
-                             QPushButton, QCheckBox, QSpinBox, QProgressBar)
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel)
 from pyvistaqt import QtInteractor
-import pyvista as pv
-import vtk
 from PyQt5.QtWidgets import QFrame, QScrollArea
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt
 import numpy as np
 
 from .mesh_builder import MeshBuilder

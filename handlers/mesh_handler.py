@@ -5,16 +5,10 @@ Manages all mesh-related operations
 """
 
 import os
-import sys
-from PyQt5.QtWidgets import QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QMessageBox
 import re
-from .preloader_manager import PreloaderManager
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parser_dir = os.path.join(current_dir, 'parser')
-if parser_dir not in sys.path:
-    sys.path.append(parser_dir)
-from ParserNeutralFile import ParserNeutralFile
+from preloader.preloader_manager import PreloaderManager
+from parser import ParserNeutralFile
 
 class MeshHandler:
     def __init__(self, main_window):

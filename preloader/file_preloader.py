@@ -4,14 +4,9 @@ Background thread for preloading .NEU files
 """
 
 import os
-import sys
 from PyQt5.QtCore import QThread, pyqtSignal, QMutex
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parser_dir = os.path.join(current_dir, 'parser')
-if parser_dir not in sys.path:
-    sys.path.append(parser_dir)
-from ParserNeutralFile import ParserNeutralFile
+from parser import ParserNeutralFile
 
 
 class FilePreloader(QThread):

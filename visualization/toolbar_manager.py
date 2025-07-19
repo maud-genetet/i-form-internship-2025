@@ -3,7 +3,7 @@ Toolbar Manager
 Centralizes all toolbar-related functionality
 """
 
-from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel, 
+from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QLabel, 
                              QPushButton, QCheckBox, QSpinBox, QProgressBar)
 
 

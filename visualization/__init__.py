@@ -1,4 +1,3 @@
-
 """
 Module de visualisation PyVista - Point d'entrée simplifié
 """

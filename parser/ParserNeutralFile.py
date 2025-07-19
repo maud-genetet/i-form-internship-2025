@@ -1,7 +1,7 @@
-from Element import Element
-from Node import Node
-from NeutralFile import NeutralFile
-from Die import Die
+from .models.Element import Element
+from .models.Node import Node
+from .models.NeutralFile import NeutralFile
+from .models.Die import Die
 import time
 
 class ParserNeutralFile:

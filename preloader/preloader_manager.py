@@ -5,7 +5,6 @@ Manages the file preloading system with UI progress
 
 from .file_preloader import FilePreloader
 
-
 class PreloaderManager:
     """Manages the file preloading system"""
     

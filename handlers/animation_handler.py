@@ -4,11 +4,9 @@ Manages mesh animation functionality with frame control and timing
 """
 
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
-                             QPushButton, QSpinBox, QDoubleSpinBox, QSlider,
+                             QPushButton, QSpinBox, QSlider,
                              QCheckBox, QGroupBox, QMessageBox)
 from PyQt5.QtCore import QTimer, Qt
-import os
-
 
 class AnimationHandler:
     def __init__(self, main_window):
