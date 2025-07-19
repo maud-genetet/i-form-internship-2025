@@ -75,7 +75,7 @@ class MainWindow(QMainWindow):
         """Connect all action signals to appropriate handlers"""
         
         # File Menu
-        self.ui.actionWorking_Derectory.triggered.connect(self.file_handler.set_working_directory)
+        self.ui.actionWorking_Directory.triggered.connect(self.file_handler.set_working_directory)
         self.ui.actionPrint.triggered.connect(self.file_handler.print_document)
         self.ui.actionSave.triggered.connect(self.file_handler.save_document)
         self.ui.actionExport_as_DXF.triggered.connect(self.file_handler.export_as_dxf)

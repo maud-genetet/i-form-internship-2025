@@ -27,7 +27,7 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionWorking_Derectory"/>
+    <addaction name="actionWorking_Directory"/>
     <addaction name="actionPrint"/>
     <addaction name="actionSave"/>
     <addaction name="actionExport_as_DXF"/>
@@ -189,6 +189,15 @@
     <property name="title">
      <string>Graphics</string>
     </property>
+    <addaction name="actionStandard_Options_5"/>
+    <addaction name="actionXY_Graphics"/>
+    <addaction name="actionPrincipal_Strain_Space"/>
+    <addaction name="actionStrain_Stress_Triaxiality"/>
+    <addaction name="actionEvolution_of_Element_Center_or_Field_Variable_with_Time"/>
+    <addaction name="separator"/>
+    <addaction name="actionSpecial_Options_3"/>
+    <addaction name="actionMesh_Quality_Assessment"/>
+    <addaction name="actionXY_Graphics_of_Electrical_Variables"/>
    </widget>
    <widget class="QMenu" name="menuDie_Stress_Analysis">
     <property name="title">
@@ -237,9 +246,9 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionWorking_Derectory">
+  <action name="actionWorking_Directory">
    <property name="text">
-    <string>Working Derectory...</string>
+    <string>Working Directory...</string>
    </property>
   </action>
   <action name="actionPrint">
@@ -313,6 +322,9 @@
    </property>
   </action>
   <action name="actionStandard_Options">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Standard Options</string>
    </property>
@@ -328,6 +340,9 @@
    </property>
   </action>
   <action name="actionStandard_Options_2">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Standard Options</string>
    </property>
@@ -348,6 +363,9 @@
    </property>
   </action>
   <action name="actionSpecial_Options">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Special Options</string>
    </property>
@@ -363,6 +381,9 @@
    </property>
   </action>
   <action name="actionStandard_Options_3">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Standard Options</string>
    </property>
@@ -379,7 +400,7 @@
   </action>
   <action name="actionStandard_Options_4">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Standard Options</string>
@@ -744,6 +765,52 @@
    </property>
    <property name="statusTip">
     <string>Open animation control dialog</string>
+   </property>
+  </action>
+  <action name="actionStandard_Options_5">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Standard Options</string>
+   </property>
+  </action>
+  <action name="actionXY_Graphics">
+   <property name="text">
+    <string>XY Graphics</string>
+   </property>
+  </action>
+  <action name="actionPrincipal_Strain_Space">
+   <property name="text">
+    <string>Principal Strain Space</string>
+   </property>
+  </action>
+  <action name="actionStrain_Stress_Triaxiality">
+   <property name="text">
+    <string>Strain-Stress Triaxiality</string>
+   </property>
+  </action>
+  <action name="actionEvolution_of_Element_Center_or_Field_Variable_with_Time">
+   <property name="text">
+    <string>Evolution of Element Center or Field Variable with Time</string>
+   </property>
+  </action>
+  <action name="actionSpecial_Options_3">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Special Options</string>
+   </property>
+  </action>
+  <action name="actionMesh_Quality_Assessment">
+   <property name="text">
+    <string>Mesh Quality Assessment</string>
+   </property>
+  </action>
+  <action name="actionXY_Graphics_of_Electrical_Variables">
+   <property name="text">
+    <string>XY Graphics of Electrical Variables</string>
    </property>
   </action>
  </widget>
