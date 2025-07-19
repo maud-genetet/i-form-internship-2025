@@ -22,7 +22,7 @@ class ParserNeutralFile:
                 neu = NeutralFile(lignes[0].strip())
 
                 nb_nodes = int(lignes[1].strip())
-                print(f"Nombre de noeuds : {nb_nodes}")
+                #print(f"Nombre de noeuds : {nb_nodes}")
 
                 # Traitement des noeuds
                 for i in range(2, 2 + nb_nodes):
@@ -46,7 +46,7 @@ class ParserNeutralFile:
                 actual_ligne = 2 + nb_nodes
 
                 nb_elements = int(lignes[actual_ligne].strip())
-                print(f"Nombre d'éléments : {nb_elements}")
+                #print(f"Nombre d'éléments : {nb_elements}")
 
                 actual_ligne += 1
 
@@ -147,7 +147,7 @@ class ParserNeutralFile:
                 # Die elements
                 nb_dies = int(lignes[actual_ligne].strip())
                 actual_ligne += 2
-                print(f"Nombre de dies : {nb_dies}")
+                #print(f"Nombre de dies : {nb_dies}")
                 
                 for die_index in range(actual_ligne, actual_ligne + nb_dies):
 
@@ -214,12 +214,12 @@ class ParserNeutralFile:
 
                 actual_ligne += nb_contact_elements
 
-                print(f"Nombre d'éléments de contact : {nb_contact_elements}")     
+                #print(f"Nombre d'éléments de contact : {nb_contact_elements}")     
 
                 nb_code_elements = int(lignes[actual_ligne].strip())
                 actual_ligne += 1
 
-                print(f"Nombre de node avec code : {nb_code_elements}") 
+                #print(f"Nombre de node avec code : {nb_code_elements}") 
 
                 for i in range(actual_ligne, actual_ligne + nb_code_elements):
                     ligne = lignes[i].strip()
@@ -239,7 +239,7 @@ class ParserNeutralFile:
                 if ligne_temps:
                     try:
                         neu.t_time = float(ligne_temps.replace('D', 'E').replace('d', 'e'))
-                        print(f"Temps : {float(ligne_temps.replace('D', 'E').replace('d', 'e'))}")
+                        #print(f"Temps : {float(ligne_temps.replace('D', 'E').replace('d', 'e'))}")
                     except ValueError:
                         print(f"Erreur de format pour le temps à la ligne {actual_ligne + 1}.")
                 else:
@@ -278,7 +278,7 @@ class ParserNeutralFile:
                 # Die elements
                 nb_dies = int(lignes[actual_ligne].strip())
                 actual_ligne += 2
-                print(f"Nombre de dies : {nb_dies}")
+                #print(f"Nombre de dies : {nb_dies}")
                 
                 for die_index in range(actual_ligne, actual_ligne + nb_dies):
 
@@ -343,7 +343,7 @@ class ParserNeutralFile:
                 if ligne_temps:
                     try:
                         neu.t_time = float(ligne_temps.replace('D', 'E').replace('d', 'e'))
-                        print(f"Temps : {float(ligne_temps.replace('D', 'E').replace('d', 'e'))}")
+                        #print(f"Temps : {float(ligne_temps.replace('D', 'E').replace('d', 'e'))}")
                     except ValueError:
                         print(f"Erreur de format pour le temps à la ligne {actual_ligne + 1}.")
                 else:
