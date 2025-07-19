@@ -316,7 +316,6 @@ class VisualizationManager:
         # Vérifier le cache
         if variable_name in self.scales_cache:
             cached_scales = self.scales_cache[variable_name]
-            print(f"Using cached scales for {variable_name}: {cached_scales['min']}, {cached_scales['max']}")
             return cached_scales['min'], cached_scales['max']
         
         # Calculer pour cette variable spécifique

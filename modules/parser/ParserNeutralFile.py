@@ -34,12 +34,12 @@ class ParserNeutralFile:
                             continue
 
                         node = Node(int(parts[0]))
-                        node.x = float(parts[1].replace('D', 'E').replace('d', 'e'))
-                        node.y = float(parts[2].replace('D', 'E').replace('d', 'e'))
-                        node.vx = float(parts[3].replace('D', 'E').replace('d', 'e'))
-                        node.vy = float(parts[4].replace('D', 'E').replace('d', 'e'))
-                        node.fx = float(parts[5].replace('D', 'E').replace('d', 'e'))
-                        node.fy = float(parts[6].replace('D', 'E').replace('d', 'e'))
+                        node.x = float(parts[1].replace('D', 'E'))
+                        node.y = float(parts[2].replace('D', 'E'))
+                        node.vx = float(parts[3].replace('D', 'E'))
+                        node.vy = float(parts[4].replace('D', 'E'))
+                        node.fx = float(parts[5].replace('D', 'E'))
+                        node.fy = float(parts[6].replace('D', 'E'))
 
                         neu.add_node(node)
 
@@ -65,9 +65,9 @@ class ParserNeutralFile:
                             element.lnods.append(neu.get_node_by_id(int(parts[3])))
                             element.lnods.append(neu.get_node_by_id(int(parts[4])))
                             element.lnods.append(neu.get_node_by_id(int(parts[5])))
-                            element.rindx = float(parts[6].replace('D', 'E').replace('d', 'e'))
-                            element.densy = float(parts[7].replace('D', 'E').replace('d', 'e'))
-                            element.fract = float(parts[8].replace('D', 'E').replace('d', 'e'))
+                            element.rindx = float(parts[6].replace('D', 'E'))
+                            element.densy = float(parts[7].replace('D', 'E'))
+                            element.fract = float(parts[8].replace('D', 'E'))
 
                             neu.add_element(element)
                         else:
@@ -81,12 +81,12 @@ class ParserNeutralFile:
                             element = neu.get_element_by_id(int(parts[0]))
 
                             if element:
-                                element.srnrt_exx = float(parts[1].replace('D', 'E').replace('d', 'e'))
-                                element.srnrt_eyy = float(parts[2].replace('D', 'E').replace('d', 'e'))
-                                element.srnrt_ezz = float(parts[3].replace('D', 'E').replace('d', 'e'))
-                                element.srnrt_exy = float(parts[4].replace('D', 'E').replace('d', 'e'))
-                                element.srnrt_e = float(parts[5].replace('D', 'E').replace('d', 'e'))
-                                element.srnrt_ev = float(parts[6].replace('D', 'E').replace('d', 'e'))
+                                element.srnrt_exx = float(parts[1].replace('D', 'E'))
+                                element.srnrt_eyy = float(parts[2].replace('D', 'E'))
+                                element.srnrt_ezz = float(parts[3].replace('D', 'E'))
+                                element.srnrt_exy = float(parts[4].replace('D', 'E'))
+                                element.srnrt_e = float(parts[5].replace('D', 'E'))
+                                element.srnrt_ev = float(parts[6].replace('D', 'E'))
                         else:
                             print(f"Erreur de format pour l'élément de taux de déformation à la ligne {strain_rate_line + 1}.")
 
@@ -98,14 +98,14 @@ class ParserNeutralFile:
                             element = neu.get_element_by_id(int(parts[0]))
 
                             if element:
-                                element.strain_exx = float(parts[1].replace('D', 'E').replace('d', 'e'))
-                                element.strain_eyy = float(parts[2].replace('D', 'E').replace('d', 'e'))
-                                element.strain_ezz = float(parts[3].replace('D', 'E').replace('d', 'e'))
-                                element.strain_exy = float(parts[4].replace('D', 'E').replace('d', 'e'))
-                                element.strain_e = float(parts[5].replace('D', 'E').replace('d', 'e'))
-                                element.strain_e1 = float(parts[6].replace('D', 'E').replace('d', 'e'))
-                                element.strain_e3 = float(parts[7].replace('D', 'E').replace('d', 'e'))
-                                element.angle13 = float(parts[8].replace('D', 'E').replace('d', 'e'))
+                                element.strain_exx = float(parts[1].replace('D', 'E'))
+                                element.strain_eyy = float(parts[2].replace('D', 'E'))
+                                element.strain_ezz = float(parts[3].replace('D', 'E'))
+                                element.strain_exy = float(parts[4].replace('D', 'E'))
+                                element.strain_e = float(parts[5].replace('D', 'E'))
+                                element.strain_e1 = float(parts[6].replace('D', 'E'))
+                                element.strain_e3 = float(parts[7].replace('D', 'E'))
+                                element.angle13 = float(parts[8].replace('D', 'E'))
                         else:
                             print(f"Erreur de format pour l'élément de déformation à la ligne {strain_line + 1}.")
 
@@ -117,12 +117,12 @@ class ParserNeutralFile:
                             element = neu.get_element_by_id(int(parts[0]))
 
                             if element:
-                                element.stress_oxx = float(parts[1].replace('D', 'E').replace('d', 'e'))
-                                element.stress_oyy = float(parts[2].replace('D', 'E').replace('d', 'e'))
-                                element.stress_ozz = float(parts[3].replace('D', 'E').replace('d', 'e'))
-                                element.stress_oxy = float(parts[4].replace('D', 'E').replace('d', 'e'))
-                                element.stress_o = float(parts[5].replace('D', 'E').replace('d', 'e'))
-                                element.stress_orr = float(parts[6].replace('D', 'E').replace('d', 'e'))
+                                element.stress_oxx = float(parts[1].replace('D', 'E'))
+                                element.stress_oyy = float(parts[2].replace('D', 'E'))
+                                element.stress_ozz = float(parts[3].replace('D', 'E'))
+                                element.stress_oxy = float(parts[4].replace('D', 'E'))
+                                element.stress_o = float(parts[5].replace('D', 'E'))
+                                element.stress_orr = float(parts[6].replace('D', 'E'))
                         else:
                             print(f"Erreur de format pour l'élément de contrainte à la ligne {stress_line + 1}.")
 
@@ -140,8 +140,8 @@ class ParserNeutralFile:
                         node = neu.get_node_by_id(int(parts[0]))
 
                         if node:
-                            node.dtemp = float(parts[1].replace('D', 'E').replace('d', 'e'))
-                            node.temp = float(parts[2].replace('D', 'E').replace('d', 'e'))
+                            node.dtemp = float(parts[1].replace('D', 'E'))
+                            node.temp = float(parts[2].replace('D', 'E'))
                 actual_ligne += nb_nodes
 
                 # Die elements
@@ -169,15 +169,15 @@ class ParserNeutralFile:
                                     print(f"Erreur de format pour le die à la ligne {actual_ligne + 1}.")
                                 
                                 main_node = Node(-1) # ID temporaire
-                                main_node.x = float(parts_die[0].replace('D', 'E').replace('d', 'e'))
-                                main_node.y = float(parts_die[1].replace('D', 'E').replace('d', 'e'))
-                                main_node.vx = float(parts_die[2].replace('D', 'E').replace('d', 'e'))
-                                main_node.vy = float(parts_die[3].replace('D', 'E').replace('d', 'e'))
-                                main_node.fx = float(parts_die[5].replace('D', 'E').replace('d', 'e'))
-                                main_node.fy = float(parts_die[6].replace('D', 'E').replace('d', 'e'))
+                                main_node.x = float(parts_die[0].replace('D', 'E'))
+                                main_node.y = float(parts_die[1].replace('D', 'E'))
+                                main_node.vx = float(parts_die[2].replace('D', 'E'))
+                                main_node.vy = float(parts_die[3].replace('D', 'E'))
+                                main_node.fx = float(parts_die[5].replace('D', 'E'))
+                                main_node.fy = float(parts_die[6].replace('D', 'E'))
                                 die.main_node = main_node
-                                die.m = float(parts_die[4].replace('D', 'E').replace('d', 'e'))
-                                die.temp = float(parts[2].replace('D', 'E').replace('d', 'e'))
+                                die.m = float(parts_die[4].replace('D', 'E'))
+                                die.temp = float(parts[2].replace('D', 'E'))
 
                                 actual_ligne += 1
 
@@ -190,8 +190,8 @@ class ParserNeutralFile:
                                         continue
 
                                     node = Node(-1) # ID temporaire
-                                    node.x = float(node_parts[0].replace('D', 'E').replace('d', 'e'))
-                                    node.y = float(node_parts[1].replace('D', 'E').replace('d', 'e'))
+                                    node.x = float(node_parts[0].replace('D', 'E'))
+                                    node.y = float(node_parts[1].replace('D', 'E'))
                                     die.nodes.append(node)
                             
                             actual_ligne += int(parts[1])
@@ -231,15 +231,15 @@ class ParserNeutralFile:
 
                         node = neu.get_node_by_id(int(parts[0]))
                         if node:
-                            node.code = float(parts[1].replace('D', 'E').replace('d', 'e'))
+                            node.code = float(parts[1].replace('D', 'E'))
 
                 actual_ligne += nb_code_elements
                 # Temps
                 ligne_temps = lignes[actual_ligne].strip()
                 if ligne_temps:
                     try:
-                        neu.t_time = float(ligne_temps.replace('D', 'E').replace('d', 'e'))
-                        #print(f"Temps : {float(ligne_temps.replace('D', 'E').replace('d', 'e'))}")
+                        neu.t_time = float(ligne_temps.replace('D', 'E'))
+                        #print(f"Temps : {float(ligne_temps.replace('D', 'E'))}")
                     except ValueError:
                         print(f"Erreur de format pour le temps à la ligne {actual_ligne + 1}.")
                 else:
@@ -300,15 +300,15 @@ class ParserNeutralFile:
                                     print(f"Erreur de format pour le die à la ligne {actual_ligne + 1}.")
                                 
                                 main_node = Node(-1) # ID temporaire
-                                main_node.x = float(parts_die[0].replace('D', 'E').replace('d', 'e'))
-                                main_node.y = float(parts_die[1].replace('D', 'E').replace('d', 'e'))
-                                main_node.vx = float(parts_die[2].replace('D', 'E').replace('d', 'e'))
-                                main_node.vy = float(parts_die[3].replace('D', 'E').replace('d', 'e'))
-                                main_node.fx = float(parts_die[5].replace('D', 'E').replace('d', 'e'))
-                                main_node.fy = float(parts_die[6].replace('D', 'E').replace('d', 'e'))
+                                main_node.x = float(parts_die[0].replace('D', 'E'))
+                                main_node.y = float(parts_die[1].replace('D', 'E'))
+                                main_node.vx = float(parts_die[2].replace('D', 'E'))
+                                main_node.vy = float(parts_die[3].replace('D', 'E'))
+                                main_node.fx = float(parts_die[5].replace('D', 'E'))
+                                main_node.fy = float(parts_die[6].replace('D', 'E'))
                                 die.main_node = main_node
-                                die.m = float(parts_die[4].replace('D', 'E').replace('d', 'e'))
-                                die.temp = float(parts[2].replace('D', 'E').replace('d', 'e'))
+                                die.m = float(parts_die[4].replace('D', 'E'))
+                                die.temp = float(parts[2].replace('D', 'E'))
 
                                 actual_ligne += 1
 
@@ -321,8 +321,8 @@ class ParserNeutralFile:
                                         continue
 
                                     node = Node(-1) # ID temporaire
-                                    node.x = float(node_parts[0].replace('D', 'E').replace('d', 'e'))
-                                    node.y = float(node_parts[1].replace('D', 'E').replace('d', 'e'))
+                                    node.x = float(node_parts[0].replace('D', 'E'))
+                                    node.y = float(node_parts[1].replace('D', 'E'))
                                     die.nodes.append(node)
                             
                             actual_ligne += int(parts[1])
@@ -342,8 +342,8 @@ class ParserNeutralFile:
                 ligne_temps = lignes[actual_ligne].strip()
                 if ligne_temps:
                     try:
-                        neu.t_time = float(ligne_temps.replace('D', 'E').replace('d', 'e'))
-                        #print(f"Temps : {float(ligne_temps.replace('D', 'E').replace('d', 'e'))}")
+                        neu.t_time = float(ligne_temps.replace('D', 'E'))
+                        #print(f"Temps : {float(ligne_temps.replace('D', 'E'))}")
                     except ValueError:
                         print(f"Erreur de format pour le temps à la ligne {actual_ligne + 1}.")
                 else:

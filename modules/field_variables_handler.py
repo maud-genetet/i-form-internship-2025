@@ -204,7 +204,6 @@ class FieldVariablesHandler:
             global_min, global_max = visualization_manager.get_global_scale_range_for_variable(scalar_name)
             if global_min is not None and global_max is not None:
                 clim = [global_min, global_max]
-                print(f"Using auto-scale for {scalar_name}: [{global_min:.6f}, {global_max:.6f}]")
         
         # Prepare main variable mesh
         if vector_mode:
