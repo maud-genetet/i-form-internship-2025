@@ -40,6 +40,8 @@ class PreloaderManager:
             neu_files, working_directory, start_index=first_file_loaded_index
         )
         
+        self.preloader_thread.set_visualization_manager(self.visualization_manager)
+        
         self.preloader_thread.file_loaded.connect(self._on_file_loaded)
         self.preloader_thread.all_files_loaded.connect(self._on_all_files_loaded)
         self.preloader_thread.progress_updated.connect(self._on_progress_updated)

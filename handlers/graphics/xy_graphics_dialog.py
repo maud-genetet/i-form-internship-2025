@@ -606,15 +606,17 @@ class XYGraphicsDialog(QDialog):
 
     def update_step_limits(self):
         """Update step number limits based on available files"""
-        multiple_data = self.get_multiple_files_data()
+        visualization_manager = self.parent().visualization_manager
         
-        if multiple_data:
-            max_files = len(multiple_data)
-            self.initial_step.setMaximum(max_files)
-            self.final_step.setMaximum(max_files)
-            self.final_step.setValue(max_files)
-        else:
-            # Single file
-            self.initial_step.setMaximum(1)
-            self.final_step.setMaximum(1)
-            self.final_step.setValue(1)
+        max_files = 1  # Default minimum
+        
+        max_files = len(visualization_manager.preloaded_data)
+        
+        # Update spinbox limits
+        self.initial_step.setMinimum(1)
+        self.initial_step.setMaximum(max_files)
+        self.initial_step.setValue(1)
+        
+        self.final_step.setMinimum(1)
+        self.final_step.setMaximum(max_files)
+        self.final_step.setValue(max_files)

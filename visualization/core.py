@@ -27,6 +27,8 @@ class VisualizationManager:
         self.current_data = None
         self.current_dir = None
         self.current_mesh = None
+
+        self.graphics_loading = False
         
         # Default configuration
         self.default_mesh_color = 'yellow'
@@ -183,7 +185,7 @@ class VisualizationManager:
             
             # Check if we have preloaded data
             preloaded_data = self.get_preloaded_data(self.current_mesh_index)
-            if preloaded_data:
+            if preloaded_data and preloaded_data.is_complete():
                 print(f"Fast loading file {self.current_mesh_index + 1}/{len(self.neu_files)}: {current_file} (preloaded)")
                 self.load_neutral_file(preloaded_data)
             else:

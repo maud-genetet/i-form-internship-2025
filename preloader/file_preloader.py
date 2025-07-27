@@ -35,6 +35,15 @@ class FilePreloader(QThread):
             for i in range(0, len(self.neu_files)):
                 if self.should_stop:
                     break
+                
+                # ATTENTE PASSIVE SI GRAPHICS LOADING EST ACTIF
+                while hasattr(self, '_visualization_manager') and getattr(self._visualization_manager, 'graphics_loading', False):
+                    if self.should_stop:
+                        break
+                    self.msleep(100)  # Sleep
+                
+                if self.should_stop:
+                    break
                     
                 filename = self.neu_files[i]
                 file_path = os.path.join(self.working_directory, filename)
@@ -81,3 +90,7 @@ class FilePreloader(QThread):
         data = self.preloaded_data.get(index)
         self.mutex.unlock()
         return data
+    
+    def set_visualization_manager(self, visualization_manager):
+        """Set reference to visualization manager for graphics loading check"""
+        self._visualization_manager = visualization_manager

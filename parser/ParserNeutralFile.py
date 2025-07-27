@@ -350,7 +350,7 @@ class ParserNeutralFile:
                     print(f"Aucune donnée de temps trouvée à la ligne {actual_ligne + 1}.")
 
                 t2 = time.time()
-                print(f"Temps de traitement du fichier : {t2 - t1:.2f} secondes")
+                print(f"GRAPHICS : Temps de traitement du fichier : {t2 - t1:.2f} secondes")
                 return neu
 
         except FileNotFoundError:

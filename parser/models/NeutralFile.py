@@ -48,3 +48,6 @@ class NeutralFile:
     
     def get_dies(self):
         return self.dies
+    
+    def is_complete(self):
+        return len(self.nodes) > 0 and len(self.elements) > 0
