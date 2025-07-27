@@ -14,7 +14,7 @@ from handlers.mesh_handler import MeshHandler
 from visualization import VisualizationManager
 from handlers.field_variables_handler import FieldVariablesHandler
 from handlers.animation_handler import AnimationHandler
-
+from handlers.graphics_handler import GraphicsHandler
 
 '''
 from modules.edit_handler import EditHandler
