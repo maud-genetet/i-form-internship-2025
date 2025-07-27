@@ -11,6 +11,8 @@ from PyQt5.QtCore import Qt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.ticker import FuncFormatter
 
 
 class XYGraphicsDialog(QDialog):
@@ -19,7 +21,7 @@ class XYGraphicsDialog(QDialog):
         self.neutral_data = neutral_data
         
         self.setWindowTitle("Graphics")
-        self.setFixedSize(640, 700)
+        self.setFixedSize(640, 600)
         self.setModal(False)
         
         # Create matplotlib figure and canvas
@@ -145,46 +147,6 @@ class XYGraphicsDialog(QDialog):
         
         layout.addLayout(axes_layout)
         
-        # Options group
-        options_group = QGroupBox("Options")
-        options_layout = QVBoxLayout()
-        
-        # Scaling
-        scaling_layout = QHBoxLayout()
-        self.auto_scaling = QRadioButton("Automatic Scaling")
-        self.auto_scaling.setChecked(True)
-        self.user_scaling = QRadioButton("User Defined Scaling")
-        scaling_layout.addWidget(self.auto_scaling)
-        scaling_layout.addWidget(self.user_scaling)
-        options_layout.addLayout(scaling_layout)
-        
-        # Min/Max values
-        minmax_layout = QHBoxLayout()
-        minmax_layout.addWidget(QLabel(""))
-        minmax_layout.addWidget(QLabel("X - axis"))
-        minmax_layout.addWidget(QLabel("Y - axis"))
-        options_layout.addLayout(minmax_layout)
-        
-        max_layout = QHBoxLayout()
-        max_layout.addWidget(QLabel("Max. Value"))
-        self.x_max = QLineEdit("0.0000E+00")
-        self.y_max = QLineEdit("0.0000E+00")
-        max_layout.addWidget(self.x_max)
-        max_layout.addWidget(self.y_max)
-        options_layout.addLayout(max_layout)
-        
-        min_layout = QHBoxLayout()
-        min_layout.addWidget(QLabel("Min. Value"))
-        self.x_min = QLineEdit("0.0000E+00")
-        self.y_min = QLineEdit("0.0000E+00")
-        min_layout.addWidget(self.x_min)
-        min_layout.addWidget(self.y_min)
-        options_layout.addLayout(min_layout)
-        
-        options_group.setLayout(options_layout)
-        layout.addWidget(options_group)
-        
-        # Format group
         format_group = QGroupBox("Format")
         format_layout = QVBoxLayout()
         
@@ -406,7 +368,7 @@ class XYGraphicsDialog(QDialog):
             return [0.0]
 
     def get_y_data(self):
-        """Get Y-axis data from multiple files - CORRIGÉ"""
+        """Get Y-axis data from multiple files"""
         y_selection = self.y_button_group.checkedId()
         
         # Skip Error and Volume (not implemented)
@@ -533,7 +495,7 @@ class XYGraphicsDialog(QDialog):
             plt.ion()
             
             # Create a proper plot window
-            fig, ax = plt.subplots(figsize=(10, 7))
+            fig, ax = plt.subplots(figsize=(12, 7))
 
             self.created_figures.append(fig)
             
@@ -562,11 +524,57 @@ class XYGraphicsDialog(QDialog):
             if len(x_data) > 1:
                 ax.legend()
             
-            # Formatting based on settings
-            if self.scientific.isChecked():
-                ax.ticklabel_format(style='scientific', axis='both', scilimits=(0,0))
+            # === NUMBER OF TICKS ===
+            x_min, x_max = ax.get_xlim()
+            y_min, y_max = ax.get_ylim()
             
-            # Show statistics in a text box
+            x_ticks_count = max(2, self.x_ticks.value())
+            y_ticks_count = max(2, self.y_ticks.value())
+            
+            x_ticks = np.linspace(x_min, x_max, x_ticks_count)
+            y_ticks = np.linspace(y_min, y_max, y_ticks_count)
+            
+            ax.set_xticks(x_ticks)
+            ax.set_yticks(y_ticks)
+            
+            # === FORMATTING ===
+            if self.scientific.isChecked():
+                # Scientific notation with significant digits
+                
+                x_sig = self.x_sig_digits.value()
+                y_sig = self.y_sig_digits.value()
+                
+                def x_formatter(x, pos):
+                    if x == 0:
+                        return "0.0e+00"
+                    precision = max(0, x_sig - 1)
+                    return f"{x:.{precision}e}"
+                
+                def y_formatter(y, pos):
+                    if y == 0:
+                        return "0.0e+00"
+                    precision = max(0, y_sig - 1)
+                    return f"{y:.{precision}e}"
+                
+                ax.xaxis.set_major_formatter(FuncFormatter(x_formatter))
+                ax.yaxis.set_major_formatter(FuncFormatter(y_formatter))
+                
+            else:
+                # Fixed style with decimal places
+                
+                x_decimal = self.x_decimal.value()
+                y_decimal = self.y_decimal.value()
+                
+                def x_formatter(x, pos):
+                    return f"{x:.{x_decimal}f}"
+                
+                def y_formatter(y, pos):
+                    return f"{y:.{y_decimal}f}"
+                
+                ax.xaxis.set_major_formatter(FuncFormatter(x_formatter))
+                ax.yaxis.set_major_formatter(FuncFormatter(y_formatter))
+            
+            # Show statistics
             if len(x_data) > 1:
                 stats_text = f"Points: {len(x_data)}\n"
                 stats_text += f"X range: {min(x_data):.3e} to {max(x_data):.3e}\n"

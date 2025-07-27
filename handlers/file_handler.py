@@ -55,7 +55,8 @@ class FileHandler:
         # Reset mesh handler data
         self.main_window.mesh_handler.neu_files = []
         self.main_window.mesh_handler.working_directory = None
-    
+
+        self.main_window.mesh_handler.preloader_manager.preloaded_files = {}
         # Reset field variables handler current variable
         self.main_window.field_variables_handler.current_variable = None
         
