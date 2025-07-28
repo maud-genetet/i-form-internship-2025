@@ -5,6 +5,8 @@ Field Variables Menu Handler
 from PyQt5.QtWidgets import QMessageBox
 import pyvista as pv
 import numpy as np
+import logging
+logger = logging.getLogger(__name__)
 
 
 class FieldVariablesHandler:
@@ -269,7 +271,7 @@ class FieldVariablesHandler:
             if vector_mesh_data:
                 prepared_meshes.append(vector_mesh_data)
         except Exception as e:
-            print(f"Error generating vectors: {e}")
+            logger.exception(f"Error generating vectors: {e}")
             # Fallback to normal display
             fallback_mesh_data = {
                 'mesh': mesh,
@@ -346,7 +348,7 @@ class FieldVariablesHandler:
             return None
             
         except Exception as e:
-            print(f"Error in vector preparation: {e}")
+            logger.exception(f"Error in vector preparation: {e}")
             return None
     
     def _prepare_line_contour_meshes(self, mesh, scalars_array, variable_name, cmap, options):
@@ -403,7 +405,7 @@ class FieldVariablesHandler:
                     prepared_meshes.append(contour_mesh_data)
                     
         except Exception as e:
-            print(f"Error generating contours: {e}")
+            logger.exception(f"Error generating contours: {e}")
         
         return prepared_meshes
     

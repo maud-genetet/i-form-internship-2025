@@ -5,7 +5,8 @@ Background thread for preloading .NEU files
 
 import os
 from PyQt5.QtCore import QThread, pyqtSignal, QMutex
-
+import logging
+logger = logging.getLogger(__name__)
 from parser import ParserNeutralFile
 
 
@@ -62,10 +63,10 @@ class FilePreloader(QThread):
                         
                         self.file_loaded.emit(i, filename)
                         loaded_count += 1
-                        print(f"Preloaded {i+1}/{len(self.neu_files)}: {filename}")
+                        logger.debug(f"Preloaded {i+1}/{len(self.neu_files)}: {filename}")
                         
                 except Exception as e:
-                    print(f"Error loading {filename}: {e}")
+                    logger.exception(f"Error loading {filename}: {e}")
                 
                 self.progress_updated.emit(
                     int((loaded_count / total_files) * 100),
@@ -75,7 +76,7 @@ class FilePreloader(QThread):
             if not self.should_stop:
                 self.progress_updated.emit(100, f"All {loaded_count} files loaded!")
                 self.all_files_loaded.emit()
-                print(f"Preloading complete: {loaded_count} files loaded")
+                logger.debug(f"Preloading complete: {loaded_count} files loaded")
                 
         except Exception as e:
             self.error_occurred.emit(f"Preloading error: {str(e)}")

@@ -3,6 +3,8 @@ from .models.Node import Node
 from .models.NeutralFile import NeutralFile
 from .models.Die import Die
 import time
+import logging
+logger = logging.getLogger(__name__)
 
 class ParserNeutralFile:
 
@@ -15,14 +17,14 @@ class ParserNeutralFile:
 
                 lignes = fichier.readlines()
                 if not lignes:
-                    print("Le fichier est vide.")
+                    logger.error("Le fichier est vide.")
                     return
                 
                 # Vérification du titre
                 neu = NeutralFile(lignes[0].strip())
 
                 nb_nodes = int(lignes[1].strip())
-                #print(f"Nombre de noeuds : {nb_nodes}")
+                #logger.debug(f"Nombre de noeuds : {nb_nodes}")
 
                 # Traitement des noeuds
                 for i in range(2, 2 + nb_nodes):
@@ -30,7 +32,7 @@ class ParserNeutralFile:
                     if ligne:
                         parts = ligne.split()
                         if len(parts) < 7:
-                            print(f"Erreur de format pour le noeud à la ligne {i + 1}.")
+                            logger.debug(f"Erreur de format pour le noeud à la ligne {i + 1}.")
                             continue
 
                         node = Node(int(parts[0]))
@@ -46,7 +48,7 @@ class ParserNeutralFile:
                 actual_ligne = 2 + nb_nodes
 
                 nb_elements = int(lignes[actual_ligne].strip())
-                #print(f"Nombre d'éléments : {nb_elements}")
+                #logger.debug(f"Nombre d'éléments : {nb_elements}")
 
                 actual_ligne += 1
 
@@ -71,7 +73,7 @@ class ParserNeutralFile:
 
                             neu.add_element(element)
                         else:
-                            print(f"Erreur de format pour l'élément à la ligne {base_line + 1}.")
+                            logger.debug(f"Erreur de format pour l'élément à la ligne {base_line + 1}.")
 
                     strain_rate_line = actual_ligne + nb_elements + i
                     ligne = lignes[strain_rate_line].strip()
@@ -88,7 +90,7 @@ class ParserNeutralFile:
                                 element.srnrt_e = float(parts[5].replace('D', 'E'))
                                 element.srnrt_ev = float(parts[6].replace('D', 'E'))
                         else:
-                            print(f"Erreur de format pour l'élément de taux de déformation à la ligne {strain_rate_line + 1}.")
+                            logger.error(f"Erreur de format pour l'élément de taux de déformation à la ligne {strain_rate_line + 1}.")
 
                     strain_line = actual_ligne + 2 * nb_elements + i
                     ligne = lignes[strain_line].strip()
@@ -107,7 +109,7 @@ class ParserNeutralFile:
                                 element.strain_e3 = float(parts[7].replace('D', 'E'))
                                 element.angle13 = float(parts[8].replace('D', 'E'))
                         else:
-                            print(f"Erreur de format pour l'élément de déformation à la ligne {strain_line + 1}.")
+                            logger.error(f"Erreur de format pour l'élément de déformation à la ligne {strain_line + 1}.")
 
                     stress_line = actual_ligne + 3 * nb_elements + i
                     ligne = lignes[stress_line].strip()
@@ -124,7 +126,7 @@ class ParserNeutralFile:
                                 element.stress_o = float(parts[5].replace('D', 'E'))
                                 element.stress_orr = float(parts[6].replace('D', 'E'))
                         else:
-                            print(f"Erreur de format pour l'élément de contrainte à la ligne {stress_line + 1}.")
+                            logger.error(f"Erreur de format pour l'élément de contrainte à la ligne {stress_line + 1}.")
 
                 actual_ligne += 4 * nb_elements
 
@@ -134,7 +136,7 @@ class ParserNeutralFile:
                     if ligne:
                         parts = ligne.split()
                         if len(parts) < 3:
-                            print(f"Erreur de format pour le noeud de température à la ligne {i + 1}.")
+                            logger.error(f"Erreur de format pour le noeud de température à la ligne {i + 1}.")
                             continue
 
                         node = neu.get_node_by_id(int(parts[0]))
@@ -147,7 +149,7 @@ class ParserNeutralFile:
                 # Die elements
                 nb_dies = int(lignes[actual_ligne].strip())
                 actual_ligne += 2
-                #print(f"Nombre de dies : {nb_dies}")
+                #logger.debug(f"Nombre de dies : {nb_dies}")
                 
                 for die_index in range(actual_ligne, actual_ligne + nb_dies):
 
@@ -155,7 +157,7 @@ class ParserNeutralFile:
                     if ligne:
                         parts = ligne.split()
                         if len(parts) < 3:
-                            print(f"Erreur de format pour le die à la ligne {actual_ligne + 1}.")
+                            logger.error(f"Erreur de format pour le die à la ligne {actual_ligne + 1}.")
                         else:
                             die = Die(int(parts[0]))
                             neu.add_die(die)
@@ -166,7 +168,7 @@ class ParserNeutralFile:
                             if ligne_die:
                                 parts_die = ligne_die.split()
                                 if len(parts_die) < 7:
-                                    print(f"Erreur de format pour le die à la ligne {actual_ligne + 1}.")
+                                    logger.error(f"Erreur de format pour le die à la ligne {actual_ligne + 1}.")
                                 
                                 main_node = Node(-1) # ID temporaire
                                 main_node.x = float(parts_die[0].replace('D', 'E'))
@@ -186,7 +188,7 @@ class ParserNeutralFile:
                                 if ligne_node:
                                     node_parts = ligne_node.split()
                                     if len(node_parts) < 2:
-                                        print(f"Erreur de format pour le noeud du die à la ligne {j + 1}.")
+                                        logger.error(f"Erreur de format pour le noeud du die à la ligne {j + 1}.")
                                         continue
 
                                     node = Node(-1) # ID temporaire
@@ -206,7 +208,7 @@ class ParserNeutralFile:
                     if ligne:
                         parts = ligne.split()
                         if len(parts) < 1:
-                            print(f"Erreur de format pour l'élément de contact à la ligne {i + 1}.")
+                            logger.error(f"Erreur de format pour l'élément de contact à la ligne {i + 1}.")
                             continue
 
                         node = neu.get_node_by_id(int(parts[0]))
@@ -214,19 +216,19 @@ class ParserNeutralFile:
 
                 actual_ligne += nb_contact_elements
 
-                #print(f"Nombre d'éléments de contact : {nb_contact_elements}")     
+                #logger.debug(f"Nombre d'éléments de contact : {nb_contact_elements}")     
 
                 nb_code_elements = int(lignes[actual_ligne].strip())
                 actual_ligne += 1
 
-                #print(f"Nombre de node avec code : {nb_code_elements}") 
+                #logger.debug(f"Nombre de node avec code : {nb_code_elements}") 
 
                 for i in range(actual_ligne, actual_ligne + nb_code_elements):
                     ligne = lignes[i].strip()
                     if ligne:
                         parts = ligne.split()
                         if len(parts) < 2:
-                            print(f"Erreur de format pour le noeud de code à la ligne {i + 1}.")
+                            logger.error(f"Erreur de format pour le noeud de code à la ligne {i + 1}.")
                             continue
 
                         node = neu.get_node_by_id(int(parts[0]))
@@ -239,20 +241,20 @@ class ParserNeutralFile:
                 if ligne_temps:
                     try:
                         neu.t_time = float(ligne_temps.replace('D', 'E'))
-                        #print(f"Temps : {float(ligne_temps.replace('D', 'E'))}")
+                        #logger.debug(f"Temps : {float(ligne_temps.replace('D', 'E'))}")
                     except ValueError:
-                        print(f"Erreur de format pour le temps à la ligne {actual_ligne + 1}.")
+                        logger.error(f"Erreur de format pour le temps à la ligne {actual_ligne + 1}.")
                 else:
-                    print(f"Aucune donnée de temps trouvée à la ligne {actual_ligne + 1}.")
+                    logger.error(f"Aucune donnée de temps trouvée à la ligne {actual_ligne + 1}.")
 
                 t2 = time.time()
-                print(f"Temps de traitement du fichier : {t2 - t1:.2f} secondes")
+                logger.debug(f"Temps de traitement du fichier : {t2 - t1:.2f} secondes")
                 return neu
 
         except FileNotFoundError:
-            print(f"Erreur : Le fichier '{nom_fichier}' est introuvable.")
+            logger.error(f"Erreur : Le fichier '{nom_fichier}' est introuvable.")
         except Exception as e:
-            print(f"Une erreur est survenue : {e}")
+            logger.error(f"Une erreur est survenue : {e}")
 
     @staticmethod
     def parser_file_graphics(nom_fichier):
@@ -262,7 +264,7 @@ class ParserNeutralFile:
 
                 lignes = fichier.readlines()
                 if not lignes:
-                    print("Le fichier est vide.")
+                    logger.error("Le fichier est vide.")
                     return
                 
                 neu = NeutralFile(lignes[0].strip())
@@ -278,7 +280,7 @@ class ParserNeutralFile:
                 # Die elements
                 nb_dies = int(lignes[actual_ligne].strip())
                 actual_ligne += 2
-                #print(f"Nombre de dies : {nb_dies}")
+                #logger.debug(f"Nombre de dies : {nb_dies}")
                 
                 for die_index in range(actual_ligne, actual_ligne + nb_dies):
 
@@ -286,7 +288,7 @@ class ParserNeutralFile:
                     if ligne:
                         parts = ligne.split()
                         if len(parts) < 3:
-                            print(f"Erreur de format pour le die à la ligne {actual_ligne + 1}.")
+                            logger.error(f"Erreur de format pour le die à la ligne {actual_ligne + 1}.")
                         else:
                             die = Die(int(parts[0]))
                             neu.add_die(die)
@@ -297,7 +299,7 @@ class ParserNeutralFile:
                             if ligne_die:
                                 parts_die = ligne_die.split()
                                 if len(parts_die) < 7:
-                                    print(f"Erreur de format pour le die à la ligne {actual_ligne + 1}.")
+                                    logger.error(f"Erreur de format pour le die à la ligne {actual_ligne + 1}.")
                                 
                                 main_node = Node(-1) # ID temporaire
                                 main_node.x = float(parts_die[0].replace('D', 'E'))
@@ -317,7 +319,7 @@ class ParserNeutralFile:
                                 if ligne_node:
                                     node_parts = ligne_node.split()
                                     if len(node_parts) < 2:
-                                        print(f"Erreur de format pour le noeud du die à la ligne {j + 1}.")
+                                        logger.error(f"Erreur de format pour le noeud du die à la ligne {j + 1}.")
                                         continue
 
                                     node = Node(-1) # ID temporaire
@@ -343,17 +345,17 @@ class ParserNeutralFile:
                 if ligne_temps:
                     try:
                         neu.t_time = float(ligne_temps.replace('D', 'E'))
-                        #print(f"Temps : {float(ligne_temps.replace('D', 'E'))}")
+                        #logger.debug(f"Temps : {float(ligne_temps.replace('D', 'E'))}")
                     except ValueError:
-                        print(f"Erreur de format pour le temps à la ligne {actual_ligne + 1}.")
+                        logger.error(f"Erreur de format pour le temps à la ligne {actual_ligne + 1}.")
                 else:
-                    print(f"Aucune donnée de temps trouvée à la ligne {actual_ligne + 1}.")
+                    logger.error(f"Aucune donnée de temps trouvée à la ligne {actual_ligne + 1}.")
 
                 t2 = time.time()
-                print(f"GRAPHICS : Temps de traitement du fichier : {t2 - t1:.2f} secondes")
+                logger.debug(f"GRAPHICS : Temps de traitement du fichier : {t2 - t1:.2f} secondes")
                 return neu
 
         except FileNotFoundError:
-            print(f"Erreur : Le fichier '{nom_fichier}' est introuvable.")
+            logger.error(f"Erreur : Le fichier '{nom_fichier}' est introuvable.")
         except Exception as e:
-            print(f"Une erreur est survenue : {e}")
+            logger.error(f"Une erreur est survenue : {e}")

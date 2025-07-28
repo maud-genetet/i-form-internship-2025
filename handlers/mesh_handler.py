@@ -9,6 +9,8 @@ from PyQt5.QtWidgets import QMessageBox
 import re
 from preloader.preloader_manager import PreloaderManager
 from parser import ParserNeutralFile
+import logging
+logger = logging.getLogger(__name__)
 
 class MeshHandler:
     def __init__(self, main_window):
@@ -24,7 +26,7 @@ class MeshHandler:
         working_directory = None
         if hasattr(self.main_window, 'file_handler') and self.main_window.file_handler.working_directory:
             working_directory = self.main_window.file_handler.working_directory
-            print(f"Dir: {working_directory}")
+            logger.debug(f"Dir: {working_directory}")
             
             # Search for FEM1.NEU
             fem1_path = os.path.join(working_directory, "FEM1.NEU")
@@ -54,7 +56,7 @@ class MeshHandler:
             
             # Display loaded filename
             filename = os.path.basename(file_path)
-            print(f"Mesh loaded: {filename}")
+            logger.debug(f"Mesh loaded: {filename}")
             
         except Exception as e:
             QMessageBox.critical(
@@ -69,17 +71,17 @@ class MeshHandler:
             preloaded_data = self.preloader_manager.get_preloaded_data(file_index)
             
             if preloaded_data:
-                print(f"Using preloaded data for file {file_index + 1}")
+                logger.debug(f"Using preloaded data for file {file_index + 1}")
                 self.main_window.visualization_manager.load_neutral_file(preloaded_data)
                 filename = self.neu_files[file_index] if file_index < len(self.neu_files) else "Unknown"
-                print(f"Fast mesh loaded: {filename}")
+                logger.debug(f"Fast mesh loaded: {filename}")
             else:
                 if file_index < len(self.neu_files):
                     file_path = os.path.join(self.working_directory, self.neu_files[file_index])
-                    print(f"Preload not ready, loading from disk: {self.neu_files[file_index]}")
+                    logger.debug(f"Preload not ready, loading from disk: {self.neu_files[file_index]}")
                     self._load_and_display_mesh(file_path)
         except Exception as e:
-            print(f"Error in fast load: {e}")
+            logger.exception(f"Error in fast load: {e}")
             # Fallback to normal loading
             if file_index < len(self.neu_files):
                 file_path = os.path.join(self.working_directory, self.neu_files[file_index])
@@ -98,7 +100,7 @@ class MeshHandler:
             self.main_window.visualization_manager._update_data_info()
             
         except Exception as e:
-            print(f"Error in smart load: {e}")
+            logger.exception(f"Error in smart load: {e}")
             self._load_and_display_mesh(file_path)
             # Update data info even on error
             self.main_window.visualization_manager._update_data_info()

@@ -5,7 +5,8 @@ Handles all display modes in one place
 
 import numpy as np
 import pyvista as pv
-
+import logging
+logger = logging.getLogger(__name__) 
 
 class DisplayModeManager:
     """Unified manager for all display modes and options"""
@@ -197,7 +198,7 @@ class DisplayModeManager:
             self._add_all_constraints(plotter, mesh)
         
         if use_point_data:
-            print(f"HD Contour: Using smooth interpolation for {variable_name}")
+            logger.debug(f"HD Contour: Using smooth interpolation for {variable_name}")
     
     def _add_all_constraints(self, plotter, mesh):
         """Add ALL constraints in ONE single add_mesh operation"""
@@ -272,7 +273,7 @@ class DisplayModeManager:
                     opacity=1.0,
                     name='all_constraints'
                 )
-                print(f"Added {len(all_positions)} constraints in ONE operation")
+                logger.debug(f"Added {len(all_positions)} constraints in ONE operation")
     
     def _display_vectors(self, plotter, mesh, scalar_name, variable_name):
         """Display vectors"""
@@ -330,7 +331,7 @@ class DisplayModeManager:
                     )
                     
         except Exception as e:
-            print(f"Error in vector display: {e}")
+            logger.exception(f"Error in vector display: {e}")
     
     def _display_contours(self, plotter, mesh, scalars_array, variable_name, cmap):
         """Display contours"""
@@ -370,7 +371,7 @@ class DisplayModeManager:
                 )
                 
         except Exception as e:
-            print(f"Error in contour display: {e}")
+            logger.exception(f"Error in contour display: {e}")
     
     def _calculate_vectors_from_variable(self, mesh, scalar_name, variable_name):
         """Calculate vector components based on the variable type"""
@@ -422,7 +423,7 @@ class DisplayModeManager:
             return vectors
             
         except Exception as e:
-            print(f"Error calculating vectors: {e}")
+            logger.exception(f"Error calculating vectors: {e}")
             return None
     
     def _get_velocity_vectors_from_nodes(self, mesh):
@@ -434,7 +435,7 @@ class DisplayModeManager:
             return points, None
                 
         except Exception as e:
-            print(f"Error getting velocity vectors: {e}")
+            logger.exception(f"Error getting velocity vectors: {e}")
             return None, None
     
     def display_mesh_with_constraints(self, plotter, mesh, mesh_color, edge_color, show_edges=True, show_constraints=False):
@@ -508,7 +509,7 @@ class DisplayModeManager:
                         name=group_name,
                         render=False  # Ne pas rendre immédiatement
                     )
-                    print(f"Added {len(positions)} {config['description']} ({group_name})")
+                    logger.debug(f"Added {len(positions)} {config['description']} ({group_name})")
         
         # !!! just render all at once
         plotter.render()

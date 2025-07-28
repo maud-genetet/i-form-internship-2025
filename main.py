@@ -7,6 +7,7 @@ Main Application - Entry Point
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 from PyQt5.QtCore import Qt
+import logging 
 
 from main_ui import Ui_MainWindow
 from handlers.file_handler import FileHandler
@@ -226,4 +227,5 @@ def main():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
     main()

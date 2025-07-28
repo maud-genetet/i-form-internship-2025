@@ -8,6 +8,8 @@ from PyQt5.QtCore import QTimer
 import pyvista as pv
 from PyQt5.QtWidgets import QButtonGroup, QRadioButton, QHBoxLayout, QLabel
 import time
+import logging
+logger = logging.getLogger(__name__) 
 
 class InteractionHandler:
     """Manager for user interactions with visualization"""
@@ -122,14 +124,14 @@ class InteractionHandler:
     def enable_mesh_picking(self):
         """Enable mesh picking with direct VTK approach"""
         if not self.plotter or not self.current_mesh:
-            print("Cannot enable picking: missing plotter or mesh")
+            logger.error("Cannot enable picking: missing plotter or mesh")
             return
             
         # Avoid multiple enabling
         if self.picking_enabled:
             return
             
-        print(f"Enabling picking on mesh with {self.current_mesh.n_cells} cells")
+        logger.debug(f"Enabling picking on mesh with {self.current_mesh.n_cells} cells")
         
         self.plotter.disable_picking()
         
@@ -142,7 +144,7 @@ class InteractionHandler:
         # Add our custom click handler
         interactor.add_observer('LeftButtonPressEvent', self._vtk_click_handler)
         self.picking_enabled = True
-        print("Mesh picking enabled")
+        logger.info("Mesh picking enabled")
     
     def disable_mesh_picking(self):
         """Disable mesh picking"""
@@ -160,12 +162,12 @@ class InteractionHandler:
         if self.plotter:
             self.plotter.disable_picking()
                 
-        print("Mesh info picking disabled")
+        logger.info("Mesh info picking disabled")
     
     def reapply_mesh_picking_if_needed(self):
         """Reapply mesh picking after mesh operations"""
         if self.picking_enabled:
-            print("Reapplying mesh picking after mesh update")
+            logger.info("Reapplying mesh picking after mesh update")
             # Reset the picking_enabled flag to allow re-enabling
             self.picking_enabled = False
             # Small delay to ensure mesh is fully loaded
@@ -201,7 +203,7 @@ class InteractionHandler:
             cell_id = picker.GetCellId()
             
             if cell_id >= 0:
-                print(f"Picked cell ID: {cell_id}")
+                logger.debug(f"Picked cell ID: {cell_id}")
                 self._display_cell_info(cell_id)
                 self._highlight_picked_cell(cell_id)
             else:
@@ -236,7 +238,7 @@ class InteractionHandler:
                 min_distance = distances[closest_point_id]
                 
                 if min_distance <= distance_threshold:
-                    print(f"Picked node ID: {closest_point_id}")
+                    logger.debug(f"Picked node ID: {closest_point_id}")
                     self._display_node_info(closest_point_id)
                     self._highlight_picked_node(closest_point_id)
                 else:
@@ -247,7 +249,7 @@ class InteractionHandler:
                     self.info_content.setText("No mesh found at click position")
                     
         except Exception as e:
-            print(f"Node picking error: {e}")
+            logger.exception(f"Node picking error: {e}")
             if self.info_content:
                 self.info_content.setText(f"Error in node picking: {e}")
     
@@ -367,12 +369,12 @@ class InteractionHandler:
                 plotter.iren.AddObserver('LeftButtonPressEvent', self._on_left_click)
                 
         except Exception as e:
-            print(f"Error enabling click tracking: {e}")
+            logger.exception(f"Error enabling click tracking: {e}")
     
     def _on_click_callback(self, point):
         """Callback called on click with track_click_position"""
         if point is not None:
-            print(f"Click at: {point}")
+            logger.debug(f"Click at: {point}")
             self.go_to_point_coordinates(point)
     
     def _on_left_click(self):
@@ -386,11 +388,11 @@ class InteractionHandler:
             picker = self.plotter.picker
             if picker.Pick(x, y, 0, self.plotter.renderer):
                 world_pos = picker.GetPickPosition()
-                print(f"Click detected at: {world_pos}")
+                logger.debug(f"Click detected at: {world_pos}")
                 self.go_to_point_coordinates(world_pos)
             
         except Exception as e:
-            print(f"Click error: {e}")
+            logger.exception(f"Click error: {e}")
     
     def go_to_point_coordinates(self, target_point):
         """Go to specific point in 3D coordinates"""
@@ -413,4 +415,4 @@ class InteractionHandler:
             self.plotter.render()
             
         except Exception as e:
-            print(f"Go to point error: {e}")
+            logger.exception(f"Go to point error: {e}")

@@ -13,6 +13,8 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import FuncFormatter
+import logging
+logger = logging.getLogger(__name__)
 
 
 class XYGraphicsDialog(QDialog):
@@ -589,7 +591,7 @@ class XYGraphicsDialog(QDialog):
             plt.ioff()  # Désactiver le mode interactif après affichage
             
         except Exception as e:
-            print(f"Error generating plot: {e}")
+            logger.exception(f"Error generating plot: {e}")
             # Show error message
             plt.ion()
             fig, ax = plt.subplots(figsize=(6, 4))

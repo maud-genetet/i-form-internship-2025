@@ -8,6 +8,8 @@ from .graphics.xy_graphics_dialog import XYGraphicsDialog
 from PyQt5.QtCore import Qt
 from parser import ParserNeutralFile
 import os
+import logging
+logger = logging.getLogger(__name__)
 
 
 class GraphicsHandler:
@@ -159,23 +161,23 @@ class GraphicsHandler:
                 file_path = os.path.join(visualization_manager.working_directory, filename)
                 
                 try:
-                    print(f"Loading {filename} for graphics ({i+1}/{total_files})")
+                    logger.debug(f"Loading {filename} for graphics ({i+1}/{total_files})")
                     # Use parser_file_graphics for just load the dies informations
                     neutral_data = ParserNeutralFile.parser_file_graphics(file_path)
                     if neutral_data:
                         visualization_manager.preloaded_data[i] = neutral_data
                         graphics_loaded += 1
-                        print(f"Successfully loaded {filename}")
+                        logger.debug(f"Successfully loaded {filename}")
                     else:
-                        print(f"Failed to parse {filename}")
+                        logger.error(f"Failed to parse {filename}")
                 except Exception as e:
-                    print(f"Error loading {filename}: {e}")
+                    logger.exception(f"Error loading {filename}: {e}")
             
             progress.setValue(total_files)
             progress.close()
             
             final_loaded = len(visualization_manager.preloaded_data)
-            print(f"Graphics loading complete: {final_loaded}/{total_files} files loaded ({graphics_loaded} new files)")
+            logger.debug(f"Graphics loading complete: {final_loaded}/{total_files} files loaded ({graphics_loaded} new files)")
             
             if final_loaded == 0:
                 QMessageBox.warning(self.main_window, "Loading Failed", 

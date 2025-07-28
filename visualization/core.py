@@ -8,7 +8,8 @@ from pyvistaqt import QtInteractor
 from PyQt5.QtWidgets import QFrame, QScrollArea
 from PyQt5.QtCore import Qt
 import numpy as np
-
+import logging
+logger = logging.getLogger(__name__) 
 from .mesh_builder import MeshBuilder
 from .interaction_handler import InteractionHandler
 from .display_modes import DisplayModeManager
@@ -186,10 +187,10 @@ class VisualizationManager:
             # Check if we have preloaded data
             preloaded_data = self.get_preloaded_data(self.current_mesh_index)
             if preloaded_data and preloaded_data.is_complete():
-                print(f"Fast loading file {self.current_mesh_index + 1}/{len(self.neu_files)}: {current_file} (preloaded)")
+                logger.debug(f"Fast loading file {self.current_mesh_index + 1}/{len(self.neu_files)}: {current_file} (preloaded)")
                 self.load_neutral_file(preloaded_data)
             else:
-                print(f"Loading file {self.current_mesh_index + 1}/{len(self.neu_files)}: {current_file} (from disk)")
+                logger.debug(f"Loading file {self.current_mesh_index + 1}/{len(self.neu_files)}: {current_file} (from disk)")
                 self.load_mesh_callback(file_path)
             
             self._update_data_info()
@@ -319,7 +320,7 @@ class VisualizationManager:
         
         # Calculer pour cette variable spécifique
         total_available_files = len(self.preloaded_data) + (1 if self.current_mesh else 0)
-        print(f"Computing scales for {variable_name} from {total_available_files} files...")
+        logger.debug(f"Computing scales for {variable_name} from {total_available_files} files...")
         
         global_min = None
         global_max = None
@@ -339,7 +340,7 @@ class VisualizationManager:
                         global_max = max(global_max, var_max)
                     
             except Exception as e:
-                print(f"Error processing file {file_index}: {e}")
+                logger.exception(f"Error processing file {file_index}: {e}")
         
         if global_min is not None and global_max is not None:
             # Mettre en cache
@@ -347,7 +348,7 @@ class VisualizationManager:
             
             return global_min, global_max
         else:
-            print(f"No data found for variable {variable_name}")
+            logger.error(f"No data found for variable {variable_name}")
             return None, None
     
     def _extract_variable_range(self, neutral_data, target_variable):
@@ -425,7 +426,7 @@ class VisualizationManager:
     def set_preloaded_data(self, preloaded_data_dict):
         """Set preloaded data from preloader"""
         self.preloaded_data = preloaded_data_dict
-        print(f"Visualization manager received {len(preloaded_data_dict)} preloaded files")
+        logger.debug(f"Visualization manager received {len(preloaded_data_dict)} preloaded files")
 
     def get_preloaded_data(self, index):
         """Get preloaded data for specific index"""

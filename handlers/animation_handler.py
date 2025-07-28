@@ -7,6 +7,8 @@ from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QSpinBox, QSlider,
                              QCheckBox, QGroupBox, QMessageBox)
 from PyQt5.QtCore import QTimer, Qt
+import logging
+logger = logging.getLogger(__name__)
 
 class AnimationHandler:
     def __init__(self, main_window):
@@ -268,7 +270,7 @@ class AnimationHandler:
             self.play_button.setText("Pause")
         self.animation_timer.setInterval(self.frame_delay)
         self.animation_timer.start()
-        print(f"Animation started: frames {self.start_frame}-{self.end_frame}, delay={self.frame_delay}ms")
+        logger.debug(f"Animation started: frames {self.start_frame}-{self.end_frame}, delay={self.frame_delay}ms")
     
     def _pause_animation(self):
         """Pause animation"""
@@ -285,7 +287,7 @@ class AnimationHandler:
         self.animation_timer.stop()
         if hasattr(self, 'info_label'):
             self.info_label.setText("Animation stopped")
-        print("Animation stopped")
+        logger.info("Animation stopped")
     
     def _reset_animation(self):
         """Reset animation to start"""
@@ -310,7 +312,7 @@ class AnimationHandler:
         self._update_frame_display()
         if hasattr(self, 'info_label'):
             self.info_label.setText("Animation reset")
-        print("Animation reset")
+        logger.info("Animation reset")
     
     def _next_frame(self):
         """Go to next frame manually"""
