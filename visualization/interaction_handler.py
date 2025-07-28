@@ -131,7 +131,7 @@ class InteractionHandler:
         if self.picking_enabled:
             return
             
-        logger.debug(f"Enabling picking on mesh with {self.current_mesh.n_cells} cells")
+        logger.info(f"Enabling picking on mesh with {self.current_mesh.n_cells} cells")
         
         self.plotter.disable_picking()
         
@@ -203,7 +203,7 @@ class InteractionHandler:
             cell_id = picker.GetCellId()
             
             if cell_id >= 0:
-                logger.debug(f"Picked cell ID: {cell_id}")
+                logger.info(f"Picked cell ID: {cell_id}")
                 self._display_cell_info(cell_id)
                 self._highlight_picked_cell(cell_id)
             else:
@@ -238,7 +238,7 @@ class InteractionHandler:
                 min_distance = distances[closest_point_id]
                 
                 if min_distance <= distance_threshold:
-                    logger.debug(f"Picked node ID: {closest_point_id}")
+                    logger.info(f"Picked node ID: {closest_point_id}")
                     self._display_node_info(closest_point_id)
                     self._highlight_picked_node(closest_point_id)
                 else:
@@ -374,7 +374,7 @@ class InteractionHandler:
     def _on_click_callback(self, point):
         """Callback called on click with track_click_position"""
         if point is not None:
-            logger.debug(f"Click at: {point}")
+            logger.info(f"Click at: {point}")
             self.go_to_point_coordinates(point)
     
     def _on_left_click(self):
@@ -388,7 +388,7 @@ class InteractionHandler:
             picker = self.plotter.picker
             if picker.Pick(x, y, 0, self.plotter.renderer):
                 world_pos = picker.GetPickPosition()
-                logger.debug(f"Click detected at: {world_pos}")
+                logger.info(f"Click detected at: {world_pos}")
                 self.go_to_point_coordinates(world_pos)
             
         except Exception as e:

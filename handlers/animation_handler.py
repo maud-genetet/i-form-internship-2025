@@ -270,7 +270,7 @@ class AnimationHandler:
             self.play_button.setText("Pause")
         self.animation_timer.setInterval(self.frame_delay)
         self.animation_timer.start()
-        logger.debug(f"Animation started: frames {self.start_frame}-{self.end_frame}, delay={self.frame_delay}ms")
+        logger.info(f"Animation started: frames {self.start_frame}-{self.end_frame}, delay={self.frame_delay}ms")
     
     def _pause_animation(self):
         """Pause animation"""

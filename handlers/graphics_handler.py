@@ -161,13 +161,13 @@ class GraphicsHandler:
                 file_path = os.path.join(visualization_manager.working_directory, filename)
                 
                 try:
-                    logger.debug(f"Loading {filename} for graphics ({i+1}/{total_files})")
+                    logger.info(f"Loading {filename} for graphics ({i+1}/{total_files})")
                     # Use parser_file_graphics for just load the dies informations
                     neutral_data = ParserNeutralFile.parser_file_graphics(file_path)
                     if neutral_data:
                         visualization_manager.preloaded_data[i] = neutral_data
                         graphics_loaded += 1
-                        logger.debug(f"Successfully loaded {filename}")
+                        logger.info(f"Successfully loaded {filename}")
                     else:
                         logger.error(f"Failed to parse {filename}")
                 except Exception as e:
@@ -177,7 +177,7 @@ class GraphicsHandler:
             progress.close()
             
             final_loaded = len(visualization_manager.preloaded_data)
-            logger.debug(f"Graphics loading complete: {final_loaded}/{total_files} files loaded ({graphics_loaded} new files)")
+            logger.info(f"Graphics loading complete: {final_loaded}/{total_files} files loaded ({graphics_loaded} new files)")
             
             if final_loaded == 0:
                 QMessageBox.warning(self.main_window, "Loading Failed", 

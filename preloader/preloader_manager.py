@@ -26,7 +26,7 @@ class PreloaderManager:
         if self.preloader_thread and self.preloader_thread.isRunning():
             return
         
-        logger.debug(f"Starting preload of {len(neu_files)} files")
+        logger.info(f"Starting preload of {len(neu_files)} files")
         
         if hasattr(self.visualization_manager, 'toolbar_manager'):
             self.visualization_manager.toolbar_manager.disable_auto_scale_during_loading()
@@ -59,7 +59,7 @@ class PreloaderManager:
     
     def _on_all_files_loaded(self):
         """Called when all files are loaded"""
-        logger.debug(f"All files preloaded! Total: {len(self.preloaded_files)} files")
+        logger.info(f"All files preloaded! Total: {len(self.preloaded_files)} files")
         
         # Hide progress components
         if self.progress_bar:

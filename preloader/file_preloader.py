@@ -41,7 +41,7 @@ class FilePreloader(QThread):
                 while hasattr(self, '_visualization_manager') and getattr(self._visualization_manager, 'graphics_loading', False):
                     if self.should_stop:
                         break
-                    self.msleep(100)  # Sleep
+                    self.msleep(1000)  # Sleep
                 
                 if self.should_stop:
                     break
@@ -63,7 +63,7 @@ class FilePreloader(QThread):
                         
                         self.file_loaded.emit(i, filename)
                         loaded_count += 1
-                        logger.debug(f"Preloaded {i+1}/{len(self.neu_files)}: {filename}")
+                        logger.info(f"Preloaded {i+1}/{len(self.neu_files)}: {filename}")
                         
                 except Exception as e:
                     logger.exception(f"Error loading {filename}: {e}")
@@ -76,7 +76,7 @@ class FilePreloader(QThread):
             if not self.should_stop:
                 self.progress_updated.emit(100, f"All {loaded_count} files loaded!")
                 self.all_files_loaded.emit()
-                logger.debug(f"Preloading complete: {loaded_count} files loaded")
+                logger.info(f"Preloading complete: {loaded_count} files loaded")
                 
         except Exception as e:
             self.error_occurred.emit(f"Preloading error: {str(e)}")

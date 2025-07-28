@@ -198,7 +198,7 @@ class DisplayModeManager:
             self._add_all_constraints(plotter, mesh)
         
         if use_point_data:
-            logger.debug(f"HD Contour: Using smooth interpolation for {variable_name}")
+            logger.info(f"HD Contour: Using smooth interpolation for {variable_name}")
     
     def _add_all_constraints(self, plotter, mesh):
         """Add ALL constraints in ONE single add_mesh operation"""
@@ -273,7 +273,7 @@ class DisplayModeManager:
                     opacity=1.0,
                     name='all_constraints'
                 )
-                logger.debug(f"Added {len(all_positions)} constraints in ONE operation")
+                logger.info(f"Added {len(all_positions)} constraints in ONE operation")
     
     def _display_vectors(self, plotter, mesh, scalar_name, variable_name):
         """Display vectors"""
@@ -509,7 +509,7 @@ class DisplayModeManager:
                         name=group_name,
                         render=False  # Ne pas rendre immédiatement
                     )
-                    logger.debug(f"Added {len(positions)} {config['description']} ({group_name})")
+                    logger.info(f"Added {len(positions)} {config['description']} ({group_name})")
         
         # !!! just render all at once
         plotter.render()

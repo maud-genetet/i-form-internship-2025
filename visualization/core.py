@@ -187,10 +187,10 @@ class VisualizationManager:
             # Check if we have preloaded data
             preloaded_data = self.get_preloaded_data(self.current_mesh_index)
             if preloaded_data and preloaded_data.is_complete():
-                logger.debug(f"Fast loading file {self.current_mesh_index + 1}/{len(self.neu_files)}: {current_file} (preloaded)")
+                logger.info(f"Fast loading file {self.current_mesh_index + 1}/{len(self.neu_files)}: {current_file} (preloaded)")
                 self.load_neutral_file(preloaded_data)
             else:
-                logger.debug(f"Loading file {self.current_mesh_index + 1}/{len(self.neu_files)}: {current_file} (from disk)")
+                logger.info(f"Loading file {self.current_mesh_index + 1}/{len(self.neu_files)}: {current_file} (from disk)")
                 self.load_mesh_callback(file_path)
             
             self._update_data_info()
@@ -320,7 +320,7 @@ class VisualizationManager:
         
         # Calculer pour cette variable spécifique
         total_available_files = len(self.preloaded_data) + (1 if self.current_mesh else 0)
-        logger.debug(f"Computing scales for {variable_name} from {total_available_files} files...")
+        logger.info(f"Computing scales for {variable_name} from {total_available_files} files...")
         
         global_min = None
         global_max = None
@@ -426,7 +426,7 @@ class VisualizationManager:
     def set_preloaded_data(self, preloaded_data_dict):
         """Set preloaded data from preloader"""
         self.preloaded_data = preloaded_data_dict
-        logger.debug(f"Visualization manager received {len(preloaded_data_dict)} preloaded files")
+        logger.info(f"Visualization manager received {len(preloaded_data_dict)} preloaded files")
 
     def get_preloaded_data(self, index):
         """Get preloaded data for specific index"""
