@@ -76,55 +76,56 @@ class ParserNeutralFile:
                             logger.error(f"Erreur de format pour l'élément à la ligne {base_line + 1}.")
 
                     strain_rate_line = actual_ligne + nb_elements + i
-                    ligne = lignes[strain_rate_line].strip()
+                    ligne = lignes[strain_rate_line].strip().replace('D', 'E')
                     if ligne:
                         parts = ligne.split()
                         if len(parts) >= 6:
                             element = neu.get_element_by_id(int(parts[0]))
 
                             if element:
-                                element.srnrt_exx = float(parts[1].replace('D', 'E'))
-                                element.srnrt_eyy = float(parts[2].replace('D', 'E'))
-                                element.srnrt_ezz = float(parts[3].replace('D', 'E'))
-                                element.srnrt_exy = float(parts[4].replace('D', 'E'))
-                                element.srnrt_e = float(parts[5].replace('D', 'E'))
-                                element.srnrt_ev = float(parts[6].replace('D', 'E'))
+                                element.srnrt_exx = float(parts[1])
+                                element.srnrt_eyy = float(parts[2])
+                                element.srnrt_ezz = float(parts[3])
+                                element.srnrt_exy = float(parts[4])
+                                element.srnrt_e = float(parts[5])
+                                element.srnrt_ev = float(parts[6])
                         else:
                             logger.error(f"Erreur de format pour l'élément de taux de déformation à la ligne {strain_rate_line + 1}.")
 
                     strain_line = actual_ligne + 2 * nb_elements + i
-                    ligne = lignes[strain_line].strip()
+                    ligne = lignes[strain_line].strip().replace('D', 'E')
                     if ligne:
                         parts = ligne.split()
                         if len(parts) >= 8:
                             element = neu.get_element_by_id(int(parts[0]))
 
                             if element:
-                                element.strain_exx = float(parts[1].replace('D', 'E'))
-                                element.strain_eyy = float(parts[2].replace('D', 'E'))
-                                element.strain_ezz = float(parts[3].replace('D', 'E'))
-                                element.strain_exy = float(parts[4].replace('D', 'E'))
-                                element.strain_e = float(parts[5].replace('D', 'E'))
-                                element.strain_e1 = float(parts[6].replace('D', 'E'))
-                                element.strain_e3 = float(parts[7].replace('D', 'E'))
-                                element.angle13 = float(parts[8].replace('D', 'E'))
+                                element.strain_exx = float(parts[1])
+                                element.strain_eyy = float(parts[2])
+                                element.strain_ezz = float(parts[3])
+                                element.strain_exy = float(parts[4])
+                                element.strain_e = float(parts[5])
+                                element.strain_e1 = float(parts[6])
+                                element.strain_e3 = float(parts[7])
+                                element.angle13 = float(parts[8])
+                                
                         else:
                             logger.error(f"Erreur de format pour l'élément de déformation à la ligne {strain_line + 1}.")
 
                     stress_line = actual_ligne + 3 * nb_elements + i
-                    ligne = lignes[stress_line].strip()
+                    ligne = lignes[stress_line].strip().replace('D', 'E')
                     if ligne:
                         parts = ligne.split()
                         if len(parts) >= 7:
                             element = neu.get_element_by_id(int(parts[0]))
 
                             if element:
-                                element.stress_oxx = float(parts[1].replace('D', 'E'))
-                                element.stress_oyy = float(parts[2].replace('D', 'E'))
-                                element.stress_ozz = float(parts[3].replace('D', 'E'))
-                                element.stress_oxy = float(parts[4].replace('D', 'E'))
-                                element.stress_o = float(parts[5].replace('D', 'E'))
-                                element.stress_orr = float(parts[6].replace('D', 'E'))
+                                element.stress_oxx = float(parts[1])
+                                element.stress_oyy = float(parts[2])
+                                element.stress_ozz = float(parts[3])
+                                element.stress_oxy = float(parts[4])
+                                element.stress_o = float(parts[5])
+                                element.stress_orr = float(parts[6])
                         else:
                             logger.error(f"Erreur de format pour l'élément de contrainte à la ligne {stress_line + 1}.")
 

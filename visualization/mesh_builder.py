@@ -46,7 +46,7 @@ class MeshBuilder:
             return None
         
         # Create mesh
-        cell_types = [5] * (len(cells) // 5)  #  9 for Quad, 5 for triangles ( 5 is better for mixed types )
+        cell_types = [9] * (len(cells) // 5)  #  9 for Quad, 5 for triangles ( 5 is better for mixed types )
         mesh = pv.UnstructuredGrid(cells, np.array(cell_types), points)
         
         # Add scalar data 
@@ -278,15 +278,32 @@ class MeshBuilder:
             y = node.get_coordY() if node.get_coordY() is not None else 0.0
             die_points.append([x, y, 0.0])
         
+        die_points = np.array(die_points)
+
+        if len(die_points) == 4:
+            # Create a quad mesh for 4 points
+            cells = [4] + list(range(len(die_points)))
+            return pv.UnstructuredGrid(
+                cells,
+                [pv.CellType.QUAD],
+                die_points
+            )
+        
+        if len(die_points) == 8:
+            # Create a hexahedron mesh for 8 points
+            cells = [8] + list(range(len(die_points)))
+            return pv.UnstructuredGrid(
+                cells,
+                [pv.CellType.HEXAHEDRON],
+                die_points
+            )
+        
         if len(die_points) >= 3:
-            die_points = np.array(die_points)
-            
-            if len(die_points) >= 3:
-                cells = [len(die_points)] + list(range(len(die_points)))
-                return pv.UnstructuredGrid(
-                    cells,
-                    [pv.CellType.POLYGON],
-                    die_points
-                )
+            cells = [len(die_points)] + list(range(len(die_points)))
+            return pv.UnstructuredGrid(
+                cells,
+                [pv.CellType.POLYGON],
+                die_points
+            )
         
         return None

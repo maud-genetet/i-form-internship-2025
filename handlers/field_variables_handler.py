@@ -217,7 +217,7 @@ class FieldVariablesHandler:
                 'mesh': mesh,
                 'scalars': scalars_array,
                 'show_edges': False,
-                'opacity': 1.0,
+                'opacity': 0.5,
                 'cmap': cmap,
                 'clim': clim,
                 'show_scalar_bar': True,

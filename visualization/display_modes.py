@@ -134,10 +134,10 @@ class DisplayModeManager:
     def display_die(self, plotter, die_mesh, die_id):
         """Display die"""
         if self.wireframe_mode:
-            plotter.add_mesh(die_mesh, style='wireframe', color='red', line_width=1, 
+            plotter.add_mesh(die_mesh, style='wireframe', color='red', line_width=1, opacity=0.5,
                            label=f"Die {die_id} - Wireframe")
         else:
-            plotter.add_mesh(die_mesh, color='lightgrey', opacity=1.0, show_edges=True, 
+            plotter.add_mesh(die_mesh, color='lightgrey', opacity=0.5, show_edges=True, 
                            edge_color='black', line_width=1, label=f"Die {die_id}")
     
     def display_variable_with_options(self, plotter, mesh, scalar_name, variable_name, edge_color, options):
@@ -173,7 +173,7 @@ class DisplayModeManager:
                     mesh,
                     scalars=scalars_array,
                     show_edges=False,
-                    opacity=1.0,
+                    opacity=0.5,
                     cmap=cmap,
                     show_scalar_bar=True,
                     scalar_bar_args={'title': variable_name},
@@ -270,7 +270,7 @@ class DisplayModeManager:
                     combined_glyphs,
                     scalars='constraint_colors',
                     rgb=True,
-                    opacity=1.0,
+                    opacity=0.8,
                     name='all_constraints'
                 )
                 logger.info(f"Added {len(all_positions)} constraints in ONE operation")
