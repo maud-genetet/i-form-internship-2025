@@ -472,17 +472,6 @@ class FieldVariablesHandler:
                 'opacity': 1.0,
                 'label': "Mesh - Materials"
             }
-        else:
-            # Fallback to single color
-            mesh_data = {
-                'mesh': mesh,
-                'show_edges': show_edges,
-                'edge_color': visualization_manager.default_edge_color,
-                'line_width': 1,
-                'color': visualization_manager.default_mesh_color,
-                'opacity': 1.0,
-                'label': "Mesh"
-            }
         
         prepared_meshes.append(mesh_data)
         

@@ -32,9 +32,7 @@ class VisualizationManager:
         self.graphics_loading = False
         
         # Default configuration
-        self.default_mesh_color = 'yellow'
         self.default_edge_color = 'black'
-        self.default_node_color = 'black'
         
         # Specialized modules
         self.mesh_builder = MeshBuilder()
@@ -60,7 +58,7 @@ class VisualizationManager:
         self.visualization_widget = QWidget()
         main_layout = QVBoxLayout()
         
-        # Create toolbars using ToolbarManager
+        # Create toolbar using ToolbarManager
         self.toolbar_manager.create_toolbars(main_layout)
         
         # Create horizontal layout for plotter + info panel
@@ -134,7 +132,6 @@ class VisualizationManager:
     def reapply_mesh_picking_if_needed(self):
         """Reapply mesh picking after mesh operations"""
         self.interaction_handler.reapply_mesh_picking_if_needed()
-    
     
     # === DEFORMED MESH METHODS ===
     
@@ -291,7 +288,6 @@ class VisualizationManager:
             )
             
             # Set new orientation (front view XY)
-            # Position: above focal point, looking down
             new_position = [
                 current_focal_point[0],  # same X as focal point
                 current_focal_point[1],  # same Y as focal point  
@@ -301,13 +297,13 @@ class VisualizationManager:
             # Apply new view
             camera.position = new_position
             camera.focal_point = current_focal_point
-            camera.view_up = [0, 1, 0]  # Y upward
+            camera.view_up = [0, 1, 0]  # Y up
             
             # Render
             self.plotter.render()
 
     def get_global_scale_range_for_variable(self, variable_name):
-        """Calcule min/max UNIQUEMENT pour la variable demandée - VERSION SIMPLIFIÉE"""
+        """Calcule min/max UNIQUEMENT pour la variable demandée"""
         # Si auto-scale n'est pas activé, retourner None
         options = self.toolbar_manager.get_current_options()
         if not options.get('auto_scale_mode', False):
