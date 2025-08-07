@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class DisplayModeManager:
     """Unified manager for all display modes and options"""
     
-    # Configuration centralisée des contraintes
+    # Centralized constraint configuration
     CONSTRAINT_CONFIG = {
         1: {'color': [1.0, 0.0, 0.0], 'name': 'red_constraints', 'description': 'Fixed X constraint'},
         2: {'color': [0.0, 0.0, 1.0], 'name': 'blue_constraints', 'description': 'Fixed Y constraint'},
@@ -22,7 +22,7 @@ class DisplayModeManager:
         'contact': {'color': [1.0, 0.41, 0.71], 'name': 'contact_constraints', 'description': 'Contact nodes'}
     }
     
-    # Configuration du niveau de détail
+    # Level of detail configuration
     LOD_SETTINGS = {
         'ultra_high': {'subdivisions': 16, 'max_count': 100},
         'high': {'subdivisions': 12, 'max_count': 500},
@@ -40,7 +40,7 @@ class DisplayModeManager:
         self.wireframe_mode = enabled
     
     def _get_constraint_config(self, code):
-        """Obtenir la configuration pour un code de contrainte"""
+        """Get configuration for a constraint code"""
         if code == 0:
             return None
         elif code in self.CONSTRAINT_CONFIG:
@@ -51,14 +51,14 @@ class DisplayModeManager:
             return {'color': [0.5, 0.5, 0.5], 'name': f'unknown_constraint_{code}', 'description': f'Unknown constraint code {code}'}
     
     def _get_optimal_lod(self, total_constraints):
-        """Déterminer le niveau de détail optimal"""
+        """Determine optimal level of detail"""
         for lod_name, settings in self.LOD_SETTINGS.items():
             if total_constraints <= settings['max_count']:
                 return settings['subdivisions'], lod_name
         return self.LOD_SETTINGS['ultra_low']['subdivisions'], 'ultra_low'
     
     def _get_cached_sphere(self, radius, subdivisions=8):
-        """Obtenir une sphère depuis le cache"""
+        """Get sphere from cache"""
         key = (radius, subdivisions)
         if key not in self.cached_spheres:
             self.cached_spheres[key] = pv.Sphere(
@@ -69,7 +69,7 @@ class DisplayModeManager:
         return self.cached_spheres[key]
     
     def _create_batched_spheres(self, positions, radius, subdivisions=8):
-        """Créer des sphères en batch avec glyph"""
+        """Create spheres in batch with glyph"""
         if not positions:
             return None
             
@@ -320,7 +320,6 @@ class DisplayModeManager:
                         geom=pv.Arrow()
                     )
                     
-                    # UNE SEULE OPERATION
                     plotter.add_mesh(
                         arrows,
                         scalars='magnitude',
@@ -358,7 +357,6 @@ class DisplayModeManager:
             )
             
             if contours.n_cells > 0:
-                # UNE SEULE OPERATION
                 plotter.add_mesh(
                     contours,
                     scalars='scalars',
@@ -381,7 +379,7 @@ class DisplayModeManager:
             if not ("Velocity" in variable_name or "Force" in variable_name):
                 return None
             
-            # scalar_name est l'array des valeurs scalaires
+            # scalar_name is the array of scalar values
             if isinstance(scalar_name, str) and scalar_name in mesh.cell_data:
                 scalar_values = mesh.cell_data[scalar_name]
             elif hasattr(scalar_name, '__len__'):
@@ -411,7 +409,7 @@ class DisplayModeManager:
                     np.zeros_like(scalar_values)
                 ])
             elif "Y" in variable_name or "(z)" in variable_name:
-                # Direction Y verticale
+                # Vertical Y direction
                 vectors = np.column_stack([
                     np.zeros_like(scalar_values),
                     scalar_values,
@@ -458,11 +456,11 @@ class DisplayModeManager:
         
         constraint_size = self._calculate_proportional_size(mesh, base_factor=0.01)
         
-        # Déterminer le niveau de détail optimal
+        # Determine optimal level of detail
         total_constraints = len([code for code in constraint_codes if code != 0])
         subdivisions, _ = self._get_optimal_lod(total_constraints)
         
-        # Grouper les contraintes par type
+        # Group constraints by type
         constraint_groups = {}
         
         for i in range(len(node_ids)):
@@ -486,19 +484,19 @@ class DisplayModeManager:
         
         self._create_batched_constraint_spheres(plotter, constraint_groups, constraint_size, subdivisions)
         
-        # Ajouter les nœuds de contact
+        # Add contact nodes
         self._add_contact_nodes_visualization(plotter, mesh, constraint_size, subdivisions)
         
         
     def _create_batched_constraint_spheres(self, plotter, constraint_groups, radius, subdivisions):
-        """Créer des sphères de contraintes par batch"""
+        """Create constraint spheres in batches"""
         
         for group_name, group_data in constraint_groups.items():
             positions = group_data['positions']
             config = group_data['config']
             
             if positions:
-                # Créer les sphères en batch
+                # Create spheres in batch
                 glyphs = self._create_batched_spheres(positions, radius, subdivisions)
                 
                 if glyphs:
@@ -507,11 +505,11 @@ class DisplayModeManager:
                         color=config['color'],
                         opacity=1.0,
                         name=group_name,
-                        render=False  # Ne pas rendre immédiatement
+                        render=False  # Don't render immediately
                     )
                     logger.info(f"Added {len(positions)} {config['description']} ({group_name})")
         
-        # !!! just render all at once
+        # Render all at once
         plotter.render()
     
     def _add_contact_nodes_visualization(self, plotter, mesh, constraint_size, subdivisions):
@@ -524,10 +522,10 @@ class DisplayModeManager:
                 contact_positions.append([node.get_coordX(), node.get_coordY(), 0])
         
         if contact_positions:
-            # Utiliser la configuration centralisée pour les contacts
+            # Use centralized configuration for contacts
             contact_config = self.CONSTRAINT_CONFIG['contact']
             
-            # Créer toutes les sphères de contact en batch
+            # Create all contact spheres in batch
             glyphs = self._create_batched_spheres(contact_positions, constraint_size, subdivisions)
             
             if glyphs:
