@@ -258,10 +258,10 @@ class Build3DHandler:
             
             for i_div in range(divisions + 1):
                 if model_type == "plane_stress":
-                    # Pour plane stress: calculer correction basée sur strain z minimum
+                    # For plane stress: calculate correction based on minimum z strain
                     z = self._calculate_plane_stress_z_coordinate(data_2d, thickness, i_div, divisions)
                 else:  # plane_strain
-                    # Pour plane strain: distribution linéaire simple
+                    # For plane strain: simple linear distribution
                     z = (thickness * i_div) / divisions
                 
                 for node_2d in nodes_2d:
@@ -347,7 +347,7 @@ class Build3DHandler:
                 
                 elements_created += 1
                 
-                # Mettre à jour la progression tous les 50 éléments pour éviter de ralentir
+                # Update progress every 300 elements to avoid slowing down
                 if elements_created % 300 == 0:
                     progress_percent = int(elements_created / total_elements)
                     progress_dialog.setValue(progress_percent)
@@ -449,14 +449,14 @@ class Build3DHandler:
                     alpha = (angle_total * i_div) / divisions
                     
                     for node_2d in die_nodes_2d:
-                        # Convert r,z to x,y,z pour axisymétrique
+                        # Convert r,z to x,y,z for axisymmetric
                         r = node_2d.get_coordX()
                         z = node_2d.get_coordY()
                         
                         x = r * math.cos(alpha)
                         y = r * math.sin(alpha)
                         
-                        # Créer le nœud 3D avec un ID unique
+                        # Create 3D node with unique ID
                         node_3d_id = -(1000 + die_2d.get_id() * 1000 + i_div * 100 + len(die_3d.get_nodes()))
                         node_3d = Node3D(node_3d_id)
                         node_3d.set_coordX(x)
@@ -470,7 +470,7 @@ class Build3DHandler:
                     z = (thickness * i_div) / divisions
                     
                     for node_2d in die_nodes_2d:
-                        # Créer le nœud 3D avec un ID unique
+                        # Create 3D node with unique ID
                         node_3d_id = -(1000 + die_2d.get_id() * 1000 + i_div * 100 + len(die_3d.get_nodes()))
                         node_3d = Node3D(node_3d_id)
                         node_3d.set_coordX(node_2d.get_coordX())

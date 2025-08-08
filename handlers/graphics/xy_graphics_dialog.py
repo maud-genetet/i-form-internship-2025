@@ -6,8 +6,7 @@ Simple dialog matching the provided interface
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, 
                              QPushButton, QLabel, QRadioButton,
                              QGroupBox, QSpinBox, QCheckBox,
-                             QButtonGroup, QLineEdit, QComboBox)
-from PyQt5.QtCore import Qt
+                             QButtonGroup, QComboBox)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
@@ -312,7 +311,7 @@ class XYGraphicsDialog(QDialog):
             for i, file_index in enumerate(sorted_indices):
                 step_number = i + 1
                 if initial_step <= step_number <= final_step:
-                    # Appliquer la fréquence
+                    # Apply frequency
                     if (step_number - initial_step) % frequency == 0:
                         filtered_indices.append((i, file_index))
             
@@ -332,7 +331,7 @@ class XYGraphicsDialog(QDialog):
                 die = self._find_die_in_data(neutral_data, die_id)
                 
                 if x_selection == 0:  # Step Number
-                    x_data.append(i + 1)  # Step number réel
+                    x_data.append(i + 1)  # Real step number
                 elif x_selection == 1:  # Vertical Displacement
                     if die and die.get_main_node() and initial_coords:
                         current_y = die.get_main_node().get_coordY() or 0.0
@@ -392,12 +391,12 @@ class XYGraphicsDialog(QDialog):
             final_step = self.final_step.value()
             frequency = int(self.frequency.value())
             
-            # Filtrer les indices selon les paramètres
+            # Filter indices according to parameters
             filtered_indices = []
             for i, file_index in enumerate(sorted_indices):
-                step_number = i + 1  # Step commence à 1
+                step_number = i + 1  # Step starts at 1
                 if initial_step <= step_number <= final_step:
-                    # Appliquer la fréquence
+                    # Apply frequency
                     if (step_number - initial_step) % frequency == 0:
                         filtered_indices.append(file_index)
             
@@ -484,16 +483,16 @@ class XYGraphicsDialog(QDialog):
                 y_data = y_data[:min_len]
             
             if len(x_data) == 0:
-                plt.ion()  # Mode interactif
+                plt.ion()  # Interactive mode
                 fig, ax = plt.subplots(figsize=(8, 6))
                 ax.text(0.5, 0.5, "No data available for plotting", 
                     ha='center', va='center', transform=ax.transAxes)
                 ax.set_title("XY Graphics - No Data")
                 plt.show()
-                plt.ioff()  # Désactiver le mode interactif
+                plt.ioff()  # Disable interactive mode
                 return
             
-            # Activer le mode interactif
+            # Enable interactive mode
             plt.ion()
             
             # Create a proper plot window
@@ -588,7 +587,7 @@ class XYGraphicsDialog(QDialog):
             # Adjust layout and show
             plt.tight_layout()
             plt.show()
-            plt.ioff()  # Désactiver le mode interactif après affichage
+            plt.ioff()  # Disable interactive mode after display
             
         except Exception as e:
             logger.exception(f"Error generating plot: {e}")

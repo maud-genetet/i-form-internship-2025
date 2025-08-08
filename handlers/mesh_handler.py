@@ -1,4 +1,3 @@
-
 """
 Mesh Menu Handler
 Manages all mesh-related operations

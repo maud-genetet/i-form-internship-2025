@@ -162,7 +162,7 @@ class GraphicsHandler:
                 
                 try:
                     logger.info(f"Loading {filename} for graphics ({i+1}/{total_files})")
-                    # Use parser_file_graphics for just load the dies informations
+                    # Use parser_file_graphics to just load the dies information
                     neutral_data = ParserNeutralFile.parser_file_graphics(file_path)
                     if neutral_data:
                         visualization_manager.preloaded_data[i] = neutral_data

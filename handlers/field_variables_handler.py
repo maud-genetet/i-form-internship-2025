@@ -449,7 +449,7 @@ class FieldVariablesHandler:
         show_edges = options['show_mesh_edges']
         show_constraints = options['view_constraints']
         
-        # PREPARE EVERYTHING BEFORE CLEARING pour éviter les saccades
+        # PREPARE EVERYTHING BEFORE CLEARING to avoid flickering
         mesh = visualization_manager.current_mesh
         
         # Store size options in mesh
@@ -458,7 +458,7 @@ class FieldVariablesHandler:
             'vector_size_factor': options.get('vector_size_factor', 1.0)
         }
         
-        # Prepare mesh de base
+        # Prepare base mesh
         prepared_meshes = []
         
         # Check if we have material colors
