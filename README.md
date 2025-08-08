@@ -221,3 +221,13 @@ i-form/
 - Add docstrings to all functions and classes
 - Include error handling for file operations
 - Test with various mesh sizes and formats
+
+#### Pep 8 Style Guide
+
+``` bash
+pip install autopep8
+
+# Format code with autopep8 at the root of the project
+autopep8 --in-place --recursive .
+
+```
