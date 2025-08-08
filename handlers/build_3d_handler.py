@@ -7,7 +7,8 @@ import os
 import math
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
                              QSpinBox, QDoubleSpinBox, QPushButton,
-                             QGroupBox, QMessageBox)
+                             QGroupBox, QMessageBox, QProgressDialog)
+from PyQt5.QtCore import Qt
 import logging
 logger = logging.getLogger(__name__)
 import math
@@ -125,25 +126,36 @@ class Build3DHandler:
             
             if not current_data:
                 return
-                
-            # Create 3D version of the neutral file in a thread 
-            data_3d = self._create_3d_neutral_file(current_data, model_type, params)
-          
-            if data_3d:
-                # Load the 3D model in visualization
-                visualization_manager.load_neutral_file(data_3d, True)
-                
-                QMessageBox.information(
-                    self.main_window,
-                    "3D Model Created",
-                    f"3D {model_type.replace('_', ' ').title()} model created successfully!"
+            
+            progress_dialog = self._create_progress_dialog()
+            progress_dialog.show()
+            
+            try:
+                data_3d = self._create_3d_neutral_file(
+                    current_data, model_type, params, progress_dialog
                 )
-            else:
-                QMessageBox.warning(
-                    self.main_window,
-                    "Error",
-                    "Failed to create 3D model."
-                )
+                
+                progress_dialog.close()
+            
+                if data_3d:
+                    # Load the 3D model in visualization
+                    visualization_manager.load_neutral_file(data_3d, True)
+                    
+                    QMessageBox.information(
+                        self.main_window,
+                        "3D Model Created",
+                        f"3D {model_type.replace('_', ' ').title()} model created successfully!"
+                    )
+                else:
+                    QMessageBox.warning(
+                        self.main_window,
+                        "Error",
+                        "Failed to create 3D model."
+                    )
+                    
+            except Exception as e:
+                progress_dialog.close()
+                raise e
                 
         except Exception as e:
             logger.exception(f"Error building 3D model: {e}")
@@ -152,8 +164,27 @@ class Build3DHandler:
                 "Error",
                 f"Error building 3D model: {str(e)}"
             )
-    
-    def _create_3d_neutral_file(self, data_2d, model_type, params):
+
+    def _create_progress_dialog(self):
+        """Create progress dialog for 3D model creation"""
+        
+        progress_dialog = QProgressDialog(
+            "Creating 3D model...", 
+            "Cancel", 
+            0, 
+            100, 
+            self.main_window
+        )
+        progress_dialog.setWindowTitle("Building 3D Model")
+        progress_dialog.setWindowModality(Qt.WindowModal)
+        progress_dialog.setMinimumDuration(0)
+        progress_dialog.setAutoClose(False)
+        progress_dialog.setAutoReset(False)
+        progress_dialog.setCancelButton(None)
+        
+        return progress_dialog
+
+    def _create_3d_neutral_file(self, data_2d, model_type, params, progress_dialog):
         """Create 3D neutral file from 2D data"""
         
         # Create new 3D neutral file
@@ -165,7 +196,7 @@ class Build3DHandler:
         self._create_3d_nodes(data_2d, neutral_3d, model_type, params)
         
         # Create 3D elements
-        self._create_3d_elements(data_2d, neutral_3d, model_type, params)
+        self._create_3d_elements(data_2d, neutral_3d, model_type, params, progress_dialog)
         
         # Create 3D dies if any
         self._create_3d_dies(data_2d, neutral_3d, model_type, params)
@@ -255,12 +286,15 @@ class Build3DHandler:
                     
                     neutral_3d.add_node(node_3d)
     
-    def _create_3d_elements(self, data_2d, neutral_3d, model_type, params):
+    def _create_3d_elements(self, data_2d, neutral_3d, model_type, params, progress_dialog = None):
         """Create 3D elements (hexahedra) from 2D elements (quads)"""
         
         divisions = params['divisions']
         elements_2d = list(data_2d.get_elements())
         nodes_2d_count = len(list(data_2d.get_nodes()))
+        
+        total_elements = len(elements_2d) * divisions
+        elements_created = 0
         
         for i_div in range(divisions):
             for elem_2d in elements_2d:
@@ -310,6 +344,16 @@ class Build3DHandler:
                 self._copy_element_properties_3d(elem_2d, elem_3d, model_type, i_div, divisions, params)
                 
                 neutral_3d.add_element(elem_3d)
+                
+                elements_created += 1
+                
+                # Mettre à jour la progression tous les 50 éléments pour éviter de ralentir
+                if elements_created % 300 == 0:
+                    progress_percent = int(elements_created / total_elements)
+                    progress_dialog.setValue(progress_percent)
+                    self.main_window.repaint()
+        
+        progress_dialog.setValue(80)
     
     def _copy_element_properties_3d(self, elem_2d, elem_3d, model_type, i_div, divisions, params):
         """Copy and transform element properties for 3D"""
