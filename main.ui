@@ -213,6 +213,11 @@
     <property name="title">
      <string>Build 3D</string>
     </property>
+    <addaction name="actionStandard_Options_6"/>
+    <addaction name="action3D_Plane_Strain_Model"/>
+    <addaction name="action3D_Plane_Stress_Model"/>
+    <addaction name="action3D_Axisymetric_Model"/>
+    <addaction name="action3D_Axisymmetric_Cheese_Model"/>
    </widget>
    <widget class="QMenu" name="menuState">
     <property name="title">
@@ -811,6 +816,34 @@
   <action name="actionXY_Graphics_of_Electrical_Variables">
    <property name="text">
     <string>XY Graphics of Electrical Variables</string>
+   </property>
+  </action>
+  <action name="actionStandard_Options_6">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Standard Options</string>
+   </property>
+  </action>
+  <action name="action3D_Plane_Strain_Model">
+   <property name="text">
+    <string>3D Plane Strain Model</string>
+   </property>
+  </action>
+  <action name="action3D_Plane_Stress_Model">
+   <property name="text">
+    <string>3D Plane Stress Model</string>
+   </property>
+  </action>
+  <action name="action3D_Axisymetric_Model">
+   <property name="text">
+    <string>3D Axisymetric Model</string>
+   </property>
+  </action>
+  <action name="action3D_Axisymmetric_Cheese_Model">
+   <property name="text">
+    <string>3D Axisymmetric Cheese Model</string>
    </property>
   </action>
  </widget>

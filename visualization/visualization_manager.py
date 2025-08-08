@@ -209,13 +209,13 @@ class VisualizationManager:
         """Set as central widget"""
         self.main_window.setCentralWidget(self.visualization_widget)
     
-    def load_neutral_file(self, neutral_file):
+    def load_neutral_file(self, neutral_file, is_3d=False):
         """Load neutral file for visualization"""
         self.current_data = neutral_file
         self._update_data_info()
         
         # Create mesh for later use but don't display it
-        mesh = self.mesh_builder.create_pyvista_mesh(self.current_data)
+        mesh = self.mesh_builder.create_pyvista_mesh(self.current_data, is_3d)
         if mesh:
             self.current_mesh = mesh
             self.interaction_handler.set_mesh_data(mesh, self.current_data)
@@ -248,20 +248,6 @@ class VisualizationManager:
         
         # Use toolbar manager
         self.toolbar_manager.update_data_info(info_text)
-    
-    def _add_dies_to_plot(self):
-        """Add dies to visualization"""
-        if not self.current_data:
-            return
-        
-        dies = self.current_data.get_dies()
-        
-        for i, die in enumerate(dies):
-            die_mesh = self.mesh_builder.create_die_mesh(die)
-            if die_mesh:
-                self.display_manager.display_die(
-                    self.plotter, die_mesh, die.get_id()
-                )
     
     def clear(self):
         """Clear visualization"""

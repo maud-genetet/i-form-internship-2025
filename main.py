@@ -13,6 +13,7 @@ from visualization import VisualizationManager
 from handlers.field_variables_handler import FieldVariablesHandler
 from handlers.animation_handler import AnimationHandler
 from handlers.graphics_handler import GraphicsHandler
+from handlers.build_3d_handler import Build3DHandler
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -42,6 +43,7 @@ class MainWindow(QMainWindow):
         self.field_variables_handler = FieldVariablesHandler(self)
         self.animation_handler = AnimationHandler(self)
         self.graphics_handler = GraphicsHandler(self)
+        self.build_3d_handler = Build3DHandler(self)
     
     def connect_signals(self):
         """Connect all action signals to appropriate functions"""
@@ -71,6 +73,12 @@ class MainWindow(QMainWindow):
         self.ui.actionEvolution_of_Element_Center_or_Field_Variable_with_Time.triggered.connect(self.graphics_handler.evolution_of_element_center_or_field_variable_with_time)
         self.ui.actionMesh_Quality_Assessment.triggered.connect(self.graphics_handler.mesh_quality_assessment)
         self.ui.actionXY_Graphics_of_Electrical_Variables.triggered.connect(self.graphics_handler.xy_graphics_of_electrical_variables)
+
+        # Build 3D Menu
+        self.ui.action3D_Plane_Strain_Model.triggered.connect(self.build_3d_handler.plane_strain_model)
+        self.ui.action3D_Plane_Stress_Model.triggered.connect(self.build_3d_handler.plane_stress_model)
+        self.ui.action3D_Axisymetric_Model.triggered.connect(self.build_3d_handler.axisymmetric_model)
+        self.ui.action3D_Axisymmetric_Cheese_Model.triggered.connect(self.build_3d_handler.axisymmetric_cheese_model)
         
     def connect_field_variables_signals(self):
         """Connect Field Variables menu signals"""

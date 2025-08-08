@@ -3,38 +3,38 @@ import math
 class Element:
     def __init__(self, id):
         self.id = id
-        # Initialize other attributes to None
-        self.matno = None # Material number
+        # Initialize other attributes to 0
+        self.matno = 0 # Material number
         self.lnods = [] # List of nodes
-        self.rindx = None # Element quality
-        self.densy = None # Relative density
-        self.fract = None # Ductile damage
+        self.rindx = 0 # Element quality
+        self.densy = 0 # Relative density
+        self.fract = 0 # Ductile damage
         
         # Strain rate attributes
-        self.srnrt_exx = None # Strain rate x(r)
-        self.srnrt_eyy = None # Strain rate y(z)
-        self.srnrt_ezz = None # Strain rate z(theta)
-        self.srnrt_exy = None # Strain rate xy(rz)
-        self.srnrt_e = None # Effective strain rate
-        self.srnrt_ev = None # Volumetric strain rate
+        self.srnrt_exx = 0 # Strain rate x(r)
+        self.srnrt_eyy = 0 # Strain rate y(z)
+        self.srnrt_ezz = 0 # Strain rate z(theta)
+        self.srnrt_exy = 0 # Strain rate xy(rz)
+        self.srnrt_e = 0 # Effective strain rate
+        self.srnrt_ev = 0 # Volumetric strain rate
         
         # Strain attributes
-        self.strain_exx = None # Strain x(r)
-        self.strain_eyy = None # Strain y(z)
-        self.strain_ezz = None # Strain z(theta)
-        self.strain_exy = None # Strain xy(rz)
-        self.strain_e = None # Effective strain
-        self.strain_e1 = None # Strain 1
-        self.strain_e3 = None # Strain 3
-        self.angle13 = None # Angle rad
+        self.strain_exx = 0 # Strain x(r)
+        self.strain_eyy = 0 # Strain y(z)
+        self.strain_ezz = 0 # Strain z(theta)
+        self.strain_exy = 0 # Strain xy(rz)
+        self.strain_e = 0 # Effective strain
+        self.strain_e1 = 0 # Strain 1
+        self.strain_e3 = 0 # Strain 3
+        self.angle13 = 0 # Angle rad
         
         # Stress attributes
-        self.stress_oxx = None # Stress x(r)
-        self.stress_oyy = None # Stress y(z)
-        self.stress_ozz = None # Stress z(theta)
-        self.stress_oxy = None # Stress xy(rz)
-        self.stress_o = None # Effective stress
-        self.stress_orr = None # Average stress
+        self.stress_oxx = 0 # Stress x(r)
+        self.stress_oyy = 0 # Stress y(z)
+        self.stress_ozz = 0 # Stress z(theta)
+        self.stress_oxy = 0 # Stress xy(rz)
+        self.stress_o = 0 # Effective stress
+        self.stress_orr = 0 # Average stress
 
     # ============== SETTERS ==============
     
@@ -42,8 +42,8 @@ class Element:
     def set_matno(self, matno):
         self.matno = matno
         
-    def set_lnods(self, lnods):
-        self.lnods.append(lnods)
+    def set_lnods(self, lnod):
+        self.lnods.append(lnod)
         
     def set_rindx(self, rindx):
         self.rindx = rindx
@@ -359,3 +359,10 @@ class Element:
             f"σ_xy/σ_eq: {self.get_stress_xy_on_effective_stress():.6f}\n"
             f"Pressure/σ_eq: {self.get_pressure_on_effective_stress():.6f}\n"
         )
+    
+class Element3D(Element):
+    def __init__(self, id):
+        super().__init__(id)
+    
+    def set_lnods(self, lnods):
+        self.lnods = lnods 

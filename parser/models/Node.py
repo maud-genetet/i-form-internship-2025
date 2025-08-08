@@ -1,16 +1,16 @@
 class Node:
     def __init__(self, id):
         self.id = id
-        # Initialize other attributes to None
-        self.x = None
-        self.y = None
-        self.vx = None
-        self.vy = None
-        self.fx = None
-        self.fy = None
-        self.dtemp = None
-        self.temp = None
-        self.n2met = None
+        # Initialize other attributes to 0
+        self.x = 0
+        self.y = 0
+        self.vx = 0
+        self.vy = 0
+        self.fx = 0
+        self.fy = 0
+        self.dtemp = 0
+        self.temp = 0
+        self.n2met = 0
         self.code = 0
         self.is_contact = False
 
@@ -101,3 +101,22 @@ class Node:
             f"Code: {self.code}\n"
             f"Is Contact Node: {'Yes' if self.is_contact else 'No'}\n"
         )
+
+class Node3D(Node):
+    def __init__(self, id):
+        super().__init__(id)
+        self.z = 0
+    
+    # Z coordinate
+    def set_coordZ(self, z):
+        self.z = z
+    def get_coordZ(self):
+        return self.z
+    
+    def __str__(self):
+        base_str = super().__str__()
+        return base_str.replace(")", f", z={self.z})")
+    
+    def get_info(self):
+        base_info = super().get_info()
+        return base_info + f"Z Coordinate: {self.z}\n"

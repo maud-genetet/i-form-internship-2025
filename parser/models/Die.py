@@ -5,7 +5,7 @@ class Die:
         self.nb_nodes = 0
         self.nodes = []
         self.main_node = None
-        self.m = None
+        self.m = 0
         self.temp = None
 
     # ============== SETTERS ==============
@@ -48,4 +48,7 @@ class Die:
     def __str__(self):
         return f"Die(ID: {self.id}, Main Node: {self.main_node}, M: {self.m}, \n{'Nodes: ' + ', '.join(str(node) for node in self.nodes)})"
 
+class Die3D(Die):
+    def __init__(self, id):
+        super().__init__(id)
         

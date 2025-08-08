@@ -5,6 +5,9 @@ PyVista Mesh Construction Module
 import numpy as np
 import pyvista as pv
 
+import logging
+logger = logging.getLogger(__name__)
+
 class MeshBuilder:
     """Responsible for creating PyVista meshes from neutral data"""
     
@@ -25,7 +28,7 @@ class MeshBuilder:
             [1.0, 0.5, 1.0]    # Light Magenta
         ]
     
-    def create_pyvista_mesh(self, neutral_data):
+    def create_pyvista_mesh(self, neutral_data, is_3d=False):
         """Create PyVista mesh from neutral data"""
         if not neutral_data:
             return None
@@ -37,30 +40,36 @@ class MeshBuilder:
             return None
         
         # Build points
-        points, node_id_to_index = self._build_points(nodes)
+        points, node_id_to_index = self._build_points(nodes, is_3d)
         
         # Build cells
-        cells = self._build_cells(elements, node_id_to_index)
+        cells = self._build_cells(elements, node_id_to_index, is_3d)
         
         if not cells:
             return None
         
         # Create mesh
-        cell_types = [9] * (len(cells) // 5)  #  9 for Quad, 5 for triangles ( 5 is better for mixed types )
+        if is_3d:
+            num_cells = len(cells) // 9  # 9 = 8 nodes + 1 count per hexahedron
+            cell_types = [12] * num_cells  # 12 = VTK_HEXAHEDRON
+        else:
+            cell_types = [9] * (len(cells) // 5)  # 9 for Quad, 5 for triangles
+        
         mesh = pv.UnstructuredGrid(cells, np.array(cell_types), points)
         
         # Add scalar data 
-        self._add_scalar_data(mesh, elements, nodes)
+        self._add_scalar_data(mesh, elements, nodes, is_3d)
         
         # Add material colors
         self._add_material_colors(mesh, elements)
         
         # Add node constraint codes as point data
-        self._add_node_constraint_codes(mesh, nodes, node_id_to_index)
-        
+        self._add_node_constraint_codes(mesh, nodes, node_id_to_index, is_3d)
+
         # Store original data for vector calculations
         mesh._original_data = neutral_data
         mesh._node_id_to_index = node_id_to_index
+        mesh._is_3d = is_3d
         
         return mesh
     
@@ -80,7 +89,7 @@ class MeshBuilder:
         # Convert to numpy array and add to mesh
         mesh.cell_data['Material_Colors'] = np.array(colors)
         
-    def _build_points(self, nodes):
+    def _build_points(self, nodes, is_3d=False):
         """Build points array and correspondence table"""
         points = []
         node_id_to_index = {}
@@ -88,18 +97,36 @@ class MeshBuilder:
         for i, node in enumerate(nodes):
             x = node.get_coordX() if node.get_coordX() is not None else 0.0
             y = node.get_coordY() if node.get_coordY() is not None else 0.0
-            points.append([x, y, 0.0])
+            
+            if is_3d :
+                z = node.get_coordZ() if node.get_coordZ() is not None else 0.0
+            else:
+                z = 0.0
+                
+            points.append([x, y, z])
             node_id_to_index[node.get_id()] = i
         
         return np.array(points), node_id_to_index
     
-    def _build_cells(self, elements, node_id_to_index):
+    def _build_cells(self, elements, node_id_to_index, is_3d=False):
         """Build cells array"""
         cells = []
         
         for element in elements:
             element_nodes = element.get_lnods()
-            if len(element_nodes) >= 3:
+            
+            if is_3d and len(element_nodes) == 8:
+                # 3D hexahedron
+                node_indices = []
+                for node in element_nodes:
+                    if node and node.get_id() in node_id_to_index:
+                        node_indices.append(node_id_to_index[node.get_id()])
+                
+                if len(node_indices) == 8:
+                    cells.extend([8] + node_indices)
+                    
+            elif not is_3d and len(element_nodes) >= 3:
+                # 2D elements
                 node_indices = []
                 for node in element_nodes:
                     if node and node.get_id() in node_id_to_index:
@@ -115,7 +142,7 @@ class MeshBuilder:
         
         return cells
     
-    def _add_node_constraint_codes(self, mesh, nodes, node_id_to_index):
+    def _add_node_constraint_codes(self, mesh, nodes, node_id_to_index, is_3d=False):
         """Add node constraint codes as point data for visualization"""
         # Create array for node codes (same length as mesh points)
         node_codes = np.zeros(len(mesh.points))
@@ -128,7 +155,9 @@ class MeshBuilder:
             'codes': []
         }
         
-        # Fill with actual node codes and store constraint information
+        if is_3d:
+            constraint_info['positions_z'] = []
+        
         for node in nodes:
             if node.get_id() in node_id_to_index:
                 index = node_id_to_index[node.get_id()]
@@ -140,6 +169,8 @@ class MeshBuilder:
                     constraint_info['node_ids'].append(node.get_id())
                     constraint_info['positions_x'].append(node.get_coordX())
                     constraint_info['positions_y'].append(node.get_coordY())
+                    if is_3d :
+                        constraint_info['positions_z'].append(node.get_coordZ())
                     constraint_info['codes'].append(code)
         
         # Add node codes to mesh point data
@@ -149,7 +180,7 @@ class MeshBuilder:
         if constraint_info['node_ids']:
             mesh._constraint_info = constraint_info
         
-    def _add_scalar_data(self, mesh, elements, nodes):
+    def _add_scalar_data(self, mesh, elements, nodes, is_3d=False):
         """Add all available scalar data to mesh including new variables"""
         element_data = {
             'Element_ID': [],
@@ -226,7 +257,7 @@ class MeshBuilder:
             element_data['Strain z(theta)'].append(element.get_strain_Ezz() or 0.0)
             element_data['Strain xy(rz)'].append(element.get_strain_Exy() or 0.0)
             element_data['Effective strain'].append(element.get_strain_E() or 0.0)
-            element_data['Volumetric Strain'].append(element.get_strain_volumetric() or 0.0)  # Fixed: matches key name
+            element_data['Volumetric Strain'].append(element.get_strain_volumetric() or 0.0)
             element_data['Strain 1'].append(element.get_strain_E1() or 0.0)
             element_data['Strain 2'].append(element.get_strain_E2() or 0.0)
             element_data['Strain 3'].append(element.get_strain_E3() or 0.0)
@@ -265,7 +296,7 @@ class MeshBuilder:
             if len(values) != 0:
                 mesh.cell_data[key] = np.array(values)
     
-    def create_die_mesh(self, die):
+    def create_die_mesh(self, die, is_3d=False):
         """Create mesh for a die"""
         die_nodes = die.get_nodes()
         
@@ -276,34 +307,38 @@ class MeshBuilder:
         for node in die_nodes:
             x = node.get_coordX() if node.get_coordX() is not None else 0.0
             y = node.get_coordY() if node.get_coordY() is not None else 0.0
-            die_points.append([x, y, 0.0])
+            
+            if is_3d :
+                z = node.get_coordZ() if node.get_coordZ() is not None else 0.0
+            else:
+                z = 0.0
+                
+            die_points.append([x, y, z])
         
         die_points = np.array(die_points)
-
-        if len(die_points) == 4:
-            # Create a quad mesh for 4 points
-            cells = [4] + list(range(len(die_points)))
-            return pv.UnstructuredGrid(
-                cells,
-                [pv.CellType.QUAD],
-                die_points
-            )
         
-        if len(die_points) == 8:
-            # Create a hexahedron mesh for 8 points
-            cells = [8] + list(range(len(die_points)))
-            return pv.UnstructuredGrid(
-                cells,
-                [pv.CellType.HEXAHEDRON],
-                die_points
-            )
+        # Create appropriate mesh based on number of points
+        if len(die_points) >= 8 and is_3d:
+            try:
+                point_cloud = pv.PolyData(die_points)
+                convex_hull = point_cloud.delaunay_3d()
+                return convex_hull
+            except Exception as e:
+                logger.warning(f"Failed to create convex hull: {e}")
+                return pv.PolyData(die_points)
         
-        if len(die_points) >= 3:
+        elif len(die_points) == 8:
+            cells = [8] + list(range(8))
+            cell_type = pv.CellType.HEXAHEDRON if is_3d else pv.CellType.QUAD
+            return pv.UnstructuredGrid(cells, [cell_type], die_points)
+        
+        elif len(die_points) == 4:
+            cells = [4] + list(range(4))
+            cell_type = pv.CellType.TETRA if is_3d else pv.CellType.QUAD
+            return pv.UnstructuredGrid(cells, [cell_type], die_points)
+        
+        elif len(die_points) >= 3:
             cells = [len(die_points)] + list(range(len(die_points)))
-            return pv.UnstructuredGrid(
-                cells,
-                [pv.CellType.POLYGON],
-                die_points
-            )
+            return pv.UnstructuredGrid(cells, [pv.CellType.POLYGON], die_points)
         
         return None

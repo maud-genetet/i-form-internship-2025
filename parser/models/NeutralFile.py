@@ -51,3 +51,7 @@ class NeutralFile:
     
     def is_complete(self):
         return len(self.nodes) > 0 and len(self.elements) > 0
+
+class NeutralFile3D(NeutralFile):
+    def __init__(self, title):
+        super().__init__(title)
