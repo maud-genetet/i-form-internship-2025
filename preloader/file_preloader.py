@@ -7,7 +7,7 @@ import os
 from PyQt5.QtCore import QThread, pyqtSignal, QMutex
 import logging
 logger = logging.getLogger(__name__)
-from parser import ParserNeutralFile
+from parser import parser_neutral_file
 
 
 class FilePreloader(QThread):
@@ -37,7 +37,7 @@ class FilePreloader(QThread):
                 if self.should_stop:
                     break
                 
-                # ATTENTE PASSIVE SI GRAPHICS LOADING EST ACTIF
+                # Passive wait to avoid blocking the GUI
                 while hasattr(self, '_visualization_manager') and getattr(self._visualization_manager, 'graphics_loading', False):
                     if self.should_stop:
                         break
@@ -55,7 +55,7 @@ class FilePreloader(QThread):
                 )
                 
                 try:
-                    neutral_data = ParserNeutralFile.parser_file(file_path)
+                    neutral_data = parser_neutral_file.parser_file(file_path)
                     if neutral_data:
                         self.mutex.lock()
                         self.preloaded_data[i] = neutral_data

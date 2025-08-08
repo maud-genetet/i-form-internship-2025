@@ -1,12 +1,12 @@
-from .models.Element import Element
-from .models.Node import Node
-from .models.NeutralFile import NeutralFile
-from .models.Die import Die
+from .models.Element import element
+from .models.Node import node
+from .models.NeutralFile import neutral_file
+from .models.Die import die
 import time
 import logging
 logger = logging.getLogger(__name__)
 
-class ParserNeutralFile:
+class parser_neutral_file:
 
     @staticmethod
     def parser_file(filename):
@@ -20,7 +20,7 @@ class ParserNeutralFile:
                     return
                 
                 # Title verification
-                neu = NeutralFile(lines[0].strip())
+                neu = neutral_file(lines[0].strip())
 
                 nb_nodes = int(lines[1].strip())
                 #logger.info(f"Number of nodes: {nb_nodes}")
@@ -34,7 +34,7 @@ class ParserNeutralFile:
                             logger.info(f"Format error for node at line {i + 1}.")
                             continue
 
-                        node = Node(int(parts[0]))
+                        node = node(int(parts[0]))
                         node.x = float(parts[1].replace('D', 'E'))
                         node.y = float(parts[2].replace('D', 'E'))
                         node.vx = float(parts[3].replace('D', 'E'))
@@ -59,7 +59,7 @@ class ParserNeutralFile:
                     if line:
                         parts = line.split()
                         if len(parts) >= 9:
-                            element = Element(int(parts[0]))
+                            element = element(int(parts[0]))
 
                             element.matno = int(parts[1])
                             element.lnods.append(neu.get_node_by_id(int(parts[2])))
@@ -159,7 +159,7 @@ class ParserNeutralFile:
                         if len(parts) < 3:
                             logger.error(f"Format error for die at line {current_line + 1}.")
                         else:
-                            die = Die(int(parts[0]))
+                            die = die(int(parts[0]))
                             neu.add_die(die)
 
                             current_line += 1
@@ -170,7 +170,7 @@ class ParserNeutralFile:
                                 if len(parts_die) < 7:
                                     logger.error(f"Format error for die at line {current_line + 1}.")
                                 
-                                main_node = Node(-1) # Temporary ID
+                                main_node = node(-1) # Temporary ID
                                 main_node.x = float(parts_die[0].replace('D', 'E'))
                                 main_node.y = float(parts_die[1].replace('D', 'E'))
                                 main_node.vx = float(parts_die[2].replace('D', 'E'))
@@ -191,7 +191,7 @@ class ParserNeutralFile:
                                         logger.error(f"Format error for die node at line {j + 1}.")
                                         continue
 
-                                    node = Node(-1) # Temporary ID
+                                    node = node(-1) # Temporary ID
                                     node.x = float(node_parts[0].replace('D', 'E'))
                                     node.y = float(node_parts[1].replace('D', 'E'))
                                     die.nodes.append(node)
@@ -266,7 +266,7 @@ class ParserNeutralFile:
                     logger.error("The file is empty.")
                     return
                 
-                neu = NeutralFile(lines[0].strip())
+                neu = neutral_file(lines[0].strip())
                 
                 nb_nodes = int(lines[1].strip())
 
@@ -289,7 +289,7 @@ class ParserNeutralFile:
                         if len(parts) < 3:
                             logger.error(f"Format error for die at line {current_line + 1}.")
                         else:
-                            die = Die(int(parts[0]))
+                            die = die(int(parts[0]))
                             neu.add_die(die)
 
                             current_line += 1
@@ -300,7 +300,7 @@ class ParserNeutralFile:
                                 if len(parts_die) < 7:
                                     logger.error(f"Format error for die at line {current_line + 1}.")
                                 
-                                main_node = Node(-1) # Temporary ID
+                                main_node = node(-1) # Temporary ID
                                 main_node.x = float(parts_die[0].replace('D', 'E'))
                                 main_node.y = float(parts_die[1].replace('D', 'E'))
                                 main_node.vx = float(parts_die[2].replace('D', 'E'))
@@ -321,7 +321,7 @@ class ParserNeutralFile:
                                         logger.error(f"Format error for die node at line {j + 1}.")
                                         continue
 
-                                    node = Node(-1) # Temporary ID
+                                    node = node(-1) # Temporary ID
                                     node.x = float(node_parts[0].replace('D', 'E'))
                                     node.y = float(node_parts[1].replace('D', 'E'))
                                     die.nodes.append(node)

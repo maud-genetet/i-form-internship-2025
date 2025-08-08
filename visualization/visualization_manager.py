@@ -289,18 +289,18 @@ class VisualizationManager:
             self.plotter.render()
 
     def get_global_scale_range_for_variable(self, variable_name):
-        """Calcule min/max UNIQUEMENT pour la variable demandée"""
-        # Si auto-scale n'est pas activé, retourner None
+        """Calculate min/max ONLY for the requested variable"""
+        # If auto-scale is not enabled, return None
         options = self.toolbar_manager.get_current_options()
         if not options.get('auto_scale_mode', False):
             return None, None
         
-        # Vérifier le cache
+        # Check cache
         if variable_name in self.scales_cache:
             cached_scales = self.scales_cache[variable_name]
             return cached_scales['min'], cached_scales['max']
         
-        # Calculer pour cette variable spécifique
+        # Calculate for this specific variable
         total_available_files = len(self.preloaded_data) + (1 if self.current_mesh else 0)
         logger.info(f"Computing scales for {variable_name} from {total_available_files} files...")
         
@@ -325,7 +325,7 @@ class VisualizationManager:
                 logger.exception(f"Error processing file {file_index}: {e}")
         
         if global_min is not None and global_max is not None:
-            # Mettre en cache
+            # Cache the result
             self.scales_cache[variable_name] = {'min': global_min, 'max': global_max}
             
             return global_min, global_max
@@ -334,7 +334,7 @@ class VisualizationManager:
             return None, None
     
     def _extract_variable_range(self, neutral_data, target_variable):
-        """Extrait min/max pour UNE SEULE variable spécifique"""
+        """Extract min/max for ONE SINGLE specific variable"""
         if not neutral_data:
             return None, None
         

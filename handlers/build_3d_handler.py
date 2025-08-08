@@ -13,10 +13,10 @@ import logging
 logger = logging.getLogger(__name__)
 import math
 
-from parser.models.NeutralFile import NeutralFile3D
-from parser.models.Node import Node3D  
-from parser.models.Element import Element3D
-from parser.models.Die import Die3D
+from parser.models.NeutralFile import neutral_file_3D
+from parser.models.Node import node_3D  
+from parser.models.Element import element_3D
+from parser.models.Die import die_3D
 
 class Build3DHandler:
     def __init__(self, main_window):
@@ -189,7 +189,7 @@ class Build3DHandler:
         
         # Create new 3D neutral file
         title_3d = f"3D_{model_type}_{data_2d.get_title()}"
-        neutral_3d = NeutralFile3D(title_3d)
+        neutral_3d = neutral_file_3D(title_3d)
         neutral_3d.set_t_time(data_2d.get_t_time())
         
         # Create 3D nodes
@@ -228,7 +228,7 @@ class Build3DHandler:
                     x = r * math.cos(alpha)
                     y = r * math.sin(alpha)
                     
-                    node_3d = Node3D(node_id_3d)
+                    node_3d = node_3D(node_id_3d)
                     node_3d.set_coordX(x)
                     node_3d.set_coordY(y) 
                     node_3d.set_coordZ(z)
@@ -267,7 +267,7 @@ class Build3DHandler:
                 for node_2d in nodes_2d:
                     node_id_3d = node_2d.get_id() + i_div * len(nodes_2d)
                     
-                    node_3d = Node3D(node_id_3d)
+                    node_3d = node_3D(node_id_3d)
                     node_3d.set_coordX(node_2d.get_coordX())
                     node_3d.set_coordY(node_2d.get_coordY())
                     node_3d.set_coordZ(z)
@@ -300,7 +300,7 @@ class Build3DHandler:
             for elem_2d in elements_2d:
                 elem_id_3d = elem_2d.get_id() + i_div * len(elements_2d)
                 
-                elem_3d = Element3D(elem_id_3d)
+                elem_3d = element_3D(elem_id_3d)
                 elem_3d.set_matno(elem_2d.get_matno())
                 
                 # Get 2D nodes
@@ -434,7 +434,7 @@ class Build3DHandler:
             thickness /= 2.0
         
         for die_2d in dies_2d:
-            die_3d = Die3D(die_2d.get_id())
+            die_3d = die_3D(die_2d.get_id())
             die_3d.set_temp(die_2d.get_temp())
             die_3d.set_m(die_2d.get_m())
             
@@ -458,7 +458,7 @@ class Build3DHandler:
                         
                         # Create 3D node with unique ID
                         node_3d_id = -(1000 + die_2d.get_id() * 1000 + i_div * 100 + len(die_3d.get_nodes()))
-                        node_3d = Node3D(node_3d_id)
+                        node_3d = node_3D(node_3d_id)
                         node_3d.set_coordX(x)
                         node_3d.set_coordY(y)
                         node_3d.set_coordZ(z)
@@ -472,7 +472,7 @@ class Build3DHandler:
                     for node_2d in die_nodes_2d:
                         # Create 3D node with unique ID
                         node_3d_id = -(1000 + die_2d.get_id() * 1000 + i_div * 100 + len(die_3d.get_nodes()))
-                        node_3d = Node3D(node_3d_id)
+                        node_3d = node_3D(node_3d_id)
                         node_3d.set_coordX(node_2d.get_coordX())
                         node_3d.set_coordY(node_2d.get_coordY())
                         node_3d.set_coordZ(z)

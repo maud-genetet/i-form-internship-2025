@@ -299,12 +299,12 @@ class ToolbarManager:
             self.main_window.field_variables_handler.standard_options()
 
     def disable_auto_scale_during_loading(self):
-        """Désactiver auto-scale pendant le chargement"""
+        """Disable auto-scale during loading"""
         if self.auto_scale_checkbox:
             self.auto_scale_checkbox.setEnabled(False)
 
     def enable_auto_scale_after_loading(self):
-        """Réactiver auto-scale après le chargement"""
+        """Re-enable auto-scale after loading"""
         if self.auto_scale_checkbox:
             self.auto_scale_checkbox.setEnabled(True)
 

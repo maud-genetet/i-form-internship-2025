@@ -1,5 +1,5 @@
 """
-Système de préchargement des fichiers .NEU en arrière-plan
+Background .NEU file preloading system
 """
 
 from .file_preloader import FilePreloader

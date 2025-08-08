@@ -2,13 +2,13 @@
 Système de parsing des fichiers .NEU
 """
 
-from .ParserNeutralFile import ParserNeutralFile
-from .models import Die, Element, NeutralFile, Node
+from .ParserNeutralFile import parser_neutral_file
+from .models import die, element, neutral_file, node
 
 __all__ = [
-    'ParserNeutralFile',
-    'Die',
-    'Element', 
-    'NeutralFile',
-    'Node'
+    'parser_neutral_file',
+    'die',
+    'element', 
+    'neutral_file',
+    'node'
 ]

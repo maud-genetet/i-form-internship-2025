@@ -7,7 +7,7 @@ import os
 from PyQt5.QtWidgets import QMessageBox
 import re
 from preloader.preloader_manager import PreloaderManager
-from parser import ParserNeutralFile
+from parser import parser_neutral_file
 import logging
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class MeshHandler:
     def _load_and_display_mesh(self, file_path):
         """Load and display mesh file"""
         try:
-            neutral_file = ParserNeutralFile.parser_file(file_path)
+            neutral_file = parser_neutral_file.parser_file(file_path)
             
             if not neutral_file:
                 QMessageBox.warning(
