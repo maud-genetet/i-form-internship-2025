@@ -614,7 +614,8 @@ class XYGraphicsDialog(QDialog):
         for fig in self.created_figures:
             try:
                 plt.close(fig)
-            except:
+            except Exception as e:
+                logger.exception(f"Error closing figure: {e}")
                 pass
         plt.close('all')
         event.accept()
