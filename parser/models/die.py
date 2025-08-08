@@ -1,4 +1,7 @@
-class die:
+""" Die class for representing a die in a mesh structure."""
+
+
+class Die:
 
     def __init__(self, id):
         self.id = id
@@ -49,6 +52,6 @@ class die:
         return f"Die(ID: {self.id}, Main Node: {self.main_node}, M: {self.m}, \n{'Nodes: ' + ', '.join(str(node) for node in self.nodes)})"
 
 
-class die_3D(die):
+class Die3D(Die):
     def __init__(self, id):
         super().__init__(id)

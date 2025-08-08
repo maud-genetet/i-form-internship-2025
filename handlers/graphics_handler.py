@@ -6,7 +6,7 @@ Manages all graphics and plotting operations for dies data
 from PyQt5.QtWidgets import QProgressDialog, QMessageBox
 from .graphics.xy_graphics_dialog import XYGraphicsDialog
 from PyQt5.QtCore import Qt
-from parser import parser_neutral_file
+from parser import ParserNeutralFile
 import os
 import logging
 logger = logging.getLogger(__name__)
@@ -167,7 +167,7 @@ class GraphicsHandler:
                     logger.info(
                         f"Loading {filename} for graphics ({i+1}/{total_files})")
                     # Use parser_file_graphics to just load the dies information
-                    neutral_data = parser_neutral_file.parser_file_graphics(
+                    neutral_data = ParserNeutralFile.parser_file_graphics(
                         file_path)
                     if neutral_data:
                         visualization_manager.preloaded_data[i] = neutral_data

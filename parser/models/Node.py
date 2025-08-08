@@ -1,4 +1,7 @@
-class node:
+""" Node class for representing a node in a mesh structure. """
+
+
+class Node:
     def __init__(self, id):
         self.id = id
         # Initialize other attributes to 0
@@ -103,7 +106,7 @@ class node:
         )
 
 
-class node_3D(node):
+class Node3D(Node):
     def __init__(self, id):
         super().__init__(id)
         self.z = 0

@@ -1,7 +1,9 @@
+""" Element class for representing a finite element in a mesh structure. """
+
 import math
 
 
-class element:
+class Element:
     def __init__(self, id):
         self.id = id
         # Initialize other attributes to 0
@@ -362,7 +364,7 @@ class element:
         )
 
 
-class element_3D(element):
+class Element3D(Element):
     def __init__(self, id):
         super().__init__(id)
 

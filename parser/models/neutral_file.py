@@ -1,4 +1,7 @@
-class neutral_file:
+""" Neutral file model for representing a mesh structure. """
+
+
+class NeutralFile:
 
     def __init__(self, title):
         self.title = title
@@ -53,6 +56,6 @@ class neutral_file:
         return len(self.nodes) > 0 and len(self.elements) > 0
 
 
-class neutral_file_3D(neutral_file):
+class NeutralFile3D(NeutralFile):
     def __init__(self, title):
         super().__init__(title)

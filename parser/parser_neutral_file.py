@@ -1,13 +1,15 @@
-from .models.Element import element
-from .models.Node import node
-from .models.NeutralFile import neutral_file
-from .models.Die import die
+""" Parser for neutral files """
+
+from .models.element import Element
+from .models.node import Node
+from .models.neutral_file import NeutralFile
+from .models.die import Die
 import time
 import logging
 logger = logging.getLogger(__name__)
 
 
-class parser_neutral_file:
+class ParserNeutralFile:
 
     @staticmethod
     def parser_file(filename):
@@ -21,7 +23,7 @@ class parser_neutral_file:
                     return
 
                 # Title verification
-                neu = neutral_file(lines[0].strip())
+                neu = NeutralFile(lines[0].strip())
 
                 nb_nodes = int(lines[1].strip())
                 # logger.info(f"Number of nodes: {nb_nodes}")
@@ -36,7 +38,7 @@ class parser_neutral_file:
                                 f"Format error for node at line {i + 1}.")
                             continue
 
-                        node = node(int(parts[0]))
+                        node = Node(int(parts[0]))
                         node.x = float(parts[1].replace('D', 'E'))
                         node.y = float(parts[2].replace('D', 'E'))
                         node.vx = float(parts[3].replace('D', 'E'))
@@ -61,7 +63,7 @@ class parser_neutral_file:
                     if line:
                         parts = line.split()
                         if len(parts) >= 9:
-                            element = element(int(parts[0]))
+                            element = Element(int(parts[0]))
 
                             element.matno = int(parts[1])
                             element.lnods.append(
@@ -171,7 +173,7 @@ class parser_neutral_file:
                             logger.error(
                                 f"Format error for die at line {current_line + 1}.")
                         else:
-                            die = die(int(parts[0]))
+                            die = Die(int(parts[0]))
                             neu.add_die(die)
 
                             current_line += 1
@@ -183,7 +185,7 @@ class parser_neutral_file:
                                     logger.error(
                                         f"Format error for die at line {current_line + 1}.")
 
-                                main_node = node(-1)  # Temporary ID
+                                main_node = Node(-1)  # Temporary ID
                                 main_node.x = float(
                                     parts_die[0].replace('D', 'E'))
                                 main_node.y = float(
@@ -211,7 +213,7 @@ class parser_neutral_file:
                                             f"Format error for die node at line {j + 1}.")
                                         continue
 
-                                    node = node(-1)  # Temporary ID
+                                    node = Node(-1)  # Temporary ID
                                     node.x = float(
                                         node_parts[0].replace('D', 'E'))
                                     node.y = float(
@@ -292,7 +294,7 @@ class parser_neutral_file:
                     logger.error("The file is empty.")
                     return
 
-                neu = neutral_file(lines[0].strip())
+                neu = NeutralFile(lines[0].strip())
 
                 nb_nodes = int(lines[1].strip())
 
@@ -316,7 +318,7 @@ class parser_neutral_file:
                             logger.error(
                                 f"Format error for die at line {current_line + 1}.")
                         else:
-                            die = die(int(parts[0]))
+                            die = Die(int(parts[0]))
                             neu.add_die(die)
 
                             current_line += 1
@@ -328,7 +330,7 @@ class parser_neutral_file:
                                     logger.error(
                                         f"Format error for die at line {current_line + 1}.")
 
-                                main_node = node(-1)  # Temporary ID
+                                main_node = Node(-1)  # Temporary ID
                                 main_node.x = float(
                                     parts_die[0].replace('D', 'E'))
                                 main_node.y = float(
@@ -356,7 +358,7 @@ class parser_neutral_file:
                                             f"Format error for die node at line {j + 1}.")
                                         continue
 
-                                    node = node(-1)  # Temporary ID
+                                    node = Node(-1)  # Temporary ID
                                     node.x = float(
                                         node_parts[0].replace('D', 'E'))
                                     node.y = float(

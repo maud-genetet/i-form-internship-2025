@@ -2,12 +2,18 @@
 Modèles de données pour les fichiers .NEU
 """
 
-from .Node import node, node_3D
-from .Element import element, element_3D
-from .Die import die, die_3D
-from .NeutralFile import neutral_file, neutral_file_3D
+from .node import Node, Node3D
+from .die import Die, Die3D
+from .element import Element, Element3D
+from .neutral_file import NeutralFile, NeutralFile3D
 
 __all__ = [
-    'node', 'element', 'die', 'neutral_file',
-    'node_3D', 'element_3D', 'die_3D', 'neutral_file_3D'
+    "Node",
+    "Node3D",
+    "Die",
+    "Die3D",
+    "Element",
+    "Element3D",
+    "NeutralFile",
+    "NeutralFile3D"
 ]
