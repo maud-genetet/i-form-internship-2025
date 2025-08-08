@@ -6,11 +6,11 @@ Handles 3D model generation from 2D models
 import os
 import math
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
-                             QSpinBox, QDoubleSpinBox, QPushButton, QCheckBox,
+                             QSpinBox, QDoubleSpinBox, QPushButton,
                              QGroupBox, QMessageBox)
-from PyQt5.QtCore import Qt
 import logging
 logger = logging.getLogger(__name__)
+import math
 
 from parser.models.NeutralFile import NeutralFile3D
 from parser.models.Node import Node3D  
@@ -223,11 +223,15 @@ class Build3DHandler:
                     neutral_3d.add_node(node_3d)
                     
         else:  # plane_strain or plane_stress
-            # Plane models: extrude in Z direction
             thickness = params['thickness']
             
             for i_div in range(divisions + 1):
-                z = (thickness * i_div) / divisions
+                if model_type == "plane_stress":
+                    # Pour plane stress: calculer correction basée sur strain z minimum
+                    z = self._calculate_plane_stress_z_coordinate(data_2d, thickness, i_div, divisions)
+                else:  # plane_strain
+                    # Pour plane strain: distribution linéaire simple
+                    z = (thickness * i_div) / divisions
                 
                 for node_2d in nodes_2d:
                     node_id_3d = node_2d.get_id() + i_div * len(nodes_2d)
@@ -381,6 +385,9 @@ class Build3DHandler:
             
         divisions = params['divisions']
         thickness = params.get('thickness', 1.0)
+
+        if model_type == "plane_stress":
+            thickness /= 2.0
         
         for die_2d in dies_2d:
             die_3d = Die3D(die_2d.get_id())
@@ -429,6 +436,26 @@ class Build3DHandler:
                         die_3d.add_node(node_3d)
                         
             neutral_3d.add_die(die_3d)
+
+    def _calculate_plane_stress_z_coordinate(self, data_2d, thickness, i_div, divisions):
+        """Calculate Z coordinate for plane stress model with strain correction"""
+        
+        if i_div == 0:
+            return 0.0
+        
+        strain_z_min = 1.0e+10
+        
+        elements = list(data_2d.get_elements())
+        for element in elements:
+            strain_z = element.get_strain_Ezz() or 0.0
+            if strain_z < strain_z_min:
+                strain_z_min = strain_z
+        
+        correction = math.exp(strain_z_min)
+        
+        thickz = (0.5 * thickness * correction * float(i_div)) / float(divisions)
+        
+        return thickz
 
 
 class Build3DDialog(QDialog):
