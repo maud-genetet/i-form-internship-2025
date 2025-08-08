@@ -418,8 +418,10 @@ class FieldVariablesHandler:
         
         dies = visualization_manager.current_data.get_dies()
         
+        is_3d = hasattr(visualization_manager.current_mesh, '_is_3d') and visualization_manager.current_mesh._is_3d
+        
         for die in dies:
-            die_mesh = visualization_manager.mesh_builder.create_die_mesh(die)
+            die_mesh = visualization_manager.mesh_builder.create_die_mesh(die, is_3d)
             if die_mesh:
                 die_data = {
                     'mesh': die_mesh,

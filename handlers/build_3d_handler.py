@@ -7,7 +7,7 @@ import os
 import math
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
                              QSpinBox, QDoubleSpinBox, QPushButton, QCheckBox,
-                             QGroupBox, QMessageBox, QLineEdit)
+                             QGroupBox, QMessageBox)
 from PyQt5.QtCore import Qt
 import logging
 logger = logging.getLogger(__name__)
@@ -380,40 +380,55 @@ class Build3DHandler:
             return
             
         divisions = params['divisions']
-        nodes_2d_count = len(list(data_2d.get_nodes()))
+        thickness = params.get('thickness', 1.0)
         
         for die_2d in dies_2d:
             die_3d = Die3D(die_2d.get_id())
             die_3d.set_temp(die_2d.get_temp())
             die_3d.set_m(die_2d.get_m())
             
-            # Transform die nodes to 3D
-            die_nodes_2d = die_2d.get_nodes()
-            total_nodes_added = 0
+            die_nodes_2d = die_2d.nodes
             
             if model_type in ["axisymmetric", "axisymmetric_cheese"]:
-                # For axisymmetric models
                 angle_total = 2 * math.pi
                 if model_type == "axisymmetric_cheese":
                     angle_total = math.radians(params['angle'])
                 
-                # Create 3D die nodes by rotation
                 for i_div in range(divisions + 1):
+                    alpha = (angle_total * i_div) / divisions
+                    
                     for node_2d in die_nodes_2d:
-                        # Find the corresponding 3D node in neutral_3d
-                        node_3d_id = node_2d.get_id() + i_div * nodes_2d_count
-                        node_3d = neutral_3d.get_node_by_id(node_3d_id)
-                        if node_3d:
-                            die_3d.add_node(node_3d)
-                            total_nodes_added += 1
+                        # Convert r,z to x,y,z pour axisymétrique
+                        r = node_2d.get_coordX()
+                        z = node_2d.get_coordY()
+                        
+                        x = r * math.cos(alpha)
+                        y = r * math.sin(alpha)
+                        
+                        # Créer le nœud 3D avec un ID unique
+                        node_3d_id = -(1000 + die_2d.get_id() * 1000 + i_div * 100 + len(die_3d.get_nodes()))
+                        node_3d = Node3D(node_3d_id)
+                        node_3d.set_coordX(x)
+                        node_3d.set_coordY(y)
+                        node_3d.set_coordZ(z)
+                        
+                        die_3d.add_node(node_3d)
                             
             else:  # plane_strain or plane_stress
-                # For plane models, extrude die nodes
                 for i_div in range(divisions + 1):
+                    z = (thickness * i_div) / divisions
+                    
                     for node_2d in die_nodes_2d:
-                        # Find the corresponding 3D node in neutral_3d
-                        node_3d_id = node_2d.get_id() + i_div * nodes_2d_count
-                        node_3d = neutral_3d.get_node_by_id(node_3d_id)
+                        # Créer le nœud 3D avec un ID unique
+                        node_3d_id = -(1000 + die_2d.get_id() * 1000 + i_div * 100 + len(die_3d.get_nodes()))
+                        node_3d = Node3D(node_3d_id)
+                        node_3d.set_coordX(node_2d.get_coordX())
+                        node_3d.set_coordY(node_2d.get_coordY())
+                        node_3d.set_coordZ(z)
+                        
+                        die_3d.add_node(node_3d)
+                        
+            neutral_3d.add_die(die_3d)
 
 
 class Build3DDialog(QDialog):
@@ -457,7 +472,7 @@ class Build3DDialog(QDialog):
             div_layout.addWidget(QLabel("Number of Divisions:"))
             self.divisions_spinbox = QSpinBox()
             self.divisions_spinbox.setMinimum(1)
-            self.divisions_spinbox.setMaximum(100)
+            self.divisions_spinbox.setMaximum(999)
             self.divisions_spinbox.setValue(16)
             div_layout.addWidget(self.divisions_spinbox)
             div_layout.addStretch()
@@ -484,7 +499,7 @@ class Build3DDialog(QDialog):
             div_layout.addWidget(QLabel("Number of Divisions:"))
             self.divisions_spinbox = QSpinBox()
             self.divisions_spinbox.setMinimum(1)
-            self.divisions_spinbox.setMaximum(100)
+            self.divisions_spinbox.setMaximum(999)
             self.divisions_spinbox.setValue(16)
             div_layout.addWidget(self.divisions_spinbox)
             div_layout.addStretch()

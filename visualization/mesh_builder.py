@@ -316,21 +316,14 @@ class MeshBuilder:
             die_points.append([x, y, z])
         
         die_points = np.array(die_points)
-        
-        # Create appropriate mesh based on number of points
-        if len(die_points) >= 8 and is_3d:
-            try:
-                point_cloud = pv.PolyData(die_points)
-                convex_hull = point_cloud.delaunay_3d()
-                return convex_hull
-            except Exception as e:
-                logger.warning(f"Failed to create convex hull: {e}")
-                return pv.PolyData(die_points)
-        
-        elif len(die_points) == 8:
-            cells = [8] + list(range(8))
+
+        if len(die_points) >= 8:
+            cells = []
+            for i in range(0, len(die_points), 4):
+                if i + 7 < len(die_points):
+                    cells.append([8] + list(range(i, i + 8)))
             cell_type = pv.CellType.HEXAHEDRON if is_3d else pv.CellType.QUAD
-            return pv.UnstructuredGrid(cells, [cell_type], die_points)
+            return pv.UnstructuredGrid(cells, [cell_type] * len(cells), die_points)
         
         elif len(die_points) == 4:
             cells = [4] + list(range(4))
