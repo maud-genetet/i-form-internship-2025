@@ -8,7 +8,7 @@ from .models import die, element, neutral_file, node
 __all__ = [
     'parser_neutral_file',
     'die',
-    'element', 
+    'element',
     'neutral_file',
     'node'
 ]

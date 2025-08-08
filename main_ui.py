@@ -117,7 +117,8 @@ class Ui_MainWindow(object):
         self.actionSpecial_Options.setEnabled(False)
         self.actionSpecial_Options.setObjectName("actionSpecial_Options")
         self.actionContact_Length_and_Ruler = QtWidgets.QAction(MainWindow)
-        self.actionContact_Length_and_Ruler.setObjectName("actionContact_Length_and_Ruler")
+        self.actionContact_Length_and_Ruler.setObjectName(
+            "actionContact_Length_and_Ruler")
         self.actionSurface_Strains = QtWidgets.QAction(MainWindow)
         self.actionSurface_Strains.setObjectName("actionSurface_Strains")
         self.actionStandard_Options_3 = QtWidgets.QAction(MainWindow)
@@ -145,11 +146,13 @@ class Ui_MainWindow(object):
         self.actionStrain_Rate_y_r = QtWidgets.QAction(MainWindow)
         self.actionStrain_Rate_y_r.setObjectName("actionStrain_Rate_y_r")
         self.actionStrain_rate_z_theta = QtWidgets.QAction(MainWindow)
-        self.actionStrain_rate_z_theta.setObjectName("actionStrain_rate_z_theta")
+        self.actionStrain_rate_z_theta.setObjectName(
+            "actionStrain_rate_z_theta")
         self.actionStrain_Rate_xy_rz = QtWidgets.QAction(MainWindow)
         self.actionStrain_Rate_xy_rz.setObjectName("actionStrain_Rate_xy_rz")
         self.actionEffective_Strain_Rate = QtWidgets.QAction(MainWindow)
-        self.actionEffective_Strain_Rate.setObjectName("actionEffective_Strain_Rate")
+        self.actionEffective_Strain_Rate.setObjectName(
+            "actionEffective_Strain_Rate")
         self.actionStrain_y_r = QtWidgets.QAction(MainWindow)
         self.actionStrain_y_r.setObjectName("actionStrain_y_r")
         self.actionStrain_z_theta = QtWidgets.QAction(MainWindow)
@@ -199,13 +202,16 @@ class Ui_MainWindow(object):
         self.actionStrain_Rate_y_z = QtWidgets.QAction(MainWindow)
         self.actionStrain_Rate_y_z.setObjectName("actionStrain_Rate_y_z")
         self.actionStrain_Rate_z_theta = QtWidgets.QAction(MainWindow)
-        self.actionStrain_Rate_z_theta.setObjectName("actionStrain_Rate_z_theta")
+        self.actionStrain_Rate_z_theta.setObjectName(
+            "actionStrain_Rate_z_theta")
         self.actionStrain_Rate_xy_z = QtWidgets.QAction(MainWindow)
         self.actionStrain_Rate_xy_z.setObjectName("actionStrain_Rate_xy_z")
         self.actionEffective_Strain_Rate_2 = QtWidgets.QAction(MainWindow)
-        self.actionEffective_Strain_Rate_2.setObjectName("actionEffective_Strain_Rate_2")
+        self.actionEffective_Strain_Rate_2.setObjectName(
+            "actionEffective_Strain_Rate_2")
         self.actionVolumetric_Strain_Rate = QtWidgets.QAction(MainWindow)
-        self.actionVolumetric_Strain_Rate.setObjectName("actionVolumetric_Strain_Rate")
+        self.actionVolumetric_Strain_Rate.setObjectName(
+            "actionVolumetric_Strain_Rate")
         self.actionStrain_x_r_2 = QtWidgets.QAction(MainWindow)
         self.actionStrain_x_r_2.setObjectName("actionStrain_x_r_2")
         self.actionStrain_y_z = QtWidgets.QAction(MainWindow)
@@ -215,7 +221,8 @@ class Ui_MainWindow(object):
         self.actionEffective_Strain_2 = QtWidgets.QAction(MainWindow)
         self.actionEffective_Strain_2.setObjectName("actionEffective_Strain_2")
         self.actionVolumetric_Strain_2 = QtWidgets.QAction(MainWindow)
-        self.actionVolumetric_Strain_2.setObjectName("actionVolumetric_Strain_2")
+        self.actionVolumetric_Strain_2.setObjectName(
+            "actionVolumetric_Strain_2")
         self.actionStrain_4 = QtWidgets.QAction(MainWindow)
         self.actionStrain_4.setObjectName("actionStrain_4")
         self.actionStrain_5 = QtWidgets.QAction(MainWindow)
@@ -243,7 +250,8 @@ class Ui_MainWindow(object):
         self.actionStress_5 = QtWidgets.QAction(MainWindow)
         self.actionStress_5.setObjectName("actionStress_5")
         self.actionThickness_Plane_Stress = QtWidgets.QAction(MainWindow)
-        self.actionThickness_Plane_Stress.setObjectName("actionThickness_Plane_Stress")
+        self.actionThickness_Plane_Stress.setObjectName(
+            "actionThickness_Plane_Stress")
         self.actionRelative_Density = QtWidgets.QAction(MainWindow)
         self.actionRelative_Density.setObjectName("actionRelative_Density")
         self.actionDuctile_Damage = QtWidgets.QAction(MainWindow)
@@ -251,24 +259,30 @@ class Ui_MainWindow(object):
         self.actionElectric_Potential = QtWidgets.QAction(MainWindow)
         self.actionElectric_Potential.setObjectName("actionElectric_Potential")
         self.actionElectric_Current_Density = QtWidgets.QAction(MainWindow)
-        self.actionElectric_Current_Density.setObjectName("actionElectric_Current_Density")
+        self.actionElectric_Current_Density.setObjectName(
+            "actionElectric_Current_Density")
         self.actionElectric_Resistivity = QtWidgets.QAction(MainWindow)
-        self.actionElectric_Resistivity.setObjectName("actionElectric_Resistivity")
+        self.actionElectric_Resistivity.setObjectName(
+            "actionElectric_Resistivity")
         self.actionSpecial_Options_2 = QtWidgets.QAction(MainWindow)
         self.actionSpecial_Options_2.setEnabled(False)
         self.actionSpecial_Options_2.setObjectName("actionSpecial_Options_2")
         self.actionStress_y_z_Ef_Stress = QtWidgets.QAction(MainWindow)
-        self.actionStress_y_z_Ef_Stress.setObjectName("actionStress_y_z_Ef_Stress")
+        self.actionStress_y_z_Ef_Stress.setObjectName(
+            "actionStress_y_z_Ef_Stress")
         self.actionStress_xy_rz_Ef_Stress = QtWidgets.QAction(MainWindow)
-        self.actionStress_xy_rz_Ef_Stress.setObjectName("actionStress_xy_rz_Ef_Stress")
+        self.actionStress_xy_rz_Ef_Stress.setObjectName(
+            "actionStress_xy_rz_Ef_Stress")
         self.actionAverage_Stress_Ef_Stress = QtWidgets.QAction(MainWindow)
-        self.actionAverage_Stress_Ef_Stress.setObjectName("actionAverage_Stress_Ef_Stress")
+        self.actionAverage_Stress_Ef_Stress.setObjectName(
+            "actionAverage_Stress_Ef_Stress")
         self.actionPressure = QtWidgets.QAction(MainWindow)
         self.actionPressure.setObjectName("actionPressure")
         self.actionPressure_Ef_Stress = QtWidgets.QAction(MainWindow)
         self.actionPressure_Ef_Stress.setObjectName("actionPressure_Ef_Stress")
         self.actionSurface_Enlargement_Ratio = QtWidgets.QAction(MainWindow)
-        self.actionSurface_Enlargement_Ratio.setObjectName("actionSurface_Enlargement_Ratio")
+        self.actionSurface_Enlargement_Ratio.setObjectName(
+            "actionSurface_Enlargement_Ratio")
         self.actionElement_Quality = QtWidgets.QAction(MainWindow)
         self.actionElement_Quality.setObjectName("actionElement_Quality")
         self.actionAnimation_Controls = QtWidgets.QAction(MainWindow)
@@ -279,29 +293,40 @@ class Ui_MainWindow(object):
         self.actionXY_Graphics = QtWidgets.QAction(MainWindow)
         self.actionXY_Graphics.setObjectName("actionXY_Graphics")
         self.actionPrincipal_Strain_Space = QtWidgets.QAction(MainWindow)
-        self.actionPrincipal_Strain_Space.setObjectName("actionPrincipal_Strain_Space")
+        self.actionPrincipal_Strain_Space.setObjectName(
+            "actionPrincipal_Strain_Space")
         self.actionStrain_Stress_Triaxiality = QtWidgets.QAction(MainWindow)
-        self.actionStrain_Stress_Triaxiality.setObjectName("actionStrain_Stress_Triaxiality")
-        self.actionEvolution_of_Element_Center_or_Field_Variable_with_Time = QtWidgets.QAction(MainWindow)
-        self.actionEvolution_of_Element_Center_or_Field_Variable_with_Time.setObjectName("actionEvolution_of_Element_Center_or_Field_Variable_with_Time")
+        self.actionStrain_Stress_Triaxiality.setObjectName(
+            "actionStrain_Stress_Triaxiality")
+        self.actionEvolution_of_Element_Center_or_Field_Variable_with_Time = QtWidgets.QAction(
+            MainWindow)
+        self.actionEvolution_of_Element_Center_or_Field_Variable_with_Time.setObjectName(
+            "actionEvolution_of_Element_Center_or_Field_Variable_with_Time")
         self.actionSpecial_Options_3 = QtWidgets.QAction(MainWindow)
         self.actionSpecial_Options_3.setEnabled(False)
         self.actionSpecial_Options_3.setObjectName("actionSpecial_Options_3")
         self.actionMesh_Quality_Assessment = QtWidgets.QAction(MainWindow)
-        self.actionMesh_Quality_Assessment.setObjectName("actionMesh_Quality_Assessment")
-        self.actionXY_Graphics_of_Electrical_Variables = QtWidgets.QAction(MainWindow)
-        self.actionXY_Graphics_of_Electrical_Variables.setObjectName("actionXY_Graphics_of_Electrical_Variables")
+        self.actionMesh_Quality_Assessment.setObjectName(
+            "actionMesh_Quality_Assessment")
+        self.actionXY_Graphics_of_Electrical_Variables = QtWidgets.QAction(
+            MainWindow)
+        self.actionXY_Graphics_of_Electrical_Variables.setObjectName(
+            "actionXY_Graphics_of_Electrical_Variables")
         self.actionStandard_Options_6 = QtWidgets.QAction(MainWindow)
         self.actionStandard_Options_6.setEnabled(False)
         self.actionStandard_Options_6.setObjectName("actionStandard_Options_6")
         self.action3D_Plane_Strain_Model = QtWidgets.QAction(MainWindow)
-        self.action3D_Plane_Strain_Model.setObjectName("action3D_Plane_Strain_Model")
+        self.action3D_Plane_Strain_Model.setObjectName(
+            "action3D_Plane_Strain_Model")
         self.action3D_Plane_Stress_Model = QtWidgets.QAction(MainWindow)
-        self.action3D_Plane_Stress_Model.setObjectName("action3D_Plane_Stress_Model")
+        self.action3D_Plane_Stress_Model.setObjectName(
+            "action3D_Plane_Stress_Model")
         self.action3D_Axisymetric_Model = QtWidgets.QAction(MainWindow)
-        self.action3D_Axisymetric_Model.setObjectName("action3D_Axisymetric_Model")
+        self.action3D_Axisymetric_Model.setObjectName(
+            "action3D_Axisymetric_Model")
         self.action3D_Axisymmetric_Cheese_Model = QtWidgets.QAction(MainWindow)
-        self.action3D_Axisymmetric_Cheese_Model.setObjectName("action3D_Axisymmetric_Cheese_Model")
+        self.action3D_Axisymmetric_Cheese_Model.setObjectName(
+            "action3D_Axisymmetric_Cheese_Model")
         self.menuFile.addAction(self.actionWorking_Directory)
         self.menuFile.addAction(self.actionPrint)
         self.menuFile.addAction(self.actionSave)
@@ -390,7 +415,8 @@ class Ui_MainWindow(object):
         self.menuField_Variables.addAction(self.actionAverage_Stress_Ef_Stress)
         self.menuField_Variables.addAction(self.actionPressure)
         self.menuField_Variables.addAction(self.actionPressure_Ef_Stress)
-        self.menuField_Variables.addAction(self.actionSurface_Enlargement_Ratio)
+        self.menuField_Variables.addAction(
+            self.actionSurface_Enlargement_Ratio)
         self.menuField_Variables.addSeparator()
         self.menuField_Variables.addAction(self.actionElement_Quality)
         self.menuAnimation.addAction(self.actionAnimation_Controls)
@@ -398,11 +424,13 @@ class Ui_MainWindow(object):
         self.menuGraphics.addAction(self.actionXY_Graphics)
         self.menuGraphics.addAction(self.actionPrincipal_Strain_Space)
         self.menuGraphics.addAction(self.actionStrain_Stress_Triaxiality)
-        self.menuGraphics.addAction(self.actionEvolution_of_Element_Center_or_Field_Variable_with_Time)
+        self.menuGraphics.addAction(
+            self.actionEvolution_of_Element_Center_or_Field_Variable_with_Time)
         self.menuGraphics.addSeparator()
         self.menuGraphics.addAction(self.actionSpecial_Options_3)
         self.menuGraphics.addAction(self.actionMesh_Quality_Assessment)
-        self.menuGraphics.addAction(self.actionXY_Graphics_of_Electrical_Variables)
+        self.menuGraphics.addAction(
+            self.actionXY_Graphics_of_Electrical_Variables)
         self.menuBuild_3D.addAction(self.actionStandard_Options_6)
         self.menuBuild_3D.addAction(self.action3D_Plane_Strain_Model)
         self.menuBuild_3D.addAction(self.action3D_Plane_Stress_Model)
@@ -436,7 +464,8 @@ class Ui_MainWindow(object):
         self.menuSummary.setTitle(_translate("MainWindow", "Summary"))
         self.menuQuery.setTitle(_translate("MainWindow", "Query"))
         self.menuMesh.setTitle(_translate("MainWindow", "Mesh"))
-        self.menuField_Variables.setTitle(_translate("MainWindow", "Field Variables"))
+        self.menuField_Variables.setTitle(
+            _translate("MainWindow", "Field Variables"))
         self.menuVelocity.setTitle(_translate("MainWindow", "Velocity"))
         self.menuStrain_Rate.setTitle(_translate("MainWindow", "Strain Rate"))
         self.menuForce.setTitle(_translate("MainWindow", "Force"))
@@ -445,123 +474,206 @@ class Ui_MainWindow(object):
         self.menuElectric.setTitle(_translate("MainWindow", "Electric"))
         self.menuAnimation.setTitle(_translate("MainWindow", "Animation"))
         self.menuGraphics.setTitle(_translate("MainWindow", "Graphics"))
-        self.menuDie_Stress_Analysis.setTitle(_translate("MainWindow", "Die Stress Analysis"))
-        self.menuDie_Thermal_Analysis.setTitle(_translate("MainWindow", "Die Thermal Analysis"))
+        self.menuDie_Stress_Analysis.setTitle(
+            _translate("MainWindow", "Die Stress Analysis"))
+        self.menuDie_Thermal_Analysis.setTitle(
+            _translate("MainWindow", "Die Thermal Analysis"))
         self.menuBuild_3D.setTitle(_translate("MainWindow", "Build 3D"))
         self.menuState.setTitle(_translate("MainWindow", "State"))
         self.menuWindow.setTitle(_translate("MainWindow", "Window"))
         self.menuHelp.setTitle(_translate("MainWindow", "Help"))
-        self.actionWorking_Directory.setText(_translate("MainWindow", "Working Directory..."))
+        self.actionWorking_Directory.setText(
+            _translate("MainWindow", "Working Directory..."))
         self.actionPrint.setText(_translate("MainWindow", "Print..."))
         self.actionSave.setText(_translate("MainWindow", "Save..."))
-        self.actionExport_as_DXF.setText(_translate("MainWindow", "Export as DXF..."))
-        self.actionExport_as_ascii.setText(_translate("MainWindow", "Export as ascii..."))
-        self.actionExport_as_RST.setText(_translate("MainWindow", "Export as RST..."))
-        self.actionExit_Program.setText(_translate("MainWindow", "Exit Program"))
+        self.actionExport_as_DXF.setText(
+            _translate("MainWindow", "Export as DXF..."))
+        self.actionExport_as_ascii.setText(
+            _translate("MainWindow", "Export as ascii..."))
+        self.actionExport_as_RST.setText(
+            _translate("MainWindow", "Export as RST..."))
+        self.actionExit_Program.setText(
+            _translate("MainWindow", "Exit Program"))
         self.actionSelect_Text.setText(_translate("MainWindow", "Select Text"))
-        self.actionSelect_Graphics.setText(_translate("MainWindow", "Select Graphics"))
+        self.actionSelect_Graphics.setText(
+            _translate("MainWindow", "Select Graphics"))
         self.actionSelect_All.setText(_translate("MainWindow", "Select All"))
         self.actionCopy.setText(_translate("MainWindow", "Copy"))
         self.actionPaste.setText(_translate("MainWindow", "Paste"))
         self.actionSize_To_Fit.setText(_translate("MainWindow", "Size To Fit"))
         self.actionFull_Screen.setText(_translate("MainWindow", "Full Screen"))
-        self.actionMagnification_Zoom.setText(_translate("MainWindow", "Magnification Zoom"))
-        self.actionStandard_Options.setText(_translate("MainWindow", "Standard Options"))
+        self.actionMagnification_Zoom.setText(
+            _translate("MainWindow", "Magnification Zoom"))
+        self.actionStandard_Options.setText(
+            _translate("MainWindow", "Standard Options"))
         self.actionWorkpiece.setText(_translate("MainWindow", "Workpiece"))
         self.actionDie.setText(_translate("MainWindow", "Die"))
-        self.actionStandard_Options_2.setText(_translate("MainWindow", "Standard Options"))
+        self.actionStandard_Options_2.setText(
+            _translate("MainWindow", "Standard Options"))
         self.actionNodes.setText(_translate("MainWindow", "Nodes"))
         self.actionElements.setText(_translate("MainWindow", "Elements"))
-        self.actionMinimum_Jacobian.setText(_translate("MainWindow", "Minimum Jacobian"))
-        self.actionSpecial_Options.setText(_translate("MainWindow", "Special Options"))
-        self.actionContact_Length_and_Ruler.setText(_translate("MainWindow", "Contact Length and Ruler"))
-        self.actionSurface_Strains.setText(_translate("MainWindow", "Surface Strains"))
-        self.actionStandard_Options_3.setText(_translate("MainWindow", "Standard Options"))
-        self.actionInitial_Mesh.setText(_translate("MainWindow", "Initial Mesh"))
-        self.actionDeformed_Mesh.setText(_translate("MainWindow", "Deformed Mesh"))
-        self.actionStandard_Options_4.setText(_translate("MainWindow", "Standard Options"))
-        self.actionVelocity_y_z.setText(_translate("MainWindow", "Velocity y(z)"))
-        self.actionTotal_Velocity.setText(_translate("MainWindow", "Total Velocity"))
+        self.actionMinimum_Jacobian.setText(
+            _translate("MainWindow", "Minimum Jacobian"))
+        self.actionSpecial_Options.setText(
+            _translate("MainWindow", "Special Options"))
+        self.actionContact_Length_and_Ruler.setText(
+            _translate("MainWindow", "Contact Length and Ruler"))
+        self.actionSurface_Strains.setText(
+            _translate("MainWindow", "Surface Strains"))
+        self.actionStandard_Options_3.setText(
+            _translate("MainWindow", "Standard Options"))
+        self.actionInitial_Mesh.setText(
+            _translate("MainWindow", "Initial Mesh"))
+        self.actionDeformed_Mesh.setText(
+            _translate("MainWindow", "Deformed Mesh"))
+        self.actionStandard_Options_4.setText(
+            _translate("MainWindow", "Standard Options"))
+        self.actionVelocity_y_z.setText(
+            _translate("MainWindow", "Velocity y(z)"))
+        self.actionTotal_Velocity.setText(
+            _translate("MainWindow", "Total Velocity"))
         self.actionForce_y_z.setText(_translate("MainWindow", "Force y(z)"))
         self.actionTotal_Force.setText(_translate("MainWindow", "Total Force"))
-        self.actionTemperature_Rate.setText(_translate("MainWindow", "Temperature Rate"))
+        self.actionTemperature_Rate.setText(
+            _translate("MainWindow", "Temperature Rate"))
         self.actionTemperature.setText(_translate("MainWindow", "Temperature"))
-        self.actionStrain_Rate_y_r.setText(_translate("MainWindow", "Strain Rate y(z)"))
-        self.actionStrain_rate_z_theta.setText(_translate("MainWindow", "Strain rate z(theta)"))
-        self.actionStrain_Rate_xy_rz.setText(_translate("MainWindow", "Strain Rate xy(rz)"))
-        self.actionEffective_Strain_Rate.setText(_translate("MainWindow", "Effective Strain Rate"))
+        self.actionStrain_Rate_y_r.setText(
+            _translate("MainWindow", "Strain Rate y(z)"))
+        self.actionStrain_rate_z_theta.setText(
+            _translate("MainWindow", "Strain rate z(theta)"))
+        self.actionStrain_Rate_xy_rz.setText(
+            _translate("MainWindow", "Strain Rate xy(rz)"))
+        self.actionEffective_Strain_Rate.setText(
+            _translate("MainWindow", "Effective Strain Rate"))
         self.actionStrain_y_r.setText(_translate("MainWindow", "Strain y(z)"))
-        self.actionStrain_z_theta.setText(_translate("MainWindow", "Strain z(theta)"))
-        self.actionStrain_xy_rz.setText(_translate("MainWindow", "Strain xy(rz)"))
-        self.actionEffective_Strain.setText(_translate("MainWindow", "Effective Strain"))
-        self.actionVolumetric_Strain.setText(_translate("MainWindow", "Volumetric Strain"))
+        self.actionStrain_z_theta.setText(
+            _translate("MainWindow", "Strain z(theta)"))
+        self.actionStrain_xy_rz.setText(
+            _translate("MainWindow", "Strain xy(rz)"))
+        self.actionEffective_Strain.setText(
+            _translate("MainWindow", "Effective Strain"))
+        self.actionVolumetric_Strain.setText(
+            _translate("MainWindow", "Volumetric Strain"))
         self.actionStrain_1.setText(_translate("MainWindow", "Strain 1"))
-        self.actionStrain_2.setText(_translate("MainWindow", "Volumetric Strain Rate"))
+        self.actionStrain_2.setText(_translate(
+            "MainWindow", "Volumetric Strain Rate"))
         self.actionStrain_3.setText(_translate("MainWindow", "Strain 3"))
         self.actionStress_y_z.setText(_translate("MainWindow", "Stress y(z)"))
-        self.actionStress_z_theta.setText(_translate("MainWindow", "Stress z(theta)"))
-        self.actionStress_xy_rz.setText(_translate("MainWindow", "Stress xy(rz)"))
-        self.actionEffective_Stress.setText(_translate("MainWindow", "Effective Stress"))
-        self.actionAverage_Stress.setText(_translate("MainWindow", "Average Stress"))
+        self.actionStress_z_theta.setText(
+            _translate("MainWindow", "Stress z(theta)"))
+        self.actionStress_xy_rz.setText(
+            _translate("MainWindow", "Stress xy(rz)"))
+        self.actionEffective_Stress.setText(
+            _translate("MainWindow", "Effective Stress"))
+        self.actionAverage_Stress.setText(
+            _translate("MainWindow", "Average Stress"))
         self.actionStress_1.setText(_translate("MainWindow", "Stress 1"))
         self.actionStress_2.setText(_translate("MainWindow", "Stress 2"))
         self.actionStress3.setText(_translate("MainWindow", "Stress3"))
-        self.actionVelocity_x_r_2.setText(_translate("MainWindow", "Velocity x(r)"))
-        self.actionVelocity_y_z_2.setText(_translate("MainWindow", "Velocity y(z)"))
-        self.actionTotal_Velocity_2.setText(_translate("MainWindow", "Total Velocity"))
+        self.actionVelocity_x_r_2.setText(
+            _translate("MainWindow", "Velocity x(r)"))
+        self.actionVelocity_y_z_2.setText(
+            _translate("MainWindow", "Velocity y(z)"))
+        self.actionTotal_Velocity_2.setText(
+            _translate("MainWindow", "Total Velocity"))
         self.actionForce_x_r_2.setText(_translate("MainWindow", "Force x(r)"))
         self.actionForce_y_y.setText(_translate("MainWindow", "Force y(y)"))
-        self.actionTotal_Force_2.setText(_translate("MainWindow", "Total Force"))
-        self.actionStrain_Rate_x_r_2.setText(_translate("MainWindow", "Strain Rate x(r)"))
-        self.actionStrain_Rate_y_z.setText(_translate("MainWindow", "Strain Rate y(z)"))
-        self.actionStrain_Rate_z_theta.setText(_translate("MainWindow", "Strain Rate z(theta)"))
-        self.actionStrain_Rate_xy_z.setText(_translate("MainWindow", "Strain Rate xy(rz)"))
-        self.actionEffective_Strain_Rate_2.setText(_translate("MainWindow", "Effective Strain Rate"))
-        self.actionVolumetric_Strain_Rate.setText(_translate("MainWindow", "Volumetric Strain Rate"))
-        self.actionStrain_x_r_2.setText(_translate("MainWindow", "Strain x(r)"))
+        self.actionTotal_Force_2.setText(
+            _translate("MainWindow", "Total Force"))
+        self.actionStrain_Rate_x_r_2.setText(
+            _translate("MainWindow", "Strain Rate x(r)"))
+        self.actionStrain_Rate_y_z.setText(
+            _translate("MainWindow", "Strain Rate y(z)"))
+        self.actionStrain_Rate_z_theta.setText(
+            _translate("MainWindow", "Strain Rate z(theta)"))
+        self.actionStrain_Rate_xy_z.setText(
+            _translate("MainWindow", "Strain Rate xy(rz)"))
+        self.actionEffective_Strain_Rate_2.setText(
+            _translate("MainWindow", "Effective Strain Rate"))
+        self.actionVolumetric_Strain_Rate.setText(
+            _translate("MainWindow", "Volumetric Strain Rate"))
+        self.actionStrain_x_r_2.setText(
+            _translate("MainWindow", "Strain x(r)"))
         self.actionStrain_y_z.setText(_translate("MainWindow", "Strain y(z)"))
-        self.actionStrain_xy_rz_2.setText(_translate("MainWindow", "Strain xy(rz)"))
-        self.actionEffective_Strain_2.setText(_translate("MainWindow", "Effective Strain"))
-        self.actionVolumetric_Strain_2.setText(_translate("MainWindow", "Volumetric Strain"))
+        self.actionStrain_xy_rz_2.setText(
+            _translate("MainWindow", "Strain xy(rz)"))
+        self.actionEffective_Strain_2.setText(
+            _translate("MainWindow", "Effective Strain"))
+        self.actionVolumetric_Strain_2.setText(
+            _translate("MainWindow", "Volumetric Strain"))
         self.actionStrain_4.setText(_translate("MainWindow", "Strain 1"))
         self.actionStrain_5.setText(_translate("MainWindow", "Strain 2"))
         self.actionStrain_6.setText(_translate("MainWindow", "Strain 3"))
-        self.actionStrain_z_theta_2.setText(_translate("MainWindow", "Strain z(theta)"))
-        self.actionStress_x_r_2.setText(_translate("MainWindow", "Stress x(r)"))
-        self.actionStress_y_z_2.setText(_translate("MainWindow", "Stress y(z)"))
-        self.actionStress_z_theta_2.setText(_translate("MainWindow", "Stress z(theta)"))
-        self.actionStress_xy_rz_2.setText(_translate("MainWindow", "Stress xy(rz)"))
-        self.actionEffective_Stress_2.setText(_translate("MainWindow", "Effective Stress"))
-        self.actionAverage_Stress_2.setText(_translate("MainWindow", "Average Stress"))
+        self.actionStrain_z_theta_2.setText(
+            _translate("MainWindow", "Strain z(theta)"))
+        self.actionStress_x_r_2.setText(
+            _translate("MainWindow", "Stress x(r)"))
+        self.actionStress_y_z_2.setText(
+            _translate("MainWindow", "Stress y(z)"))
+        self.actionStress_z_theta_2.setText(
+            _translate("MainWindow", "Stress z(theta)"))
+        self.actionStress_xy_rz_2.setText(
+            _translate("MainWindow", "Stress xy(rz)"))
+        self.actionEffective_Stress_2.setText(
+            _translate("MainWindow", "Effective Stress"))
+        self.actionAverage_Stress_2.setText(
+            _translate("MainWindow", "Average Stress"))
         self.actionStress_3.setText(_translate("MainWindow", "Stress 1"))
         self.actionStress_4.setText(_translate("MainWindow", "Stress 2"))
         self.actionStress_5.setText(_translate("MainWindow", "Stress 3"))
-        self.actionThickness_Plane_Stress.setText(_translate("MainWindow", "Thickness (Plane Stress)"))
-        self.actionRelative_Density.setText(_translate("MainWindow", "Relative Density"))
-        self.actionDuctile_Damage.setText(_translate("MainWindow", "Ductile Damage"))
-        self.actionElectric_Potential.setText(_translate("MainWindow", "Electric Potential"))
-        self.actionElectric_Current_Density.setText(_translate("MainWindow", "Electric Current Density"))
-        self.actionElectric_Resistivity.setText(_translate("MainWindow", "Electric Resistivity"))
-        self.actionSpecial_Options_2.setText(_translate("MainWindow", "Special Options"))
-        self.actionStress_y_z_Ef_Stress.setText(_translate("MainWindow", "Stress y(z)/Ef.Stress"))
-        self.actionStress_xy_rz_Ef_Stress.setText(_translate("MainWindow", "Stress xy(rz)/Ef.Stress"))
-        self.actionAverage_Stress_Ef_Stress.setText(_translate("MainWindow", "Average Stress/Ef.Stress"))
+        self.actionThickness_Plane_Stress.setText(
+            _translate("MainWindow", "Thickness (Plane Stress)"))
+        self.actionRelative_Density.setText(
+            _translate("MainWindow", "Relative Density"))
+        self.actionDuctile_Damage.setText(
+            _translate("MainWindow", "Ductile Damage"))
+        self.actionElectric_Potential.setText(
+            _translate("MainWindow", "Electric Potential"))
+        self.actionElectric_Current_Density.setText(
+            _translate("MainWindow", "Electric Current Density"))
+        self.actionElectric_Resistivity.setText(
+            _translate("MainWindow", "Electric Resistivity"))
+        self.actionSpecial_Options_2.setText(
+            _translate("MainWindow", "Special Options"))
+        self.actionStress_y_z_Ef_Stress.setText(
+            _translate("MainWindow", "Stress y(z)/Ef.Stress"))
+        self.actionStress_xy_rz_Ef_Stress.setText(
+            _translate("MainWindow", "Stress xy(rz)/Ef.Stress"))
+        self.actionAverage_Stress_Ef_Stress.setText(
+            _translate("MainWindow", "Average Stress/Ef.Stress"))
         self.actionPressure.setText(_translate("MainWindow", "Pressure"))
-        self.actionPressure_Ef_Stress.setText(_translate("MainWindow", "Pressure/Ef.Stress"))
-        self.actionSurface_Enlargement_Ratio.setText(_translate("MainWindow", "Surface Enlargement Ratio"))
-        self.actionElement_Quality.setText(_translate("MainWindow", "Element Quality"))
-        self.actionAnimation_Controls.setText(_translate("MainWindow", "Animation Controls..."))
-        self.actionAnimation_Controls.setStatusTip(_translate("MainWindow", "Open animation control dialog"))
-        self.actionStandard_Options_5.setText(_translate("MainWindow", "Standard Options"))
+        self.actionPressure_Ef_Stress.setText(
+            _translate("MainWindow", "Pressure/Ef.Stress"))
+        self.actionSurface_Enlargement_Ratio.setText(
+            _translate("MainWindow", "Surface Enlargement Ratio"))
+        self.actionElement_Quality.setText(
+            _translate("MainWindow", "Element Quality"))
+        self.actionAnimation_Controls.setText(
+            _translate("MainWindow", "Animation Controls..."))
+        self.actionAnimation_Controls.setStatusTip(
+            _translate("MainWindow", "Open animation control dialog"))
+        self.actionStandard_Options_5.setText(
+            _translate("MainWindow", "Standard Options"))
         self.actionXY_Graphics.setText(_translate("MainWindow", "XY Graphics"))
-        self.actionPrincipal_Strain_Space.setText(_translate("MainWindow", "Principal Strain Space"))
-        self.actionStrain_Stress_Triaxiality.setText(_translate("MainWindow", "Strain-Stress Triaxiality"))
-        self.actionEvolution_of_Element_Center_or_Field_Variable_with_Time.setText(_translate("MainWindow", "Evolution of Element Center or Field Variable with Time"))
-        self.actionSpecial_Options_3.setText(_translate("MainWindow", "Special Options"))
-        self.actionMesh_Quality_Assessment.setText(_translate("MainWindow", "Mesh Quality Assessment"))
-        self.actionXY_Graphics_of_Electrical_Variables.setText(_translate("MainWindow", "XY Graphics of Electrical Variables"))
-        self.actionStandard_Options_6.setText(_translate("MainWindow", "Standard Options"))
-        self.action3D_Plane_Strain_Model.setText(_translate("MainWindow", "3D Plane Strain Model"))
-        self.action3D_Plane_Stress_Model.setText(_translate("MainWindow", "3D Plane Stress Model"))
-        self.action3D_Axisymetric_Model.setText(_translate("MainWindow", "3D Axisymetric Model"))
-        self.action3D_Axisymmetric_Cheese_Model.setText(_translate("MainWindow", "3D Axisymmetric Cheese Model"))
+        self.actionPrincipal_Strain_Space.setText(
+            _translate("MainWindow", "Principal Strain Space"))
+        self.actionStrain_Stress_Triaxiality.setText(
+            _translate("MainWindow", "Strain-Stress Triaxiality"))
+        self.actionEvolution_of_Element_Center_or_Field_Variable_with_Time.setText(
+            _translate("MainWindow", "Evolution of Element Center or Field Variable with Time"))
+        self.actionSpecial_Options_3.setText(
+            _translate("MainWindow", "Special Options"))
+        self.actionMesh_Quality_Assessment.setText(
+            _translate("MainWindow", "Mesh Quality Assessment"))
+        self.actionXY_Graphics_of_Electrical_Variables.setText(
+            _translate("MainWindow", "XY Graphics of Electrical Variables"))
+        self.actionStandard_Options_6.setText(
+            _translate("MainWindow", "Standard Options"))
+        self.action3D_Plane_Strain_Model.setText(
+            _translate("MainWindow", "3D Plane Strain Model"))
+        self.action3D_Plane_Stress_Model.setText(
+            _translate("MainWindow", "3D Plane Stress Model"))
+        self.action3D_Axisymetric_Model.setText(
+            _translate("MainWindow", "3D Axisymetric Model"))
+        self.action3D_Axisymmetric_Cheese_Model.setText(
+            _translate("MainWindow", "3D Axisymmetric Cheese Model"))

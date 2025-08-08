@@ -10,7 +10,7 @@ from .graphics_handler import GraphicsHandler
 
 __all__ = [
     'AnimationHandler',
-    'FieldVariablesHandler', 
+    'FieldVariablesHandler',
     'FileHandler',
     'MeshHandler',
     'GraphicsHandler',
