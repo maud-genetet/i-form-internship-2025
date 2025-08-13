@@ -13,6 +13,7 @@ class ParserNeutralFile:
 
     @staticmethod
     def parser_file(filename):
+        """Parse complete neutral file including all mesh data"""
         t1 = time.time()
         try:
             with open(filename, 'r', encoding='utf-8') as file:
@@ -22,13 +23,13 @@ class ParserNeutralFile:
                     logger.error("The file is empty.")
                     return
 
-                # Title verification
+                # Parse title
                 neu = NeutralFile(lines[0].strip())
 
                 nb_nodes = int(lines[1].strip())
                 # logger.info(f"Number of nodes: {nb_nodes}")
 
-                # Node processing
+                # Parse nodes
                 for i in range(2, 2 + nb_nodes):
                     line = lines[i].strip()
                     if line:
@@ -55,7 +56,7 @@ class ParserNeutralFile:
 
                 current_line += 1
 
-                # Element processing
+                # Parse elements
                 for i in range(nb_elements):
                     base_line = current_line + i
 
@@ -83,6 +84,7 @@ class ParserNeutralFile:
                             logger.error(
                                 f"Format error for element at line {base_line + 1}.")
 
+                    # Parse strain rate data
                     strain_rate_line = current_line + nb_elements + i
                     line = lines[strain_rate_line].strip().replace('D', 'E')
                     if line:
@@ -101,6 +103,7 @@ class ParserNeutralFile:
                             logger.error(
                                 f"Format error for strain rate element at line {strain_rate_line + 1}.")
 
+                    # Parse strain data
                     strain_line = current_line + 2 * nb_elements + i
                     line = lines[strain_line].strip().replace('D', 'E')
                     if line:
@@ -122,6 +125,7 @@ class ParserNeutralFile:
                             logger.error(
                                 f"Format error for strain element at line {strain_line + 1}.")
 
+                    # Parse stress data
                     stress_line = current_line + 3 * nb_elements + i
                     line = lines[stress_line].strip().replace('D', 'E')
                     if line:
@@ -159,7 +163,7 @@ class ParserNeutralFile:
                             node.temp = float(parts[2].replace('D', 'E'))
                 current_line += nb_nodes
 
-                # Die elements
+                # Parse die data
                 nb_dies = int(lines[current_line].strip())
                 current_line += 2
                 # logger.info(f"Number of dies: {nb_dies}")
@@ -178,6 +182,7 @@ class ParserNeutralFile:
 
                             current_line += 1
 
+                            # Parse die main node data
                             die_line = lines[current_line].strip()
                             if die_line:
                                 parts_die = die_line.split()
@@ -204,6 +209,7 @@ class ParserNeutralFile:
 
                                 current_line += 1
 
+                            # Parse die geometry nodes
                             for j in range(current_line, current_line + int(parts[1])):
                                 node_line = lines[j].strip()
                                 if node_line:
@@ -222,11 +228,11 @@ class ParserNeutralFile:
 
                             current_line += int(parts[1])
 
-                # Contact nodes
+                # Parse contact nodes
                 nb_contact_elements = int(lines[current_line].strip())
                 current_line += 1
 
-                # put the node n in contact with set_contact
+                # Mark contact nodes
                 for i in range(current_line, current_line + nb_contact_elements):
                     line = lines[i].strip()
                     if line:
@@ -262,7 +268,8 @@ class ParserNeutralFile:
                             node.code = float(parts[1].replace('D', 'E'))
 
                 current_line += nb_code_elements
-                # Time
+
+                # Parse time data
                 time_line = lines[current_line].strip()
                 if time_line:
                     try:
@@ -285,6 +292,7 @@ class ParserNeutralFile:
 
     @staticmethod
     def parser_file_graphics(filename):
+        """Parse neutral file for graphics only (dies and time data)"""
         t1 = time.time()
         try:
             with open(filename, 'r', encoding='utf-8') as file:
@@ -302,6 +310,7 @@ class ParserNeutralFile:
 
                 nb_elements = int(lines[current_line].strip())
 
+                # Skip element and node data blocks
                 current_line += 1 + 4 * nb_elements + nb_nodes
 
                 # Die elements
@@ -323,6 +332,7 @@ class ParserNeutralFile:
 
                             current_line += 1
 
+                            # Parse die main node
                             die_line = lines[current_line].strip()
                             if die_line:
                                 parts_die = die_line.split()
@@ -349,6 +359,7 @@ class ParserNeutralFile:
 
                                 current_line += 1
 
+                            # Parse die geometry nodes
                             for j in range(current_line, current_line + int(parts[1])):
                                 node_line = lines[j].strip()
                                 if node_line:
@@ -367,7 +378,7 @@ class ParserNeutralFile:
 
                             current_line += int(parts[1])
 
-                # Contact nodes
+                # Skip contact and code elements
                 nb_contact_elements = int(lines[current_line].strip())
                 current_line += 1
 
@@ -378,7 +389,7 @@ class ParserNeutralFile:
 
                 current_line += nb_code_elements
 
-                # Time
+                # Parse time data
                 time_line = lines[current_line].strip()
                 if time_line:
                     try:

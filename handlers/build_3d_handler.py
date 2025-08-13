@@ -23,29 +23,29 @@ class Build3DHandler:
         self.working_directory = None
 
     def plane_strain_model(self):
-        """Handle 3D Plane Strain Model"""
+        """Create 3D plane strain model"""
         self._show_build_dialog("plane_strain")
 
     def plane_stress_model(self):
-        """Handle 3D Plane Stress Model"""
+        """Create 3D plane stress model"""
         self._show_build_dialog("plane_stress")
 
     def axisymmetric_model(self):
-        """Handle 3D Axisymmetric Model"""
+        """Create 3D axisymmetric model"""
         self._show_build_dialog("axisymmetric")
 
     def axisymmetric_cheese_model(self):
-        """Handle 3D Axisymmetric Cheese Model"""
+        """Create 3D axisymmetric cheese model (partial rotation)"""
         self._show_build_dialog("axisymmetric_cheese")
 
     def _show_build_dialog(self, model_type):
-        """Show build 3D dialog"""
+        """Display configuration dialog for 3D model creation"""
         if not self._check_prerequisites():
             return
 
         dialog = Build3DDialog(self.main_window, model_type)
 
-        # Parse fem.dat to get thickness if available
+        # Try to get thickness from fem.dat
         thickness = self._parse_fem_dat()
         if thickness is not None:
             dialog.set_thickness(thickness)
@@ -55,7 +55,7 @@ class Build3DHandler:
             self._build_3d_model(model_type, params)
 
     def _check_prerequisites(self):
-        """Check if prerequisites are met"""
+        """Verify required data is available"""
         visualization_manager = self.main_window.visualization_manager
 
         if not visualization_manager.working_directory:
@@ -77,7 +77,7 @@ class Build3DHandler:
         return True
 
     def _parse_fem_dat(self):
-        """Parse fem.dat file to extract thickness"""
+        """Extract thickness parameter from fem.dat file"""
         visualization_manager = self.main_window.visualization_manager
         working_dir = visualization_manager.working_directory
 
@@ -116,7 +116,7 @@ class Build3DHandler:
         return None
 
     def _build_3d_model(self, model_type, params):
-        """Build 3D model from 2D data"""
+        """Create 3D model from current 2D data"""
         try:
             step = params['step']
             visualization_manager = self.main_window.visualization_manager
@@ -137,7 +137,7 @@ class Build3DHandler:
                 progress_dialog.close()
 
                 if data_3d:
-                    # Load the 3D model in visualization
+                    # Load 3D model in visualization
                     visualization_manager.load_neutral_file(data_3d, True)
 
                     QMessageBox.information(
@@ -165,8 +165,7 @@ class Build3DHandler:
             )
 
     def _create_progress_dialog(self):
-        """Create progress dialog for 3D model creation"""
-
+        """Create progress dialog for model creation"""
         progress_dialog = QProgressDialog(
             "Creating 3D model...",
             "Cancel",
@@ -210,7 +209,7 @@ class Build3DHandler:
         nodes_2d = list(data_2d.get_nodes())
 
         if model_type in ["axisymmetric", "axisymmetric_cheese"]:
-            # Axisymmetric models: rotate around Z axis
+            # Axisymmetric: rotate around Z axis
             angle_total = 2 * math.pi
             if model_type == "axisymmetric_cheese":
                 angle_total = math.radians(params['angle'])
@@ -233,19 +232,21 @@ class Build3DHandler:
                     node_3d.set_coordY(y)
                     node_3d.set_coordZ(z)
 
-                    # Copy other properties
+                    # Transform velocities to cartesian
                     if node_2d.get_Vx() is not None:
                         vx = node_2d.get_Vx() * math.cos(alpha)
                         vy = node_2d.get_Vx() * math.sin(alpha)
                         node_3d.set_Vx(vx)
                         node_3d.set_Vy(vy)
 
+                    # Transform forces to cartesian
                     if node_2d.get_Fx() is not None:
                         fx = node_2d.get_Fx() * math.cos(alpha)
                         fy = node_2d.get_Fx() * math.sin(alpha)
                         node_3d.set_Fx(fx)
                         node_3d.set_Fy(fy)
 
+                    # Copy scalar properties
                     node_3d.set_Temp(node_2d.get_Temp())
                     node_3d.set_DTemp(node_2d.get_DTemp())
                     node_3d.set_code(node_2d.get_code())
@@ -258,11 +259,11 @@ class Build3DHandler:
 
             for i_div in range(divisions + 1):
                 if model_type == "plane_stress":
-                    # For plane stress: calculate correction based on minimum z strain
+                    # Plane stress: adjust Z based on strain
                     z = self._calculate_plane_stress_z_coordinate(
                         data_2d, thickness, i_div, divisions)
                 else:  # plane_strain
-                    # For plane strain: simple linear distribution
+                    # Plane strain: linear distribution
                     z = (thickness * i_div) / divisions
 
                 for node_2d in nodes_2d:
@@ -288,8 +289,7 @@ class Build3DHandler:
                     neutral_3d.add_node(node_3d)
 
     def _create_3d_elements(self, data_2d, neutral_3d, model_type, params, progress_dialog=None):
-        """Create 3D elements (hexahedra) from 2D elements (quads)"""
-
+        """Convert 2D elements (quads) to 3D elements (hexahedra)"""
         divisions = params['divisions']
         elements_2d = list(data_2d.get_elements())
         nodes_2d_count = len(list(data_2d.get_nodes()))
@@ -316,7 +316,7 @@ class Build3DHandler:
 
                 # Top face (next level)
                 if i_div == divisions - 1 and model_type in ["axisymmetric"]:
-                    # For full axisymmetric, connect to first layer
+                    # Full axisymmetric: connect to first layer
                     node5_3d_id = nodes_2d[0].get_id()
                     node6_3d_id = nodes_2d[1].get_id()
                     node7_3d_id = nodes_2d[2].get_id()
@@ -368,7 +368,7 @@ class Build3DHandler:
         elem_3d.set_densy(elem_2d.get_densy())
         elem_3d.set_fract(elem_2d.get_fract())
 
-        # Transform strains and stresses based on model type
+        # Transform strain and stress based on model type
         if model_type in ["axisymmetric", "axisymmetric_cheese"]:
             # Axisymmetric transformation
             angle_total = 2 * math.pi
@@ -395,7 +395,7 @@ class Build3DHandler:
             elem_3d.set_strain_Ezz(strain_z)
             elem_3d.set_strain_Exy(strain_xy)
 
-            # Similar transformation for stresses
+            # Transform stresses similarly
             stress_r = elem_2d.get_stress_Oxx() or 0.0
             stress_z = elem_2d.get_stress_Oyy() or 0.0
             stress_t = elem_2d.get_stress_Ozz() or 0.0
@@ -434,7 +434,7 @@ class Build3DHandler:
         elem_3d.set_strain_rate_Ev(elem_2d.get_strain_rate_Ev())
 
     def _create_3d_dies(self, data_2d, neutral_3d, model_type, params):
-        """Create 3D dies from 2D dies"""
+        """Generate 3D die geometry from 2D dies"""
         dies_2d = data_2d.get_dies()
 
         if not dies_2d:
@@ -484,7 +484,7 @@ class Build3DHandler:
                     z = (thickness * i_div) / divisions
 
                     for node_2d in die_nodes_2d:
-                        # Create 3D node with unique ID
+                        # Create 3D die node with unique ID
                         node_3d_id = -(1000 + die_2d.get_id() * 1000 +
                                        i_div * 100 + len(die_3d.get_nodes()))
                         node_3d = Node3D(node_3d_id)
@@ -497,8 +497,7 @@ class Build3DHandler:
             neutral_3d.add_die(die_3d)
 
     def _calculate_plane_stress_z_coordinate(self, data_2d, thickness, i_div, divisions):
-        """Calculate Z coordinate for plane stress model with strain correction"""
-
+        """Calculate Z coordinate for plane stress with strain correction"""
         if i_div == 0:
             return 0.0
 
@@ -519,6 +518,8 @@ class Build3DHandler:
 
 
 class Build3DDialog(QDialog):
+    """Configuration dialog for 3D model creation"""
+
     def __init__(self, parent=None, model_type="plane_strain"):
         super().__init__(parent)
         self.model_type = model_type
@@ -526,6 +527,7 @@ class Build3DDialog(QDialog):
         self.setupUi()
 
     def setupUi(self):
+        """Build dialog interface"""
         self.setWindowTitle("Build 3D Model")
         self.setFixedSize(400, 250)
 
@@ -621,7 +623,7 @@ class Build3DDialog(QDialog):
         self.setLayout(layout)
 
     def set_thickness(self, thickness):
-        """Set thickness value from fem.dat parsing"""
+        """Update thickness value from fem.dat"""
         self.thick = thickness
         if hasattr(self, 'thickness_label'):
             self.thickness_label.setText(f"{thickness:.2f}")

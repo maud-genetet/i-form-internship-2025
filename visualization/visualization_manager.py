@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 class VisualizationManager:
     """
-    Centralized manager for PyVista visualization
-    Shared between all application modules
+    Main visualization controller
+    Manages PyVista rendering and user interface
     """
 
     def __init__(self, main_window):
@@ -32,10 +32,10 @@ class VisualizationManager:
 
         self.graphics_loading = False
 
-        # Default configuration
+        # Rendering settings
         self.default_edge_color = 'black'
 
-        # Specialized modules
+        # Core components
         self.mesh_builder = MeshBuilder()
         self.interaction_handler = InteractionHandler()
         self.display_manager = DisplayModeManager()
@@ -55,17 +55,17 @@ class VisualizationManager:
         self._setup_visualization_widget()
 
     def _setup_visualization_widget(self):
-        """Configure main visualization widget"""
+        """Set up the main visualization interface"""
         self.visualization_widget = QWidget()
         main_layout = QVBoxLayout()
 
-        # Create toolbar using ToolbarManager
+        # Create toolbars
         self.toolbar_manager.create_toolbars(main_layout)
 
-        # Create horizontal layout for plotter + info panel
+        # Create content area with plotter and info panel
         content_layout = QHBoxLayout()
 
-        # PyVista visualization area
+        # PyVista visualization
         self.plotter = QtInteractor(self.visualization_widget)
         content_layout.addWidget(self.plotter.interactor)
 
@@ -78,11 +78,11 @@ class VisualizationManager:
 
         self.visualization_widget.setLayout(main_layout)
 
-        # Plotter configuration
+        # Configure plotter
         self._configure_plotter()
 
     def _create_info_panel(self):
-        """Create info panel for mesh information"""
+        """Create mesh information panel"""
         self.info_panel = QFrame()
         self.info_panel.setFixedWidth(300)
 
@@ -92,7 +92,7 @@ class VisualizationManager:
         self.info_title = QLabel("Mesh Information")
         info_layout.addWidget(self.info_title)
 
-        # Scrollable content area
+        # Scrollable content
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -108,21 +108,21 @@ class VisualizationManager:
         self.info_panel.setLayout(info_layout)
 
     def _show_info_panel(self):
-        """Show the info panel"""
+        """Show mesh information panel"""
         self.info_panel.setVisible(True)
 
     def _hide_info_panel(self):
-        """Hide the info panel and disable picking"""
+        """Hide mesh information panel"""
         self.info_panel.setVisible(False)
         self.toolbar_manager.mesh_info_btn.setChecked(False)
         self.interaction_handler.disable_mesh_picking()
 
     def _configure_plotter(self):
-        """Configure plotter with automatic click"""
+        """Configure PyVista plotter settings"""
         self.plotter.show_axes()
         self.plotter.view_xy()
 
-        # Initialize interaction handler
+        # Setup interaction handler
         self.interaction_handler.setup(self.plotter)
         self.interaction_handler.set_info_panel(
             self.info_panel,
@@ -131,27 +131,26 @@ class VisualizationManager:
         )
 
     def reapply_mesh_picking_if_needed(self):
-        """Reapply mesh picking after mesh operations"""
+        """Reapply mesh picking after visualization updates"""
         self.interaction_handler.reapply_mesh_picking_if_needed()
 
-    # === DEFORMED MESH METHODS ===
+    # Deformed mesh navigation
 
     def add_deformed_mesh_controls(self, neu_files, working_directory, load_callback):
-        """Add navigation controls for deformed mesh"""
+        """Add controls for navigating through mesh sequence"""
         self.neu_files = neu_files
         self.working_directory = working_directory
         self.load_mesh_callback = load_callback
         self.current_mesh_index = 0
 
-        # Use toolbar manager
+        # Show navigation controls
         self.toolbar_manager.show_navigation_controls(neu_files)
 
         # Update button states
         self._update_mesh_controls_state()
 
     def hide_deformed_mesh_controls(self):
-        """Hide deformed mesh navigation controls"""
-        # Use toolbar manager
+        """Hide mesh sequence navigation"""
         self.toolbar_manager.hide_navigation_controls()
 
     def _previous_mesh(self):
@@ -169,7 +168,7 @@ class VisualizationManager:
             self._update_mesh_controls_state()
 
     def _on_mesh_spinbox_changed(self, value):
-        """Spinbox value change callback"""
+        """Handle direct mesh selection"""
         new_index = value - 1  # Convert 1-based to 0-based
         if 0 <= new_index < len(self.neu_files):
             self.current_mesh_index = new_index
@@ -177,7 +176,7 @@ class VisualizationManager:
             self._update_mesh_controls_state()
 
     def _load_current_mesh(self):
-        """Load current mesh file"""
+        """Load currently selected mesh file"""
         if self.neu_files and self.working_directory and self.load_mesh_callback:
             current_file = self.neu_files[self.current_mesh_index]
             file_path = f"{self.working_directory}/{current_file}"
@@ -196,20 +195,20 @@ class VisualizationManager:
             self._update_data_info()
 
     def _update_mesh_controls_state(self):
-        """Update navigation controls state"""
+        """Update navigation control states"""
         self.toolbar_manager.update_navigation_state(
             self.current_mesh_index,
             len(self.neu_files)
         )
 
-    # === PUBLIC METHODS ===
+    # Public interface
 
     def get_widget(self):
-        """Return visualization widget"""
+        """Get the main visualization widget"""
         return self.visualization_widget
 
     def set_as_central_widget(self):
-        """Set as central widget"""
+        """Set as main window central widget"""
         self.main_window.setCentralWidget(self.visualization_widget)
 
     def load_neutral_file(self, neutral_file, is_3d=False):
@@ -223,7 +222,7 @@ class VisualizationManager:
             self.current_mesh = mesh
             self.interaction_handler.set_mesh_data(mesh, self.current_data)
 
-        # Reapply currently selected variable if exists
+        # Reapply current variable if one is selected
         if hasattr(self.main_window, 'field_variables_handler'):
             self.main_window.field_variables_handler.reapply_current_variable()
 
@@ -232,7 +231,7 @@ class VisualizationManager:
         self.current_dir = dir_name
 
     def _update_data_info(self):
-        """Update displayed information"""
+        """Update data information display"""
         info_text = ""
 
         if self.current_data and self.current_dir:
@@ -249,7 +248,7 @@ class VisualizationManager:
         else:
             info_text = "No directory set"
 
-        # Use toolbar manager
+        # Update toolbar display
         self.toolbar_manager.update_data_info(info_text)
 
     def clear(self):
@@ -258,15 +257,15 @@ class VisualizationManager:
             self.plotter.clear()
 
     def reset_view(self):
-        """Reset view to default"""
+        """Reset camera to default position"""
         if self.plotter:
             self.plotter.reset_camera()
             self.plotter.view_xy()
 
     def set_front_view(self):
-        """Set front view (XY plane) """
+        """Set front view (XY plane)"""
         if self.plotter:
-            # Save current camera position to keep
+            # Preserve current camera distance
             camera = self.plotter.camera
             current_position = camera.position
             current_focal_point = camera.focal_point
@@ -293,8 +292,8 @@ class VisualizationManager:
             self.plotter.render()
 
     def get_global_scale_range_for_variable(self, variable_name):
-        """Calculate min/max ONLY for the requested variable"""
-        # If auto-scale is not enabled, return None
+        """Calculate global min/max for auto-scaling"""
+        # Check if auto-scale is enabled
         options = self.toolbar_manager.get_current_options()
         if not options.get('auto_scale_mode', False):
             return None, None
@@ -304,7 +303,7 @@ class VisualizationManager:
             cached_scales = self.scales_cache[variable_name]
             return cached_scales['min'], cached_scales['max']
 
-        # Calculate for this specific variable
+        # Calculate scales from all available data
         total_available_files = len(
             self.preloaded_data) + (1 if self.current_mesh else 0)
         logger.info(
@@ -342,7 +341,7 @@ class VisualizationManager:
             return None, None
 
     def _extract_variable_range(self, neutral_data, target_variable):
-        """Extract min/max for ONE SINGLE specific variable"""
+        """Extract min/max for specific variable from data"""
         if not neutral_data:
             return None, None
 
@@ -423,7 +422,7 @@ class VisualizationManager:
         """Get preloaded data for specific index"""
         return self.preloaded_data.get(index)
 
-    # Methods to access toolbar manager properties for backward compatibility
+    # Backward compatibility properties
     @property
     def progress_bar(self):
         """Access progress bar through toolbar manager"""

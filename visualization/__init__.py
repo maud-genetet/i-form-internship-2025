@@ -1,5 +1,5 @@
 """
-Module de visualisation PyVista - Point d'entrée simplifié
+PyVista visualization module - Main entry point
 """
 
 from .visualization_manager import VisualizationManager

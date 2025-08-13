@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 class MeshBuilder:
-    """Responsible for creating PyVista meshes from neutral data"""
+    """Creates PyVista meshes from neutral data"""
 
     def __init__(self):
-        # Define distinct colors for different materials
+        # Material color palette
         self.material_colors = [
             [1.0, 1.0, 0.0],    # Yellow
             [0.5, 0.0, 0.5],    # Purple
@@ -58,7 +58,7 @@ class MeshBuilder:
 
         mesh = pv.UnstructuredGrid(cells, np.array(cell_types), points)
 
-        # Add scalar data
+        # Add data arrays
         self._add_scalar_data(mesh, elements, nodes, is_3d)
 
         # Add material colors
@@ -81,17 +81,17 @@ class MeshBuilder:
         for element in elements:
             mat_num = element.get_matno()
             if mat_num is None or mat_num == 0:
-                # Default gray color for unknown/zero material
+                # Default gray for unknown material
                 colors.append([0.7, 0.7, 0.7])
             else:
                 color_index = (mat_num - 1) % len(self.material_colors)
                 colors.append(self.material_colors[color_index])
 
-        # Convert to numpy array and add to mesh
+        # Add to mesh
         mesh.cell_data['Material_Colors'] = np.array(colors)
 
     def _build_points(self, nodes, is_3d=False):
-        """Build points array and correspondence table"""
+        """Build points array and ID mapping"""
         points = []
         node_id_to_index = {}
 
@@ -144,11 +144,11 @@ class MeshBuilder:
         return cells
 
     def _add_node_constraint_codes(self, mesh, nodes, node_id_to_index, is_3d=False):
-        """Add node constraint codes as point data for visualization"""
-        # Create array for node codes (same length as mesh points)
+        """Add node constraint information for visualization"""
+        # Create constraint code array
         node_codes = np.zeros(len(mesh.points))
 
-        # Store constraint information in a class attribute for external access
+        # Store constraint info for external access
         constraint_info = {
             'node_ids': [],
             'positions_x': [],
@@ -165,8 +165,7 @@ class MeshBuilder:
                 code = node.get_code()
                 node_codes[index] = code
 
-                # Store node information for ALL nodes with non-zero codes
-                # Store all constrained nodes (positive and negative codes)
+                # Store constrained nodes (non-zero codes)
                 if code != 0:
                     constraint_info['node_ids'].append(node.get_id())
                     constraint_info['positions_x'].append(node.get_coordX())
@@ -176,15 +175,15 @@ class MeshBuilder:
                             node.get_coordZ())
                     constraint_info['codes'].append(code)
 
-        # Add node codes to mesh point data
+        # Add to mesh
         mesh.point_data['Node_Code'] = node_codes
 
-        # Store constraint information as a mesh attribute
+        # Store constraint info as mesh attribute
         if constraint_info['node_ids']:
             mesh._constraint_info = constraint_info
 
     def _add_scalar_data(self, mesh, elements, nodes, is_3d=False):
-        """Add all available scalar data to mesh including new variables"""
+        """Add all field variable data to mesh"""
         element_data = {
             'Element_ID': [],
 
@@ -321,12 +320,13 @@ class MeshBuilder:
             element_data['Temperature Rate'].append(
                 element.get_temperature_rate() or 0.0)
 
+        # Add non-empty arrays to mesh
         for key, values in element_data.items():
             if len(values) != 0:
                 mesh.cell_data[key] = np.array(values)
 
     def create_die_mesh(self, die, is_3d=False):
-        """Create mesh for a die"""
+        """Create mesh for die geometry"""
         die_nodes = die.get_nodes()
 
         if not die_nodes or len(die_nodes) < 3:

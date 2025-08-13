@@ -83,6 +83,13 @@ pip install -r requirements.txt
 python main.py
 ```
 
+## To create executable files
+
+``` bash
+pip install pyinstaller
+pyinstaller --onefile --windowed main.py
+```
+
 ## Project Structure
 
 ```

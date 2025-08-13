@@ -1,5 +1,5 @@
 """
-Menu and user action handlers
+Application menu and action handlers
 """
 
 from .animation_handler import AnimationHandler

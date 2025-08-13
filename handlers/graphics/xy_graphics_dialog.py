@@ -25,7 +25,7 @@ class XYGraphicsDialog(QDialog):
         self.setFixedSize(640, 600)
         self.setModal(False)
 
-        # Create matplotlib figure and canvas
+        # Matplotlib setup
         self.figure = Figure(figsize=(8, 6))
         self.canvas = FigureCanvas(self.figure)
 
@@ -37,13 +37,13 @@ class XYGraphicsDialog(QDialog):
         self.update_step_limits()
 
     def setup_ui(self):
-        """Setup the user interface"""
+        """Build the dialog interface"""
         layout = QVBoxLayout()
 
-        # Step controls
+        # Step range and navigation controls
         step_layout = QHBoxLayout()
 
-        # Initial Step Number
+        # Initial step control
         step_layout.addWidget(QLabel("Initial Step Number"))
         self.initial_step = QSpinBox()
         self.initial_step.setMinimum(0)
@@ -53,7 +53,7 @@ class XYGraphicsDialog(QDialog):
 
         step_layout.addStretch()
 
-        # Final Step Number
+        # Final step control
         step_layout.addWidget(QLabel("Final Step Number"))
         self.final_step = QSpinBox()
         self.final_step.setMinimum(1)
@@ -71,7 +71,7 @@ class XYGraphicsDialog(QDialog):
 
         step_layout.addStretch()
 
-        # Frequency
+        # Frequency control
         step_layout.addWidget(QLabel("Frequency"))
         self.frequency = QSpinBox()
         self.frequency.setMinimum(1)
@@ -81,10 +81,10 @@ class XYGraphicsDialog(QDialog):
 
         layout.addLayout(step_layout)
 
-        # Axes selection
+        # Axis selection groups
         axes_layout = QHBoxLayout()
 
-        # X-axis group
+        # X-axis options
         x_group = QGroupBox("X - axis")
         x_layout = QVBoxLayout()
 
@@ -108,7 +108,7 @@ class XYGraphicsDialog(QDialog):
         x_group.setLayout(x_layout)
         axes_layout.addWidget(x_group)
 
-        # Y-axis group
+        # Y-axis options
         y_group = QGroupBox("Y - axis")
         y_layout = QVBoxLayout()
 
@@ -135,7 +135,7 @@ class XYGraphicsDialog(QDialog):
         y_layout.addWidget(self.y_error)
         y_layout.addWidget(self.y_volume)
 
-        # Die Number
+        # Die selection
         die_layout = QHBoxLayout()
         die_layout.addWidget(QLabel("Die Number"))
         self.die_number = QComboBox()
@@ -148,10 +148,11 @@ class XYGraphicsDialog(QDialog):
 
         layout.addLayout(axes_layout)
 
+        # Formatting options
         format_group = QGroupBox("Format")
         format_layout = QVBoxLayout()
 
-        # Scientific/Fixed style
+        # Number format style
         style_layout = QHBoxLayout()
         self.scientific = QRadioButton("Scientific")
         self.scientific.setChecked(True)
@@ -160,12 +161,12 @@ class XYGraphicsDialog(QDialog):
         style_layout.addWidget(self.fixed_style)
         format_layout.addLayout(style_layout)
 
-        # Absolute values
+        # Absolute values option
         self.absolute_values = QCheckBox("Absolute Values")
         format_layout.addWidget(self.absolute_values)
         self.absolute_values.setChecked(True)
 
-        # Significant Digits
+        # Significant digits controls
         digits_layout = QHBoxLayout()
         digits_layout.addWidget(QLabel("Significant Digits"))
         digits_layout.addWidget(QLabel("X - axis"))
@@ -186,7 +187,7 @@ class XYGraphicsDialog(QDialog):
         sig_layout.addWidget(self.y_sig_digits)
         format_layout.addLayout(sig_layout)
 
-        # Decimal Places
+        # Decimal places controls
         decimal_layout = QHBoxLayout()
         decimal_layout.addWidget(QLabel("Decimal Places"))
         self.x_decimal = QSpinBox()
@@ -201,7 +202,7 @@ class XYGraphicsDialog(QDialog):
         decimal_layout.addWidget(self.y_decimal)
         format_layout.addLayout(decimal_layout)
 
-        # Number Ticks
+        # Tick count controls
         ticks_layout = QHBoxLayout()
         ticks_layout.addWidget(QLabel("Number Ticks"))
         self.x_ticks = QSpinBox()
@@ -219,7 +220,7 @@ class XYGraphicsDialog(QDialog):
         format_group.setLayout(format_layout)
         layout.addWidget(format_group)
 
-        # Buttons
+        # Action buttons
         button_layout = QHBoxLayout()
         button_layout.addStretch()
 
@@ -235,14 +236,14 @@ class XYGraphicsDialog(QDialog):
         self.setLayout(layout)
 
     def setup_connections(self):
-        """Setup signal connections"""
+        """Connect UI signals to handlers"""
         self.ok_button.clicked.connect(self.generate_plot)
         self.exit_button.clicked.connect(self.close)
         self.prev_btn.clicked.connect(self.previous_step)
         self.next_btn.clicked.connect(self.next_step)
 
     def update_die_numbers(self):
-        """Update die number combo box"""
+        """Populate die number dropdown from current data"""
         if not self.neutral_data:
             return
 
@@ -253,18 +254,18 @@ class XYGraphicsDialog(QDialog):
             self.die_number.addItem(str(die.get_id()))
 
     def previous_step(self):
-        """Go to previous step"""
+        """Navigate to previous step"""
         current = self.final_step.value()
         if current > self.initial_step.value() + 1:
             self.final_step.setValue(current - 1)
 
     def next_step(self):
-        """Go to next step"""
+        """Navigate to next step"""
         current = self.final_step.value()
         self.final_step.setValue(current + 1)
 
     def get_selected_die(self):
-        """Get selected die object"""
+        """Get currently selected die object"""
         if not self.neutral_data:
             return None
 
@@ -279,8 +280,8 @@ class XYGraphicsDialog(QDialog):
         return None
 
     def get_multiple_files_data(self):
-        """Get data from multiple NEU files if available"""
-        # Check if we have access to multiple files through the main window
+        """Access preloaded data from multiple mesh files"""
+        # Get reference to visualization manager through parent
         visualization_manager = self.parent().visualization_manager
 
         if not hasattr(visualization_manager, 'neu_files') or not visualization_manager.neu_files:
@@ -292,10 +293,10 @@ class XYGraphicsDialog(QDialog):
         return visualization_manager.preloaded_data
 
     def get_x_data(self):
-        """Get X-axis data from multiple files"""
+        """Extract X-axis data from loaded files"""
         x_selection = self.x_button_group.checkedId()
 
-        # Get multiple files data
+        # Try to get data from multiple files
         multiple_data = self.get_multiple_files_data()
 
         if multiple_data:
@@ -309,15 +310,16 @@ class XYGraphicsDialog(QDialog):
             final_step = self.final_step.value()
             frequency = int(self.frequency.value())
 
+            # Filter files based on step range and frequency
             filtered_indices = []
             for i, file_index in enumerate(sorted_indices):
                 step_number = i + 1
                 if initial_step <= step_number <= final_step:
-                    # Apply frequency
+                    # Apply frequency sampling
                     if (step_number - initial_step) % frequency == 0:
                         filtered_indices.append((i, file_index))
 
-            # Get initial coordinates from first file for displacement calculation
+            # Get initial coordinates for displacement calculation
             initial_coords = None
             if x_selection in [1, 2] and filtered_indices:  # Displacement modes
                 first_data = multiple_data[filtered_indices[0][1]]
@@ -328,17 +330,18 @@ class XYGraphicsDialog(QDialog):
                         'y': first_die.get_main_node().get_coordY() or 0.0
                     }
 
+            # Extract X data based on selection
             for i, file_index in filtered_indices:
                 neutral_data = multiple_data[file_index]
                 die = self._find_die_in_data(neutral_data, die_id)
 
                 if x_selection == 0:  # Step Number
-                    x_data.append(i + 1)  # Real step number
+                    x_data.append(i + 1)
                 elif x_selection == 1:  # Vertical Displacement
                     if die and die.get_main_node() and initial_coords:
                         current_y = die.get_main_node().get_coordY() or 0.0
                         displacement = current_y - initial_coords['y']
-                        x_data.append(-displacement)
+                        x_data.append(-displacement)  # Sign convention
                     else:
                         x_data.append(0.0)
                 elif x_selection == 2:  # Horizontal Displacement
@@ -353,7 +356,7 @@ class XYGraphicsDialog(QDialog):
 
             return x_data
         else:
-            # Single file - fallback to single point
+            # Single file fallback
             if x_selection == 0:  # Step Number
                 return [1]
             elif x_selection == 1:  # Vertical Displacement
@@ -371,18 +374,18 @@ class XYGraphicsDialog(QDialog):
             return [0.0]
 
     def get_y_data(self):
-        """Get Y-axis data from multiple files"""
+        """Extract Y-axis data from loaded files"""
         y_selection = self.y_button_group.checkedId()
 
-        # Skip Error and Volume (not implemented)
+        # Skip unimplemented options
         if y_selection in [4, 5]:  # Error or Volume
             return [0.0]
 
-        # Get multiple files data
+        # Try to get data from multiple files
         multiple_data = self.get_multiple_files_data()
 
         if multiple_data:
-            # We have multiple files - create proper time series
+            # Multiple files available
             y_data = []
             die_id = int(self.die_number.currentText()
                          ) if self.die_number.currentText() else 1
@@ -397,12 +400,13 @@ class XYGraphicsDialog(QDialog):
             # Filter indices according to parameters
             filtered_indices = []
             for i, file_index in enumerate(sorted_indices):
-                step_number = i + 1  # Step starts at 1
+                step_number = i + 1
                 if initial_step <= step_number <= final_step:
                     # Apply frequency
                     if (step_number - initial_step) % frequency == 0:
                         filtered_indices.append(file_index)
 
+            # Extract Y data
             for file_index in filtered_indices:
                 neutral_data = multiple_data[file_index]
                 die = self._find_die_in_data(neutral_data, die_id)
@@ -429,7 +433,7 @@ class XYGraphicsDialog(QDialog):
 
             return y_data
         else:
-            # Single file - fallback to single point
+            # Single file fallback
             die = self.get_selected_die()
 
             if not die or not die.get_main_node():
@@ -451,7 +455,7 @@ class XYGraphicsDialog(QDialog):
             return [0.0]
 
     def _find_die_in_data(self, neutral_data, die_id):
-        """Find a specific die in neutral data by ID"""
+        """Find die by ID in neutral data"""
         for die in neutral_data.get_dies():
             if die.get_id() == die_id:
                 return die
@@ -473,14 +477,14 @@ class XYGraphicsDialog(QDialog):
         return x_label, y_label
 
     def generate_plot(self):
-        """Generate the plot with current settings"""
+        """Create and display the XY plot"""
         try:
-            # Get data
+            # Get plot data
             x_data = self.get_x_data()
             y_data = self.get_y_data()
             x_label, y_label = self.get_axis_labels()
 
-            # Check if we have enough data points
+            # Ensure data arrays match
             if len(x_data) != len(y_data):
                 min_len = min(len(x_data), len(y_data))
                 x_data = x_data[:min_len]
@@ -499,7 +503,7 @@ class XYGraphicsDialog(QDialog):
             # Enable interactive mode
             plt.ion()
 
-            # Create a proper plot window
+            # Create new plot window
             fig, ax = plt.subplots(figsize=(12, 7))
 
             self.created_figures.append(fig)
@@ -524,14 +528,14 @@ class XYGraphicsDialog(QDialog):
             ax.set_title(
                 f"{y_label} vs {x_label} (Die {self.die_number.currentText()})", fontsize=14)
 
-            # Grid
+            # Add grid
             ax.grid(True, alpha=0.3)
 
             # Legend if multiple points
             if len(x_data) > 1:
                 ax.legend()
 
-            # === NUMBER OF TICKS ===
+            # Configure tick counts
             x_min, x_max = ax.get_xlim()
             y_min, y_max = ax.get_ylim()
 
@@ -610,7 +614,7 @@ class XYGraphicsDialog(QDialog):
             plt.ioff()
 
     def closeEvent(self, event):
-        """Override close event to close all matplotlib figures"""
+        """Clean up matplotlib figures when dialog closes"""
         for fig in self.created_figures:
             try:
                 plt.close(fig)
@@ -621,7 +625,7 @@ class XYGraphicsDialog(QDialog):
         event.accept()
 
     def update_step_limits(self):
-        """Update step number limits based on available files"""
+        """Update step range based on available files"""
         visualization_manager = self.parent().visualization_manager
 
         max_files = 1  # Default minimum

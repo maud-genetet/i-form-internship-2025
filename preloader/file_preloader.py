@@ -13,11 +13,14 @@ logger = logging.getLogger(__name__)
 class FilePreloader(QThread):
     """Background thread for preloading .NEU files"""
 
-    file_loaded = pyqtSignal(int, str)  # index, filename
+    # Signal emitted when individual file is loaded (index, filename)
+    file_loaded = pyqtSignal(int, str)
+    # Signal emitted when all files are loaded
     all_files_loaded = pyqtSignal()
-    # progress percentage, status message
+    # Signal emitted for progress updates (percentage, message)
     progress_updated = pyqtSignal(int, str)
-    error_occurred = pyqtSignal(str)  # error message
+    # Signal emitted on errors (error message)
+    error_occurred = pyqtSignal(str)
 
     def __init__(self, neu_files, working_directory, start_index=1):
         super().__init__()
@@ -29,7 +32,7 @@ class FilePreloader(QThread):
         self.should_stop = False
 
     def run(self):
-        """Run the preloading process"""
+        """Main preloading loop executed in background thread"""
         total_files = len(self.neu_files)
         loaded_count = 0
 
@@ -38,11 +41,11 @@ class FilePreloader(QThread):
                 if self.should_stop:
                     break
 
-                # Passive wait to avoid blocking the GUI
+                # Yield to graphics loading if needed
                 while hasattr(self, '_visualization_manager') and getattr(self._visualization_manager, 'graphics_loading', False):
                     if self.should_stop:
                         break
-                    self.msleep(1000)  # Sleep
+                    self.msleep(1000)  # Wait 1 second
 
                 if self.should_stop:
                     break
@@ -50,14 +53,17 @@ class FilePreloader(QThread):
                 filename = self.neu_files[i]
                 file_path = os.path.join(self.working_directory, filename)
 
+                # Update progress before loading
                 self.progress_updated.emit(
                     int((loaded_count / total_files) * 100),
                     f"Loading {filename}..."
                 )
 
                 try:
+                    # Parse the mesh file
                     neutral_data = ParserNeutralFile.parser_file(file_path)
                     if neutral_data:
+                        # Thread-safe storage
                         self.mutex.lock()
                         self.preloaded_data[i] = neutral_data
                         self.mutex.unlock()
@@ -70,11 +76,13 @@ class FilePreloader(QThread):
                 except Exception as e:
                     logger.exception(f"Error loading {filename}: {e}")
 
+                # Update progress after loading
                 self.progress_updated.emit(
                     int((loaded_count / total_files) * 100),
                     f"Loaded {loaded_count}/{total_files} files"
                 )
 
+            # Completion handling
             if not self.should_stop:
                 self.progress_updated.emit(
                     100, f"All {loaded_count} files loaded!")
@@ -86,16 +94,16 @@ class FilePreloader(QThread):
             self.error_occurred.emit(f"Preloading error: {str(e)}")
 
     def stop(self):
-        """Stop the preloading process"""
+        """Request thread to stop preloading"""
         self.should_stop = True
 
     def get_preloaded_data(self, index):
-        """Get preloaded data for a specific index (thread-safe)"""
+        """Get preloaded mesh data by index (thread-safe)"""
         self.mutex.lock()
         data = self.preloaded_data.get(index)
         self.mutex.unlock()
         return data
 
     def set_visualization_manager(self, visualization_manager):
-        """Set reference to visualization manager for graphics loading check"""
+        """Set reference to check for graphics loading priority"""
         self._visualization_manager = visualization_manager

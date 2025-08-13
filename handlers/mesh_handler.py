@@ -16,30 +16,30 @@ class MeshHandler:
     def __init__(self, main_window):
         self.main_window = main_window
 
-        # Initialize preloader manager
+        # Initialize background preloader
         self.preloader_manager = PreloaderManager(
             main_window.visualization_manager)
         self.neu_files = []
         self.working_directory = None
 
     def initial_mesh(self):
-        """Load initial mesh (FEM1.NEU)"""
+        """Load initial mesh file (FEM1.NEU)"""
         working_directory = None
         if hasattr(self.main_window, 'file_handler') and self.main_window.file_handler.working_directory:
             working_directory = self.main_window.file_handler.working_directory
-            logger.info(f"Dir: {working_directory}")
+            logger.info(f"Working directory: {working_directory}")
 
-            # Search for FEM1.NEU
+            # Look for FEM1.NEU
             fem1_path = os.path.join(working_directory, "FEM1.NEU")
             if not os.path.exists(fem1_path):
                 raise FileNotFoundError(f"File {fem1_path} does not exist")
             else:
                 self._load_and_display_mesh(fem1_path)
-                # reset the visualization manager to default state
+                # Reset view to default
                 self.main_window.visualization_manager.reset_view()
 
     def _load_and_display_mesh(self, file_path):
-        """Load and display mesh file"""
+        """Load mesh file and display in visualization"""
         try:
             neutral_file = ParserNeutralFile.parser_file(file_path)
 
@@ -56,7 +56,7 @@ class MeshHandler:
                 neutral_file)
             self.main_window.visualization_manager.set_as_central_widget()
 
-            # Display loaded filename
+            # Log loaded filename
             filename = os.path.basename(file_path)
             logger.info(f"Mesh loaded: {filename}")
 
@@ -68,7 +68,7 @@ class MeshHandler:
             )
 
     def _fast_load_and_display_mesh(self, file_index):
-        """Fast load using preloaded data"""
+        """Fast loading using preloaded data"""
         try:
             preloaded_data = self.preloader_manager.get_preloaded_data(
                 file_index)
@@ -89,14 +89,14 @@ class MeshHandler:
                     self._load_and_display_mesh(file_path)
         except Exception as e:
             logger.exception(f"Error in fast load: {e}")
-            # Fallback to normal loading
+            # Fallback to disk loading
             if file_index < len(self.neu_files):
                 file_path = os.path.join(
                     self.working_directory, self.neu_files[file_index])
                 self._load_and_display_mesh(file_path)
 
     def _smart_load_callback(self, file_path):
-        """Smart loading callback that uses preloaded data when available"""
+        """Smart loading that prefers preloaded data over disk access"""
         try:
             filename = os.path.basename(file_path)
             if filename in self.neu_files:
@@ -114,13 +114,13 @@ class MeshHandler:
             self.main_window.visualization_manager._update_data_info()
 
     def deformed_mesh(self):
-        """Display deformed mesh"""
+        """Load and setup deformed mesh sequence navigation"""
         working_directory = None
         if hasattr(self.main_window, 'file_handler') and self.main_window.file_handler.working_directory:
             working_directory = self.main_window.file_handler.working_directory
             self.working_directory = working_directory
 
-            # Search for all .NEU files in directory
+            # Find all .NEU files in directory
             try:
                 neu_files = [f for f in os.listdir(
                     working_directory) if f.endswith('.NEU')]
@@ -136,7 +136,7 @@ class MeshHandler:
 
                 # Sort files numerically (FEM1, FEM2, FEM10, FEM11...)
                 def natural_sort_key(filename):
-                    """Natural sorting function for filenames with numbers"""
+                    """Natural sorting for filenames with numbers"""
                     parts = re.split(r'(\d+)', filename)
                     return [int(part) if part.isdigit() else part for part in parts]
 
@@ -146,12 +146,12 @@ class MeshHandler:
                 first_file_path = os.path.join(working_directory, neu_files[0])
                 self._load_and_display_mesh(first_file_path)
 
-                # Add navigation controls in toolbar
+                # Add navigation controls
                 self.main_window.visualization_manager.add_deformed_mesh_controls(
                     neu_files, working_directory, self._smart_load_callback
                 )
 
-                # Start preloading other files in background (starting from index 1)
+                # Start background preloading (starting from index 1)
                 if len(neu_files) > 1:
                     self.preloader_manager.start_preloading(
                         neu_files, working_directory, first_file_loaded_index=1

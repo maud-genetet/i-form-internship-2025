@@ -14,6 +14,7 @@ class FieldVariablesHandler:
         self.main_window = main_window
         self.current_variable = None
 
+        # Map UI variable names to mesh data keys
         self.variable_mapping = {
             "Velocity_X": "Velocity X(r)",
             "Velocity_Y": "Velocity Y(z)",
@@ -71,18 +72,18 @@ class FieldVariablesHandler:
         }
 
     def get_visualization_manager(self):
-        """Get visualization manager"""
+        """Get reference to visualization manager"""
         return self.main_window.visualization_manager
 
     def _get_current_options(self):
-        """Get current options from toolbar manager"""
+        """Get current visualization options from toolbar"""
         visualization_manager = self.get_visualization_manager()
 
-        # Try to get options from toolbar manager first
+        # Get options from toolbar manager
         if hasattr(visualization_manager, 'toolbar_manager'):
             return visualization_manager.toolbar_manager.get_current_options()
         else:
-            # Fallback to local viz_options for backward compatibility
+            # Fallback options
             return self.viz_options.get_current_options()
 
     def apply_variable(self, variable_key):
@@ -94,15 +95,16 @@ class FieldVariablesHandler:
                                 "Please load a mesh first.")
             return
 
-        # Resolve variable key
+        # Resolve variable key to mesh data name
         resolved_key = self._resolve_variable_key(variable_key)
         if not resolved_key:
             return
 
-        # Apply the resolved variable
+        # Apply the variable to mesh
         self._apply_variable_to_mesh(resolved_key, variable_key)
 
     def _resolve_variable_key(self, variable_key):
+        """Convert variable key to actual mesh data name"""
         mesh = self.get_visualization_manager().current_mesh
 
         if variable_key in self.variable_mapping:
@@ -110,7 +112,7 @@ class FieldVariablesHandler:
             if mapped_name in mesh.cell_data:
                 return mapped_name
             else:
-                # Show error with mapped name
+                # Variable not available in mesh
                 available_list = list(mesh.cell_data.keys())
                 QMessageBox.information(
                     self.main_window,
@@ -120,11 +122,11 @@ class FieldVariablesHandler:
                 )
                 return None
 
-        # Fallback: check if key is directly in mesh data (for backward compatibility)
+        # Check if key exists directly in mesh data
         if variable_key in mesh.cell_data:
             return variable_key
 
-        # Not found anywhere
+        # Variable not found
         available_list = list(mesh.cell_data.keys())
         QMessageBox.information(
             self.main_window,
@@ -135,9 +137,10 @@ class FieldVariablesHandler:
         return None
 
     def _apply_variable_to_mesh(self, resolved_variable_name, original_key):
+        """Apply variable visualization to mesh"""
         visualization_manager = self.get_visualization_manager()
 
-        # PREPARE EVERYTHING BEFORE CLEARING
+        # Prepare all visualization data before clearing
         mesh = visualization_manager.current_mesh
         options = self._get_current_options()
 
@@ -150,18 +153,18 @@ class FieldVariablesHandler:
         # Prepare dies
         prepared_dies = self._prepare_dies_for_display(visualization_manager)
 
-        # NOW DO EVERYTHING ATOMICALLY
+        # Clear and redraw atomically
         visualization_manager.clear()
 
-        # Add all prepared meshes in one go
+        # Add all prepared meshes
         for mesh_data in prepared_meshes:
             visualization_manager.plotter.add_mesh(**mesh_data)
 
-        # Add all prepared dies in one go
+        # Add all prepared dies
         for die_data in prepared_dies:
             visualization_manager.plotter.add_mesh(**die_data)
 
-        # Single final render
+        # Single render
         visualization_manager.plotter.render()
 
         self.current_variable = resolved_variable_name
@@ -170,7 +173,7 @@ class FieldVariablesHandler:
         visualization_manager.reapply_mesh_picking_if_needed()
 
     def _prepare_all_meshes_for_display(self, mesh, scalar_name, variable_display_name, edge_color, options):
-        """Prepare all meshes for atomic display"""
+        """Prepare all mesh data for atomic rendering"""
         prepared_meshes = []
 
         mesh._size_options = {
@@ -209,7 +212,7 @@ class FieldVariablesHandler:
             if global_min is not None and global_max is not None:
                 clim = [global_min, global_max]
 
-        # Prepare main variable mesh
+        # Prepare mesh based on mode
         if vector_mode:
             return self._prepare_vector_meshes(mesh, scalars_array, variable_display_name, options)
         elif line_contour_mode:
@@ -243,20 +246,17 @@ class FieldVariablesHandler:
 
         prepared_meshes.append(mesh_data)
 
-        if view_constraints and hasattr(mesh, '_constraint_info'):
-            pass
-
         return prepared_meshes
 
     def _prepare_vector_meshes(self, mesh, scalars_array, variable_name, options):
-        """Prepare meshes for vector display"""
+        """Prepare vector field visualization"""
         prepared_meshes = []
 
-        # Get options
+        # Extract options
         show_mesh_edges = options.get('show_mesh_edges', True)
         edge_color = self.get_visualization_manager().default_edge_color
 
-        # Add base mesh with transparency
+        # Add semi-transparent base mesh
         base_mesh_data = {
             'mesh': mesh,
             'color': 'lightgray',
@@ -289,7 +289,7 @@ class FieldVariablesHandler:
         return prepared_meshes
 
     def _prepare_vector_field(self, mesh, scalars_array, variable_name):
-        """Prepare vector field data"""
+        """Create vector field visualization data"""
         try:
             display_manager = self.get_visualization_manager().display_manager
 
@@ -316,7 +316,7 @@ class FieldVariablesHandler:
                     vector_mesh['vectors'] = filtered_vectors
                     vector_mesh['magnitude'] = filtered_magnitudes
 
-                    # Calculate scale factor
+                    # Calculate arrow scale
                     mesh_bounds = mesh.bounds
                     mesh_size = max(
                         mesh_bounds[1] - mesh_bounds[0], mesh_bounds[3] - mesh_bounds[2])
@@ -358,10 +358,10 @@ class FieldVariablesHandler:
             return None
 
     def _prepare_line_contour_meshes(self, mesh, scalars_array, variable_name, cmap, options):
-        """Prepare meshes for line contour display"""
+        """Prepare contour line visualization"""
         prepared_meshes = []
 
-        # Add base mesh with transparency
+        # Add semi-transparent base mesh
         show_mesh_edges = options.get('show_mesh_edges', True)
         edge_color = self.get_visualization_manager().default_edge_color
 
@@ -376,7 +376,7 @@ class FieldVariablesHandler:
         }
         prepared_meshes.append(base_mesh_data)
 
-        # Generate contours
+        # Generate contour lines
         try:
             n_contours = 10
             scalar_min = np.min(scalars_array)
@@ -417,7 +417,7 @@ class FieldVariablesHandler:
         return prepared_meshes
 
     def _prepare_dies_for_display(self, visualization_manager):
-        """Prepare dies for atomic display"""
+        """Prepare die geometry for rendering"""
         prepared_dies = []
 
         if not visualization_manager.current_data:
@@ -446,7 +446,7 @@ class FieldVariablesHandler:
         return prepared_dies
 
     def standard_options(self):
-        """Display only geometry - Standard Options"""
+        """Display mesh geometry without field variables"""
         visualization_manager = self.get_visualization_manager()
 
         if not visualization_manager.current_data:
@@ -459,10 +459,10 @@ class FieldVariablesHandler:
         show_edges = options['show_mesh_edges']
         show_constraints = options['view_constraints']
 
-        # PREPARE EVERYTHING BEFORE CLEARING to avoid flickering
+        # Prepare mesh for display
         mesh = visualization_manager.current_mesh
 
-        # Store size options in mesh
+        # Store size options
         mesh._size_options = {
             'constraint_size_factor': options.get('constraint_size_factor', 1.0),
             'vector_size_factor': options.get('vector_size_factor', 1.0)
@@ -471,7 +471,7 @@ class FieldVariablesHandler:
         # Prepare base mesh
         prepared_meshes = []
 
-        # Check if we have material colors
+        # Check for material colors
         if 'Material_Colors' in mesh.cell_data:
             # Use material colors
             mesh_data = {
@@ -490,14 +490,14 @@ class FieldVariablesHandler:
         # Prepare dies
         prepared_dies = self._prepare_dies_for_display(visualization_manager)
 
-        # NOW DO EVERYTHING ATOMICALLY
+        # Clear and redraw atomically
         visualization_manager.clear()
 
-        # Add all prepared meshes in one go
+        # Add all prepared meshes
         for mesh_data in prepared_meshes:
             visualization_manager.plotter.add_mesh(**mesh_data)
 
-        # Add all prepared dies in one go
+        # Add all prepared dies
         for die_data in prepared_dies:
             visualization_manager.plotter.add_mesh(**die_data)
 
@@ -505,7 +505,7 @@ class FieldVariablesHandler:
             visualization_manager.display_manager._add_all_constraints(
                 visualization_manager.plotter, mesh)
 
-        # Single final render
+        # Single render
         visualization_manager.plotter.render()
 
         self.current_variable = None
@@ -514,9 +514,9 @@ class FieldVariablesHandler:
         visualization_manager.reapply_mesh_picking_if_needed()
 
     def reapply_current_variable(self):
-        """Reapply current variable with current options"""
+        """Reapply current variable with updated options"""
         if self.current_variable:
-            # Find the original key that corresponds to current variable
+            # Find original key for current variable
             original_key = None
             for key, value in self.variable_mapping.items():
                 if value == self.current_variable:
@@ -530,10 +530,11 @@ class FieldVariablesHandler:
                 self._apply_variable_to_mesh(
                     self.current_variable, self.current_variable)
         else:
-            # No variable active, display geometry only
+            # No variable active, show geometry only
             self.standard_options()
 
     def get_available_variables(self):
+        """Get list of available variables in current mesh"""
         visualization_manager = self.get_visualization_manager()
 
         if not visualization_manager.current_mesh:
@@ -549,10 +550,11 @@ class FieldVariablesHandler:
         return available_vars
 
     def get_current_variable_key(self):
+        """Get the key for currently active variable"""
         if not self.current_variable:
             return None
 
-        # Find the key that maps to current variable
+        # Find key that maps to current variable
         for key, value in self.variable_mapping.items():
             if value == self.current_variable:
                 return key

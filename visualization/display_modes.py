@@ -10,9 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 class DisplayModeManager:
-    """Unified manager for all display modes and options"""
+    """Manages mesh display modes and rendering options"""
 
-    # Centralized constraint configuration
+    # Constraint visualization settings
     CONSTRAINT_CONFIG = {
         1: {'color': [1.0, 0.0, 0.0], 'name': 'red_constraints', 'description': 'Fixed X constraint'},
         2: {'color': [0.0, 0.0, 1.0], 'name': 'blue_constraints', 'description': 'Fixed Y constraint'},
@@ -23,7 +23,7 @@ class DisplayModeManager:
         'contact': {'color': [1.0, 0.41, 0.71], 'name': 'contact_constraints', 'description': 'Contact nodes'}
     }
 
-    # Level of detail configuration
+    # Performance settings for different mesh sizes
     LOD_SETTINGS = {
         'ultra_high': {'subdivisions': 16, 'max_count': 100},
         'high': {'subdivisions': 12, 'max_count': 500},
@@ -41,7 +41,7 @@ class DisplayModeManager:
         self.wireframe_mode = enabled
 
     def _get_constraint_config(self, code):
-        """Get configuration for a constraint code"""
+        """Get constraint visualization settings by code"""
         if code == 0:
             return None
         elif code in self.CONSTRAINT_CONFIG:
@@ -52,14 +52,14 @@ class DisplayModeManager:
             return {'color': [0.5, 0.5, 0.5], 'name': f'unknown_constraint_{code}', 'description': f'Unknown constraint code {code}'}
 
     def _get_optimal_lod(self, total_constraints):
-        """Determine optimal level of detail"""
+        """Choose level of detail based on constraint count"""
         for lod_name, settings in self.LOD_SETTINGS.items():
             if total_constraints <= settings['max_count']:
                 return settings['subdivisions'], lod_name
         return self.LOD_SETTINGS['ultra_low']['subdivisions'], 'ultra_low'
 
     def _get_cached_sphere(self, radius, subdivisions=8):
-        """Get sphere from cache"""
+        """Get sphere geometry from cache or create new one"""
         key = (radius, subdivisions)
         if key not in self.cached_spheres:
             self.cached_spheres[key] = pv.Sphere(
@@ -70,7 +70,7 @@ class DisplayModeManager:
         return self.cached_spheres[key]
 
     def _create_batched_spheres(self, positions, radius, subdivisions=8):
-        """Create spheres in batch with glyph"""
+        """Create multiple spheres efficiently using glyph"""
         if not positions:
             return None
 
@@ -80,7 +80,7 @@ class DisplayModeManager:
         return points.glyph(geom=sphere_source, scale=False, orient=False)
 
     def _calculate_proportional_size(self, mesh, base_factor=0.005):
-        """Calculate proportional size based on mesh dimensions and element density"""
+        """Calculate sphere size proportional to mesh dimensions"""
         if not mesh or not hasattr(mesh, 'bounds'):
             return 0.01  # Default fallback size
 
@@ -115,9 +115,9 @@ class DisplayModeManager:
         return proportional_size
 
     def display_mesh(self, plotter, mesh, mesh_color, edge_color, show_edges=True):
-        """Display main mesh - MODIFIED to use material colors when available"""
+        """Display main mesh with material colors when available"""
 
-        # Check if we have material colors - NEW
+        # Check if we have material colors
         if 'Material_Colors' in mesh.cell_data:
             # Use material colors
             if self.wireframe_mode:
@@ -127,7 +127,7 @@ class DisplayModeManager:
                 plotter.add_mesh(mesh, show_edges=show_edges, edge_color=edge_color, line_width=1,
                                  scalars='Material_Colors', rgb=True, opacity=1.0, label="Mesh - Materials")
         else:
-            # Original behavior - fallback to single color
+            # Single color fallback
             if self.wireframe_mode:
                 plotter.add_mesh(mesh, style='wireframe', color=edge_color,
                                  line_width=1, label="Mesh - Wireframe")
@@ -145,9 +145,9 @@ class DisplayModeManager:
                              edge_color='black', line_width=1, label=f"Die {die_id}")
 
     def display_variable_with_options(self, plotter, mesh, scalar_name, variable_name, edge_color, options):
-        """Display variables with all options"""
+        """Display field variables with visualization options"""
 
-        # Get options
+        # Extract options
         wireframe_mode = options.get('wireframe_mode', False)
         show_mesh_edges = options.get('show_mesh_edges', True)
         monochromatic_mode = options.get('monochromatic_mode', False)
@@ -156,7 +156,7 @@ class DisplayModeManager:
         line_contour_mode = options.get('line_contour_mode', False)
         vector_mode = options.get('vector_mode', False)
 
-        # Apply HD contour if needed
+        # Apply HD contour if requested
         if high_definition_contour:
             mesh = self._apply_hd_contour(mesh, scalar_name)
 
@@ -167,7 +167,7 @@ class DisplayModeManager:
         scalars_array, use_point_data = self._get_scalar_data(
             mesh, scalar_name, high_definition_contour)
 
-        # Handle vector mode
+        # Render based on mode
         if vector_mode:
             self._display_vectors(plotter, mesh, scalar_name, variable_name)
         elif line_contour_mode:
@@ -208,7 +208,7 @@ class DisplayModeManager:
                 f"HD Contour: Using smooth interpolation for {variable_name}")
 
     def _add_all_constraints(self, plotter, mesh):
-        """Add ALL constraints in ONE single add_mesh operation"""
+        """Display all constraints in a single operation for performance"""
         constraint_info = mesh._constraint_info
         node_ids = constraint_info['node_ids']
         positions_x = constraint_info['positions_x']
@@ -250,7 +250,7 @@ class DisplayModeManager:
                 all_positions.append([node.get_coordX(), node.get_coordY(), 0])
                 all_colors.append(contact_config['color'])
 
-        # Create ALL spheres in ONE operation
+        # Create all spheres at once
         if all_positions:
             combined_glyphs = self._create_batched_spheres(
                 all_positions, constraint_size, subdivisions)
@@ -277,7 +277,7 @@ class DisplayModeManager:
                 combined_glyphs.point_data['constraint_colors'] = np.array(
                     expanded_colors)
 
-                # Add everything in ONE add_mesh call
+                # Add to plotter
                 plotter.add_mesh(
                     combined_glyphs,
                     scalars='constraint_colors',
@@ -286,10 +286,10 @@ class DisplayModeManager:
                     name='all_constraints'
                 )
                 logger.info(
-                    f"Added {len(all_positions)} constraints in ONE operation")
+                    f"Added {len(all_positions)} constraints")
 
     def _display_vectors(self, plotter, mesh, scalar_name, variable_name):
-        """Display vectors"""
+        """Display vector fields as arrows"""
         try:
             if "Velocity" in variable_name:
                 points, vectors = self._get_velocity_vectors_from_nodes(mesh)
@@ -349,7 +349,7 @@ class DisplayModeManager:
             logger.exception(f"Error in vector display: {e}")
 
     def _display_contours(self, plotter, mesh, scalars_array, variable_name, cmap):
-        """Display contours"""
+        """Display contour lines"""
         try:
             n_contours = 10
             scalar_min = np.min(scalars_array)
@@ -388,14 +388,14 @@ class DisplayModeManager:
             logger.exception(f"Error in contour display: {e}")
 
     def _calculate_vectors_from_variable(self, mesh, scalar_name, variable_name):
-        """Calculate vector components based on the variable type"""
+        """Calculate vector components for vector variables"""
 
         try:
-            # If not a vector variable, return None
+            # Check if this is a vector variable
             if not ("Velocity" in variable_name or "Force" in variable_name):
                 return None
 
-            # scalar_name is the array of scalar values
+            # Get scalar values
             if isinstance(scalar_name, str) and scalar_name in mesh.cell_data:
                 scalar_values = mesh.cell_data[scalar_name]
             elif hasattr(scalar_name, '__len__'):
@@ -455,8 +455,8 @@ class DisplayModeManager:
             return None, None
 
     def display_mesh_with_constraints(self, plotter, mesh, mesh_color, edge_color, show_edges=True, show_constraints=False):
-        """Display mesh with optional constraints"""
-        # Display normal mesh first
+        """Display mesh with optional constraint visualization"""
+        # Display mesh
         self.display_mesh(plotter, mesh, mesh_color, edge_color, show_edges)
 
         # Add constraints if requested
@@ -464,7 +464,7 @@ class DisplayModeManager:
             self._add_constraints_visualization(plotter, mesh)
 
     def _add_constraints_visualization(self, plotter, mesh):
-        """Add constraint visualizations based on node codes"""
+        """Add constraint spheres to visualization"""
 
         constraint_info = mesh._constraint_info
         node_ids = constraint_info['node_ids']
@@ -475,12 +475,12 @@ class DisplayModeManager:
         constraint_size = self._calculate_proportional_size(
             mesh, base_factor=0.01)
 
-        # Determine optimal level of detail
+        # Performance optimization
         total_constraints = len(
             [code for code in constraint_codes if code != 0])
         subdivisions, _ = self._get_optimal_lod(total_constraints)
 
-        # Group constraints by type
+        # Group by constraint type
         constraint_groups = {}
 
         for i in range(len(node_ids)):
@@ -527,7 +527,7 @@ class DisplayModeManager:
                         color=config['color'],
                         opacity=1.0,
                         name=group_name,
-                        render=False  # Don't render immediately
+                        render=False  # Batch render
                     )
                     logger.info(
                         f"Added {len(positions)} {config['description']} ({group_name})")
@@ -536,7 +536,7 @@ class DisplayModeManager:
         plotter.render()
 
     def _add_contact_nodes_visualization(self, plotter, mesh, constraint_size, subdivisions):
-        """Add pink spheres for contact nodes"""
+        """Add contact node spheres"""
         nodes = mesh._original_data.get_nodes()
         contact_positions = []
 
@@ -546,10 +546,9 @@ class DisplayModeManager:
                     [node.get_coordX(), node.get_coordY(), 0])
 
         if contact_positions:
-            # Use centralized configuration for contacts
             contact_config = self.CONSTRAINT_CONFIG['contact']
 
-            # Create all contact spheres in batch
+            # Create contact spheres
             glyphs = self._create_batched_spheres(
                 contact_positions, constraint_size, subdivisions)
 

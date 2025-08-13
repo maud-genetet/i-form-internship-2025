@@ -102,9 +102,6 @@ class MainWindow(QMainWindow):
         """Connect Field Variables menu signals"""
         fv = self.field_variables_handler
 
-        # Standard Options
-        self.ui.actionStandard_Options_4.triggered.connect(fv.standard_options)
-
         # Velocity
         self.ui.actionVelocity_x_r_2.triggered.connect(
             lambda: fv.apply_variable("Velocity_X"))
